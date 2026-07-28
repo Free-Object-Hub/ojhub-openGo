@@ -178,7 +178,6 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "content/getGuidesAdmin" + php, DropPhp},
 	{"", apiAddr + "send/newGuide" + php, DropPhp},
 	{"", apiAddr + "send/editGuide" + php, DropPhp},
-	{"", apiAddr + "send/guideEdit" + php, DropPhp},
 	{"", apiAddr + "wiki/setWikiTag" + php, DropPhp},
 	{"", apiAddr + "wiki/templatesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/templateSave" + php, DropPhp},
