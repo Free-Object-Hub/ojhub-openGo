@@ -68,7 +68,7 @@ func COMMfetchById(ID int) (*Comm, error) {
 	return &comm, nil
 }
 
-func GetComms(channel int, whereIz int, page int) ([]Comm, error) {
+func GetComms(channel int, whereIz int, page int) ([]CommResp, error) {
 	cackeKey := fmt.Sprintf("comms:%d:%d", channel, whereIz)
 	if page == 0 {
 		var err error
@@ -77,7 +77,7 @@ func GetComms(channel int, whereIz int, page int) ([]Comm, error) {
 			return nil, err
 		}
 		if cached != "" {
-			var comments []Comm
+			var comments []CommResp
 			if err := json.Unmarshal([]byte(cached), &comments); err != nil {
 				log.Printf("Failed to decode cached comments %s: %v", cackeKey, err)
 			} else {
@@ -101,10 +101,15 @@ func GetComms(channel int, whereIz int, page int) ([]Comm, error) {
 		channel,
 		offset,
 	)
+	result := make([]CommResp, len(comments))
+	for i, comm := range comments {
+		result[i] = comm.CommRender()
+	}
 	if page == 0 {
-		if commCache, err := json.Marshal(comments); err != nil {
+		if commCache, err := json.Marshal(result); err != nil {
 			log.Printf("Failed to decode cached comments %s: %v", cackeKey, err)
 		} else {
+			log.Println(commCache)
 			RamSet(
 				fmt.Sprintf("comms:%d:%d", channel, whereIz),
 				string(commCache),
@@ -112,7 +117,7 @@ func GetComms(channel int, whereIz int, page int) ([]Comm, error) {
 			)
 		}
 	}
-	return comments, err
+	return result, err
 }
 
 type CommResp [8]interface{}

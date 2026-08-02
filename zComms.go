@@ -23,7 +23,7 @@ func LoadMoreComms(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		page = 0
 	}
-	commPre, err := GetComms(
+	comms, err := GetComms(
 		commentType,
 		commentID,
 		page,
@@ -35,10 +35,6 @@ func LoadMoreComms(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError,
 		)
 		return
-	}
-	comms := make([]CommResp, 0, len(commPre))
-	for _, c := range commPre {
-		comms = append(comms, c.CommRender())
 	}
 	if err := json.NewEncoder(w).Encode(comms); err != nil {
 		http.Error(
@@ -87,14 +83,10 @@ func CommentSend(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		commsPre, err := GetComms(channel, id, 0)
+		comms, err := GetComms(channel, id, 0)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
-		}
-		comms := make([]CommResp, 0, len(commsPre))
-		for _, c := range commsPre {
-			comms = append(comms, c.CommRender())
 		}
 		// TODO: TGwebhookLog(...)
 		json.NewEncoder(w).Encode(comms)

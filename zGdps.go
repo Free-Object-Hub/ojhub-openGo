@@ -87,31 +87,15 @@ func GDPSopener(w http.ResponseWriter, r *http.Request) {
 	})
 
 	g.Go(func() error {
-		cached, err := RamGet(fmt.Sprintf("comms:0:%d", id))
+		comms, err := GetComms(0, id, 0)
 		if err != nil {
 			return err
-		}
-		if cached != "" {
-			commsJSON = json.RawMessage(cached)
-			return nil
-		}
-		commPre, err := GetComms(0, id, 0)
-		if err != nil {
-			return err
-		}
-		comms := make([]CommResp, 0, len(commPre))
-		for _, c := range commPre {
-			comms = append(comms, c.CommRender())
 		}
 		commsJSON, err = json.Marshal(comms)
 		if err != nil {
 			return err
 		}
-		return RamSet(
-			fmt.Sprintf("comms:0:%d", id),
-			string(commsJSON),
-			10*time.Minute,
-		)
+		return nil
 	})
 
 	if err := g.Wait(); err != nil {

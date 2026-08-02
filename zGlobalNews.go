@@ -70,8 +70,8 @@ func NewsGetOne(w http.ResponseWriter, r *http.Request) {
 	}
 	//
 	var (
-		news    *News
-		commPre []Comm
+		news  *News
+		comms []CommResp
 	)
 	g, _ := errgroup.WithContext(r.Context())
 	g.Go(func() error {
@@ -81,7 +81,7 @@ func NewsGetOne(w http.ResponseWriter, r *http.Request) {
 	})
 	g.Go(func() error {
 		var err error
-		commPre, err = GetComms(3, id, 0)
+		comms, err = GetComms(3, id, 0)
 		return err
 	})
 	if err := g.Wait(); err != nil {
@@ -89,10 +89,6 @@ func NewsGetOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//
-	comms := make([]CommResp, 0, len(commPre))
-	for _, c := range commPre {
-		comms = append(comms, c.CommRender())
-	}
 	jsonData := NewsOneResp{
 		Gdps: map[string]NewsResp{
 			"n" + strconv.Itoa(news.ID): news.NewsRender(),

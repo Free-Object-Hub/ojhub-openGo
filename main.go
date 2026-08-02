@@ -115,7 +115,7 @@ func DropPhp(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(399)
 }
 
-// Обратите внимание - в php 64 эндпоинта, здесь же их всего 30
+// Обратите внимание - в php 67 эндпоинта, здесь же их всего 30
 var endpoints = []Endpoint{
 	{"POST ", apiAddr + "user/login" + php, userLogin},             // zUserLogin.go
 	{"POST ", apiAddr + "user/register" + php, userRegister},       // zUserLogin.go

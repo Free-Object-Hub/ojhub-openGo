@@ -66,14 +66,9 @@ func GetVacancyPage(vacID, userID int) (*VacancyPageResponse, error) {
 		return nil, err
 	}
 
-	commPre, err := GetComms(5, int(vacID), 0)
+	comms, err := GetComms(5, int(vacID), 0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get vacancy comments: %w", err)
-	}
-
-	comms := make([]CommResp, 0, len(commPre))
-	for _, c := range commPre {
-		comms = append(comms, c.CommRender())
 	}
 
 	result := &VacancyPageResponse{

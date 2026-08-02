@@ -87,7 +87,7 @@ func GuideHandler(w http.ResponseWriter, r *http.Request) {
 	for _, comm := range comms {
 		jsonData.Comments = append(
 			jsonData.Comments,
-			comm.CommRender(),
+			comm,
 		)
 	}
 
