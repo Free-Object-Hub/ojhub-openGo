@@ -181,9 +181,13 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "wiki/setWikiTag" + php, DropPhp},
 	{"", apiAddr + "wiki/templatesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/templateSave" + php, DropPhp},
+	{"", apiAddr + "wiki/filesGet" + php, DropPhp},
+	{"", apiAddr + "wiki/filesSend" + php, DropPhp},
 	{"", apiAddr + "content/getOwners" + php, DropPhp},
 	{"", apiAddr + "send/perm" + php, DropPhp},
 	{"", apiAddr + "send/permAdd" + php, DropPhp},
+	// Админ панель
+	{"", apiAddr + "!newTakeAll" + php, DropPhp},
 	//{"", apiAddr + "" + php, DropPhp},
 }
 

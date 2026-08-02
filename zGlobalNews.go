@@ -39,6 +39,7 @@ func LocalNews(w http.ResponseWriter, r *http.Request) {
 	gdpsId, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {
 		http.Error(w, "Error converting gdpsId", http.StatusInternalServerError)
+		return
 	}
 	news, err := GetLocalNews(gdpsId, page)
 	if err != nil {
