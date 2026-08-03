@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -45,10 +46,14 @@ func LoadMoreComms(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// FIXME: сделать рейт лимит на базе редиса
 func CommentSend(w http.ResponseWriter, r *http.Request) {
 	user, ok := RequireDevice(w, r)
 	if !ok {
+		return
+	}
+	cached, err := RamGet(fmt.Sprintf("userCommRate:%d", user.UserId))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -72,16 +77,23 @@ func CommentSend(w http.ResponseWriter, r *http.Request) {
 	text := base64.StdEncoding.EncodeToString([]byte(textPre))
 	//
 	if len(textPre) >= 10 {
-		err = COMMadd(
-			user.UserId,
-			id,
-			text,
-			time.Now().Unix(),
-			channel,
-		)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		if cached != "yes" {
+			err = COMMadd(
+				user.UserId,
+				id,
+				text,
+				time.Now().Unix(),
+				channel,
+			)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			RamSet(
+				fmt.Sprintf("userCommRate:%d", user.UserId),
+				"yes",
+				5*time.Minute,
+			)
 		}
 		comms, err := GetComms(channel, id, 0)
 		if err != nil {
