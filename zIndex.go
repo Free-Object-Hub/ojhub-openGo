@@ -54,7 +54,6 @@ func buildMetaTags(r *http.Request) string {
 	if ok {
 		switch route {
 		case "VacsC":
-			log.Println(id)
 			if vac, err := VACSfetchById(id, 0); err == nil && vac != nil {
 				metaTitle = vac.Title
 				metaDescription = vac.Text
@@ -65,7 +64,6 @@ func buildMetaTags(r *http.Request) string {
 		}
 	} else {
 		q := r.URL.Query()
-		log.Println(q)
 		if _, ok := q["Wikis"]; ok {
 			metaTitle = "Object Hub Wiki"
 			metaDescription = "Object Hub Wiki - не Mediawiki! добро пожаловать на наш вики движок!"

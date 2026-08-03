@@ -52,7 +52,7 @@ var versions = []clientVersion{
 		JS: []asset{
 			{Href: "newHelper.js", Query: "?ver=23", Defer: true},
 			{Href: "nhConfig.js", Query: "?ver=24", Defer: true},
-			{Href: "ojhub.js", Query: "?ver=23", Defer: true},
+			{Href: "ojhub.js", Query: "?ver=24", Defer: true},
 		},
 		IsWorking: true,
 	},
@@ -143,7 +143,7 @@ var versions = []clientVersion{
 		Ver: "0.96.3", Date: "12 Sep 2025", Desc: "wiki isnt working", Status: LoaderStatusLegacy,
 		CSS: []asset{
 			{Href: "main.css", Query: "?ver=18"},
-			{Href: "window.css", Query: "?ver=`18"},
+			{Href: "window.css", Query: "?ver=18"},
 		},
 		JS: []asset{
 			{Href: "ojhub.js", Query: "?ver=18&helper", Defer: true},
