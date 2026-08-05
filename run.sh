@@ -18,6 +18,8 @@ export TG_BOT_TOKEN="bot0:LOL"
 # export IMGS="/usr/local/ojhub/public/imgs/" # единственная настройка из dev среды
 export IMGS="/home/miobomb/ojhub/public/imgs/"
 
+export CLI_VER="0.97.7"
+
 #go126 run .
 /home/miobomb/go/bin/air
 #./ojhub-go

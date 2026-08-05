@@ -202,16 +202,13 @@ func NewUserToken(username string, password string, email string, activated stri
 
 func ValidateEmail(email string) bool {
 	email = strings.TrimSpace(email)
-
 	if email == "" || strings.ContainsAny(email, "\r\n") {
 		return false
 	}
-
 	addr, err := mail.ParseAddress(email)
 	if err != nil {
 		return false
 	}
-
 	return addr.Address == email
 }
 
@@ -240,6 +237,16 @@ func (d Device) Render() map[string]any {
 		"platform":  d.Platform,
 		"browser":   d.Browser,
 	}
+}
+
+func GetDeviceByToken(token string) (*Device, error) {
+	var devices Device
+	query := "SELECT * FROM devices WHERE staticFp = ?"
+	err := DB.Get(&devices, query, token)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by token: %w", err)
+	}
+	return &devices, err
 }
 
 func (u *User) GetDevices() ([]Device, error) {
@@ -346,13 +353,10 @@ func InsertDevice(
 	if err != nil {
 		return err
 	}
-
 	if exists {
 		return nil
 	}
-
 	ua := useragent.Parse(userAgent)
-
 	return user.AddDevice(
 		userAgent,
 		ip,

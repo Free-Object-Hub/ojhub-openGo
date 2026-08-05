@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"html"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -32,7 +31,6 @@ func futureLinkFormat(r *http.Request) (string, int, bool) {
 	// да, это тот самый фикс ми который будет висеть ещё не один год
 	for key := range r.URL.Query() {
 		parts := strings.SplitN(key, "/", 2)
-		log.Println(parts)
 		if len(parts) != 2 {
 			continue
 		}

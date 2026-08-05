@@ -132,6 +132,11 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "user/removeDevice" + php, RemoveDevice},        // zDevices.go
 	{"POST ", apiAddr + "user/getAccInfo" + php, GetConfInfo},      // zUserEdit.go
 	{"POST ", apiAddr + "send/deviceAdd" + php, DeviceAddTab},      // zDevices.go
+	{"", apiAddr + "content/getAlarms" + php, GetAlarms},           // zAlarms.go
+	{"", apiAddr + "content/getAlarm" + php, GetAlarm},             // zAlarms.go
+	{"", apiAddr + "send/deleteAlarm" + php, DeleteAlarm},          // zAlarms.go
+	{"", apiAddr + "send/writeAlarm" + php, WriteAlarmHandler},     // zAlarms.go
+	{"POST ", apiAddr + "sub" + php, PushSub},                      // zPushs.go
 	{"", apiAddr + "content/fetchComms" + php, LoadMoreComms},      // zComms.go
 	{"", apiAddr + "content/newsAll" + php, GlobalNews},            // zGlobalNews.go
 	{"", apiAddr + "content/news" + php, LocalNews},                // zGlobalNews.go

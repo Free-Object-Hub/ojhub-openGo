@@ -49,7 +49,7 @@ func GetLocalNews(gdpsId int, page int) ([]News, error) {
 		FROM news n
 		LEFT JOIN users u ON n.userId = u.userId 
 		LEFT JOIN gdpses g ON n.gdpsId = g.ID 
-		WHERE n.checked = 1 AND n.gdpsId = ?
+		WHERE n.gdpsId = ?
 		ORDER BY n.ID DESC LIMIT 11 OFFSET ?`
 	var page2 int
 	if page <= 0 {
