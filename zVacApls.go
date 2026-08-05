@@ -10,7 +10,6 @@ import (
 )
 
 func vacApply(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	user, ok := RequireDevice(w, r)
 	if !ok {
 		return

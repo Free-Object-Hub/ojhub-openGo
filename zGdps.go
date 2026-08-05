@@ -190,7 +190,7 @@ func GDPSjoin(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if err := LogJoin(id, userID, findKey); err != nil {
-			log.Printf("failed to log GDPS join: %v", err)
+			log.Printf("failed to Log GDPS join: %v", err)
 		}
 		http.Redirect(w, r, targetURL, http.StatusFound)
 		return
@@ -204,7 +204,7 @@ func GDPSjoin(w http.ResponseWriter, r *http.Request) {
 		}
 		if user != nil && PasswordVerify(password, user.Password) {
 			if err := LogJoin(id, user.UserId, findKey); err != nil {
-				log.Printf("failed to log GDPS join: %v", err)
+				log.Printf("failed to Log GDPS join: %v", err)
 			}
 			http.Redirect(w, r, targetURL, http.StatusFound)
 			return
@@ -215,7 +215,7 @@ func GDPSjoin(w http.ResponseWriter, r *http.Request) {
 		user, err := GetUserByToken(token)
 		if err == nil && user != nil {
 			if err := LogJoin(id, user.UserId, findKey); err != nil {
-				log.Printf("failed to log GDPS join: %v", err)
+				log.Printf("failed to Log GDPS join: %v", err)
 			}
 			http.Redirect(w, r, targetURL, http.StatusFound)
 			return

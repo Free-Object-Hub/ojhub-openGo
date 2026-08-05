@@ -136,6 +136,9 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "content/getAlarm" + php, GetAlarm},             // zAlarms.go
 	{"", apiAddr + "send/deleteAlarm" + php, DeleteAlarm},          // zAlarms.go
 	{"", apiAddr + "send/writeAlarm" + php, WriteAlarmHandler},     // zAlarms.go
+	{"", apiAddr + "gdps/sub" + php, gdpsSub},                      // zAlarms.go
+	{"", apiAddr + "gdps/unsub" + php, gdpsUnsub},                  // zAlarms.go
+	{"", apiAddr + "gdps/subs" + php, gdpsSubs},                    // zAlarms.go
 	{"POST ", apiAddr + "sub" + php, PushSub},                      // zPushs.go
 	{"", apiAddr + "content/fetchComms" + php, LoadMoreComms},      // zComms.go
 	{"", apiAddr + "content/newsAll" + php, GlobalNews},            // zGlobalNews.go

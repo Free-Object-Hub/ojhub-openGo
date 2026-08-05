@@ -65,8 +65,9 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	title := ExploitPatch(titleRaw[0])
+	textPre := ExploitPatch(textRaw[0])
 	text := base64.StdEncoding.EncodeToString(
-		[]byte(textRaw[0]),
+		[]byte(textPre),
 	)
 	newsID, err := NEWSpost(
 		user.UserId,
@@ -94,8 +95,36 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 			ApiError(w, 500, "File error", "-9")
 		}
 	}
+
+	go func() {
+		subscribers, err := GetGdpsSubscribers(gdpsID)
+		if err != nil {
+			log.Println("failed to get subscribers:", err)
+			return
+		}
+		alarmTitle := title
+		if len(alarmTitle) > 100 {
+			alarmTitle = alarmTitle[:100]
+		}
+		for _, subId := range subscribers {
+			log.Println(subId)
+			alarmID, err := FullWrite(
+				alarmTitle,
+				textPre,
+				subId,
+				time.Now().Unix(),
+				0,
+			)
+			log.Println("SUBS:", alarmID)
+			if err != nil {
+				log.Printf("alarm creation failed for user %d: %v\n", subId, err)
+				continue
+			}
+			log.Printf("created alarm %d for user %d\n", alarmID, subId)
+		}
+	}()
+
 	fmt.Fprintf(w, "%d", newsID)
-	//json.NewEncoder(w).Encode(newsID)
 }
 
 func NewsEdit(w http.ResponseWriter, r *http.Request) {

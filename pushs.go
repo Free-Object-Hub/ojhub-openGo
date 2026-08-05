@@ -68,17 +68,14 @@ func SendPushToUser(userId int, title, body string) error {
 	if err != nil {
 		return fmt.Errorf("user push endpoint not found: %w", err)
 	}
-
 	err = DB.Get(&p256dh, "SELECT p256dh FROM pushs WHERE userId = ?", userId)
 	if err != nil {
 		return fmt.Errorf("user push p256dh not found: %w", err)
 	}
-
 	err = DB.Get(&auth, "SELECT auth FROM pushs WHERE userId = ?", userId)
 	if err != nil {
 		return fmt.Errorf("user push auth not found: %w", err)
 	}
-
 	payload := map[string]interface{}{
 		"endpoint": endpoint,
 		"p256dh":   p256dh,
@@ -86,7 +83,6 @@ func SendPushToUser(userId int, title, body string) error {
 		"title":    title,
 		"body":     body,
 	}
-
 	jsonData, _ := json.Marshal(payload)
 	resp, err := http.Post("http://localhost:8087/cli/send-push", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
