@@ -20,6 +20,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func ExtractIP(r *http.Request) string {
+	return r.Header.Get("X-Real-IP")
+}
+
 // #region users
 type User struct {
 	UserId    int       `json:"ID" db:"userId"`
@@ -382,7 +386,6 @@ func PasswordVerify(password, hash string) bool {
 }
 
 func reCaptcha(token string) (bool, error) {
-	return true, nil
 	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify",
 		map[string][]string{
 			"secret":   {os.Getenv("RECAPTCHA")},

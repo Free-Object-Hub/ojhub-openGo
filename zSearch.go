@@ -135,7 +135,7 @@ func fullSearch(w http.ResponseWriter, r *http.Request) {
 		if projects, ok := data.([]GDPS); ok {
 			shortProjects := make([]GDPSshort, 0, len(projects))
 			for _, project := range projects {
-				shortProjects = append(shortProjects, project.ToShort(false))
+				shortProjects = append(shortProjects, project.ToShort(false, false))
 			}
 			result = GenerateOrderedMap(shortProjects, func(project GDPSshort) string {
 				return prefix + strconv.Itoa(project.ID)

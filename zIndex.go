@@ -56,7 +56,7 @@ func buildMetaTags(r *http.Request) string {
 				metaTitle = vac.Title
 				metaDescription = vac.Text
 				if gdps, err := GDPSfetchById(vac.GdpsID); err == nil && gdps != nil {
-					metaImage = gdps.ToShort(false).Img
+					metaImage = gdps.ToShort(false, false).Img
 				}
 			}
 		}
@@ -69,7 +69,7 @@ func buildMetaTags(r *http.Request) string {
 		if gdpsID := firstQueryValue(q, "camp", "show", "pere", "tele"); gdpsID != "" {
 			if id, err := strconv.Atoi(gdpsID); err == nil {
 				if gdps, err := GDPSfetchById(id); err == nil && gdps != nil {
-					gdpsFull := gdps.ToShort(false)
+					gdpsFull := gdps.ToShort(false, false)
 					metaTitle = gdpsFull.Title
 					metaDescription = gdpsFull.Text
 					metaImage = gdpsFull.Img
@@ -96,7 +96,7 @@ func buildMetaTags(r *http.Request) string {
 							metaDescription = ""
 						}
 						if gdps, err := GDPSfetchById(news.GdpsId); err == nil && gdps != nil {
-							metaImage = gdps.ToShort(false).Img
+							metaImage = gdps.ToShort(false, false).Img
 						}
 					}
 				}

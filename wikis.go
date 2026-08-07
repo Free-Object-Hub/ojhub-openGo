@@ -73,6 +73,30 @@ func WIKIfetchGuides(ID, page int) ([]Guide, error) {
 	return guides, nil
 }
 
+func CheckWikiAccess(userID, wikiID int) (int, error) {
+	var access int
+	err := DB.Get(&access, `
+		SELECT CASE
+			WHEN EXISTS(
+				SELECT 1
+				FROM wikis
+				WHERE ID = ? AND userId = ?
+			) THEN 2
+			WHEN EXISTS(
+				SELECT 1
+				FROM wikisoowners
+				WHERE wikiId = ? AND userId = ?
+			) THEN 1
+			ELSE 0
+		END AS access_level
+		LIMIT 1
+	`, wikiID, userID, wikiID, userID)
+	if err != nil {
+		return 0, err
+	}
+	return access, nil
+}
+
 type UserWikiContent struct {
 	Owned   []Wiki
 	SOOwned []Wiki

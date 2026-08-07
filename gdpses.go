@@ -159,34 +159,43 @@ type GDPSshort struct {
 	Ban      string `json:"ban"`
 	Channel  int    `json:"channel"`
 	Wiki     int    `json:"wiki"`
+	Checked  *int   `json:"checked,omitempty"`
+	Points   *int   `json:"points,omitempty"`
 }
 
-func (p GDPS) ToShort(fullText bool) GDPSshort {
+func (p GDPS) ToShort(fullText, renderChecked bool) GDPSshort {
 	text := p.Description
-	if fullText == false {
+	if !fullText {
 		if p.Short != "" {
 			text = p.Short
 		} else if len(text) > 121 {
 			text = text[:121]
 		}
 	}
-	//
+
+	var checked *int
+	var points *int
+	if renderChecked {
+		c := p.Checked
+		checked = &c
+		po := p.Points
+		points = &po
+	}
+
 	return GDPSshort{
-		ID:    p.ID,
-		Title: p.Title,
-		Text:  text,
-		Tags:  p.Tags,
-		Os:    p.Os,
-		Likes: [3]int{
-			p.Likes,
-			p.Disls,
-			p.CommsCount,
-		},
+		ID:       p.ID,
+		Title:    p.Title,
+		Text:     text,
+		Tags:     p.Tags,
+		Os:       p.Os,
+		Likes:    [3]int{p.Likes, p.Disls, p.CommsCount},
 		Author:   p.Author,
 		Username: p.Username,
 		Img:      p.Img,
 		Ban:      p.Ban,
 		Channel:  p.Channel,
+		Checked:  checked,
+		Points:   points,
 		Wiki:     p.ConnectedWiki,
 	}
 }

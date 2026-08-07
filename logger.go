@@ -27,6 +27,7 @@ var GlobalHTTPClient = &http.Client{
 // TGWebhookLog отправляет технический лог в Telegram.
 // Ошибка отправки лога не должна ломать основной запрос.
 func TGWebhookLog(msg string) error {
+	log.Println(msg)
 	botToken := os.Getenv("TG_BOT_TOKEN")
 	chatID := os.Getenv("TG_NEWS_RESENDER")
 
@@ -71,8 +72,6 @@ func TGWebhookLog(msg string) error {
 			resp.StatusCode,
 		)
 	}
-
-	log.Println("TG log sent OK")
 
 	return nil
 }

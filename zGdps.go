@@ -112,13 +112,59 @@ func GDPSopener(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(resp))
 }
 
-/* php:
-public static function logJoin(int $gdpsId, int $userId, string $findKey) {
-	global $conn;
-	$conn->prepare('INSERT INTO `joinlog`(`gdpsId`, `userId`, `joinData`, `joinDate`) VALUES (?, ?, ?, ?)')
-		->execute([$gdpsId, $userId, $findKey, time()]);
+// возвращает (points, canBumpNow) - false в canBumpNow означает "checked != 1", как false в php
+func GdpsSetPoint(gdpsId int, date, currentDate int64) (int64, bool, error) {
+	gdps, err := GDPSfetchById(gdpsId)
+	if err != nil {
+		return 0, false, err
+	}
+	if gdps.Checked != 1 {
+		return 0, false, nil
+	}
+	if int64(gdps.Points)-currentDate > 0 {
+		return int64(gdps.Points), true, nil
+	}
+	_, err = DB.Exec(`UPDATE gdpses SET points = ? WHERE ID = ?`, date, gdpsId)
+	if err != nil {
+		return 0, false, err
+	}
+	return date, true, nil
 }
-*/
+
+func GdpsBump(w http.ResponseWriter, r *http.Request) {
+	user, ok := RequireDevice(w, r)
+	if !ok {
+		return
+	}
+
+	gdpsId, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		w.Write([]byte("no"))
+		return
+	}
+
+	if user.Activated == 0 {
+		w.Write([]byte("no"))
+		return
+	}
+
+	now := time.Now().Unix()
+	futureTime := now + 7200
+
+	point, ok, err := GdpsSetPoint(gdpsId, futureTime, now)
+	if err != nil {
+		return
+	}
+	if !ok {
+		w.Write([]byte("no"))
+		return
+	}
+
+	canBump := now - point
+	resp := []int64{point, futureTime, canBump}
+	json.NewEncoder(w).Encode(resp)
+}
+
 // openGo:
 func LogJoin(gdpsId, userId int, findKey string) error {
 	_, err := DB.Exec(`INSERT INTO joinlog (gdpsId, userId, joinData, joinDate) VALUES (?,?,?,?)`, gdpsId, userId, findKey, time.Now().Unix())

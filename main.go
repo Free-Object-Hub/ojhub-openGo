@@ -98,6 +98,7 @@ var (
 	HELPER_VER = "133"
 	apiAddr    = "/server/" + HELPER_VER + "/"
 	php        = ".php"
+	HELPER_URL = "https://objecthub.xyz/"
 )
 
 type Endpoint struct {
@@ -115,7 +116,7 @@ func DropPhp(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(399)
 }
 
-// Обратите внимание - в php 67 эндпоинта, здесь же их всего 30
+// Обратите внимание - в php 66 эндпоинта, здесь же их всего 44
 var endpoints = []Endpoint{
 	{"POST ", apiAddr + "user/login" + php, userLogin},             // zUserLogin.go
 	{"POST ", apiAddr + "user/register" + php, userRegister},       // zUserLogin.go
@@ -136,6 +137,18 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "content/getAlarm" + php, GetAlarm},             // zAlarms.go
 	{"", apiAddr + "send/deleteAlarm" + php, DeleteAlarm},          // zAlarms.go
 	{"", apiAddr + "send/writeAlarm" + php, WriteAlarmHandler},     // zAlarms.go
+	{"", apiAddr + "send/campAdd" + php, CampAdd},                  // zGdpsAdd.go
+	{"", apiAddr + "send/showAdd" + php, ShowAdd},                  // zGdpsAdd.go
+	{"", apiAddr + "send/pereAdd" + php, PereAdd},                  // zGdpsAdd.go
+	{"", apiAddr + "send/teleAdd" + php, TeleAdd},                  // zGdpsAdd.go
+	{"", apiAddr + "send/campEdit" + php, CampEdit},                // zGdpsEdit.go
+	{"", apiAddr + "send/showEdit" + php, ShowEdit},                // zGdpsEdit.go
+	{"", apiAddr + "send/pereEdit" + php, PereEdit},                // zGdpsEdit.go
+	{"", apiAddr + "send/teleEdit" + php, TeleEdit},                // zGdpsEdit.go
+	{"", apiAddr + "send/bump" + php, GdpsBump},                    // zGdps.go
+	{"", apiAddr + "content/getOwners" + php, GetOwners},           // zOwners.go
+	{"", apiAddr + "send/permAdd" + php, PermAdd},                  // zOwners.go
+	{"", apiAddr + "send/perm" + php, PermRemove},                  // zOwners.go
 	{"", apiAddr + "gdps/sub" + php, gdpsSub},                      // zAlarms.go
 	{"", apiAddr + "gdps/unsub" + php, gdpsUnsub},                  // zAlarms.go
 	{"", apiAddr + "gdps/subs" + php, gdpsSubs},                    // zAlarms.go
@@ -165,14 +178,6 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "content/getAddedShows" + php, DropPhp},
 	{"", apiAddr + "content/getAddedPeres" + php, DropPhp},
 	{"", apiAddr + "content/getUserGuides" + php, DropPhp},
-	{"", apiAddr + "send/campAdd" + php, DropPhp},
-	{"", apiAddr + "send/showAdd" + php, DropPhp},
-	{"", apiAddr + "send/pereAdd" + php, DropPhp},
-	{"", apiAddr + "send/teleAdd" + php, DropPhp},
-	{"", apiAddr + "send/campEdit" + php, DropPhp},
-	{"", apiAddr + "send/showEdit" + php, DropPhp},
-	{"", apiAddr + "send/pereEdit" + php, DropPhp},
-	{"", apiAddr + "send/teleEdit" + php, DropPhp},
 	{"", apiAddr + "vacans/get" + php, DropPhp},
 	{"", apiAddr + "vacans/edit" + php, DropPhp},
 	{"", apiAddr + "send/vacsAdd" + php, DropPhp},
@@ -191,9 +196,6 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "wiki/templateSave" + php, DropPhp},
 	{"", apiAddr + "wiki/filesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/filesSend" + php, DropPhp},
-	{"", apiAddr + "content/getOwners" + php, DropPhp},
-	{"", apiAddr + "send/perm" + php, DropPhp},
-	{"", apiAddr + "send/permAdd" + php, DropPhp},
 	// Админ панель
 	{"", apiAddr + "!newTakeAll" + php, DropPhp},
 	//{"", apiAddr + "" + php, DropPhp},

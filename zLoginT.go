@@ -93,7 +93,7 @@ func publicInit() (json.RawMessage, error) {
 	}
 	gdpsShorts := make([]GDPSshort, 0, len(cachedGdpses))
 	for _, p := range cachedGdpses {
-		gdpsShorts = append(gdpsShorts, p.ToShort(false))
+		gdpsShorts = append(gdpsShorts, p.ToShort(false, false))
 	}
 	GDPSes := GenerateOrderedMap(
 		gdpsShorts,
@@ -230,7 +230,7 @@ func privateInit(ip string, token string, device string, showToken bool, ignoreD
 
 				userGdpses := make([]GDPSshort, 0, len(userGdpsesPre))
 				for _, p := range userGdpsesPre {
-					userGdpses = append(userGdpses, p.ToShort(true))
+					userGdpses = append(userGdpses, p.ToShort(true, true))
 				}
 				userGDPSes := GenerateOrderedMap(
 					userGdpses,
