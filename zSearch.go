@@ -11,7 +11,6 @@ import (
 )
 
 func fullSearch(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "form error "+err.Error(), http.StatusBadRequest)
@@ -150,7 +149,6 @@ func fullSearch(w http.ResponseWriter, r *http.Request) {
 }
 
 func wikiSearch(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	wikisPre, err := NewWikiFinder(0, -1, page, []int{}, []int{}, "", 0)
 	if err != nil {
@@ -170,8 +168,6 @@ func wikiSearch(w http.ResponseWriter, r *http.Request) {
 }
 
 func vacsSearch(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
 	token := GetUserToken(r)
 	userId := 0
 	if token != "" {

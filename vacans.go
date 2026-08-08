@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -108,6 +109,7 @@ func (v Vacancy) ToShort(userID int) Vacan {
 		}
 	}
 	applied := int(0)
+	log.Println(userID, v.Applied)
 	if userID != 0 && v.Applied != nil {
 		applied = *v.Applied
 	}

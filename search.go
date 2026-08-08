@@ -146,7 +146,7 @@ func NewVacsFinder(userID, method, typeFilter, page int, tags, oss []int, name s
 	var queryBuilder strings.Builder
 	var args []interface{}
 	queryBuilder.WriteString(`
-		SELECT g.*, p.channel as gChannel, p.title as gTitle
+		SELECT g.*, p.channel as gChannel, p.title as gTitle, a.ID as applied
 		FROM vacans g
 		LEFT JOIN gdpses p ON g.gdpsId = p.ID
 		LEFT JOIN vacsApplies a ON g.ID = a.vacId AND a.userId = ?
