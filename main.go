@@ -165,6 +165,12 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "vacans/apply" + php, vacApply},                 // zVacApls.go
 	{"", apiAddr + "vacans/removeApl" + php, vacUnapply},           // zVacApls.go
 	{"", apiAddr + "content/vacsC" + php, GetOneVac},               // zVacApls.go
+	{"", apiAddr + "vacans/get" + php, VacsGet},                    // zVacans.go
+	{"", apiAddr + "send/vacsAdd" + php, VacsAdd},                  // zVacans.go
+	{"", apiAddr + "send/vacsEdit" + php, VacsEdit},                // zVacans.go
+	{"", apiAddr + "vacans/edit" + php, VacsEditPre},               // zVacans.go
+	{"", apiAddr + "vacans/applies" + php, VacsApplies},            // zVacans.go
+	{"", apiAddr + "vacans/removeVac" + php, VacsRemove},           // zVacans.go
 	{"", apiAddr + "content/camp" + php, GDPSopener},               // zGdps.go
 	{"", apiAddr + "loginT" + php, FreeBSDcompile},                 // zLoginT.go
 	{"", apiAddr + "likesT" + php, LikesT},                         // zLikesT.go
@@ -178,11 +184,6 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "content/getAddedShows" + php, DropPhp},
 	{"", apiAddr + "content/getAddedPeres" + php, DropPhp},
 	{"", apiAddr + "content/getUserGuides" + php, DropPhp},
-	{"", apiAddr + "vacans/get" + php, DropPhp},
-	{"", apiAddr + "vacans/edit" + php, DropPhp},
-	{"", apiAddr + "send/vacsAdd" + php, DropPhp},
-	{"", apiAddr + "vacans/removeVac" + php, DropPhp},
-	{"", apiAddr + "vacans/applies" + php, DropPhp},
 	{"", apiAddr + "content/getJoinLog" + php, DropPhp},
 	{"", apiAddr + "search/connectWiki" + php, DropPhp},
 	{"", apiAddr + "send/newWiki" + php, DropPhp},

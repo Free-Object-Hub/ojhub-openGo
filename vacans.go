@@ -61,6 +61,7 @@ type Vacan struct {
 	Title     string  `json:"title"`
 	Tags      string  `json:"tags"`
 	Text      string  `json:"text"`
+	Short     string  `json:"short,omitempty"`
 	Date      int     `json:"date"`
 	IsApplied int     `json:"isApplied"`
 	Likes     [3]int  `json:"likes"`
@@ -69,16 +70,21 @@ type Vacan struct {
 	GChannel  *int    `json:"gChannel"`
 }
 
-func (v Vacancy) ToFull(userID int) Vacan {
+func (v Vacancy) ToFull(userID int, alsoAddShort bool) Vacan {
 	applied := 0
 	if userID != 0 && v.Applied != nil {
 		applied = *v.Applied
+	}
+	short := ""
+	if alsoAddShort == true {
+		short = v.Short
 	}
 	return Vacan{
 		ID:        v.ID,
 		Title:     v.Title,
 		Tags:      v.Tags,
 		Text:      v.Text,
+		Short:     short,
 		Date:      v.Date,
 		IsApplied: applied,
 		Likes: [3]int{
@@ -347,6 +353,35 @@ func RemoveVacancyApply(applyID, userID int) error {
 	affected, err := result.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("failed to check apply deletion: %w", err)
+	}
+	if affected == 0 {
+		return ErrApplyNotFound
+	}
+	return nil
+}
+
+func GetGdpsIdByApplyId(applyId int) (int, error) {
+	var gdpsId int
+	err := DB.Get(&gdpsId, `
+		SELECT v.gdpsId
+		FROM vacsApplies a
+		JOIN vacans v ON a.vacId = v.ID
+		WHERE a.ID = ?
+	`, applyId)
+	if err != nil {
+		return 0, fmt.Errorf("failed to resolve gdps for apply %d: %w", applyId, err)
+	}
+	return gdpsId, nil
+}
+
+func RemoveVacancyApplyAsOwner(applyID int) error {
+	result, err := DB.Exec(`DELETE FROM vacsApplies WHERE ID = ?`, applyID)
+	if err != nil {
+		return fmt.Errorf("failed to remove vacancy apply as owner: %w", err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
 	}
 	if affected == 0 {
 		return ErrApplyNotFound
