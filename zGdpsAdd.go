@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -118,19 +119,35 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 		ext := GetFileExt(imgFile)
 		imgPath := fmt.Sprintf("%scustomuser/i%d.%s", getEnv("IMGS", "./imgs/"), gdpsId, ext)
 		if err := SaveFile(imgFile, imgPath); err != nil {
+			log.Println(err)
 			ApiError(w, 500, "File error", "-3")
 			return
 		}
-		img = fmt.Sprintf("%simgs/customuser/i%d.%s", HELPER_URL, gdpsId, ext)
+		webpPath := fmt.Sprintf("%scustomuser/i%d.webp", getEnv("IMGS", "./imgs/"), gdpsId)
+		if err := ConvertToWebp(imgPath, webpPath, 256, 256); err != nil {
+			fmt.Printf("webp conversion failed: %v\n", err)
+			log.Println(err)
+			// если файл сломался то оригинал остаётся, img путь не меняется - деградация без падения
+		} else {
+			img = fmt.Sprintf("%simgs/customuser/i%d.webp", HELPER_URL, gdpsId)
+		}
 	}
 	if banFile != nil {
 		ext := GetFileExt(banFile)
 		banPath := fmt.Sprintf("%scustomuser/b%d.%s", getEnv("IMGS", "./imgs/"), gdpsId, ext)
 		if err := SaveFile(banFile, banPath); err != nil {
+			log.Println(err)
 			ApiError(w, 500, "File error", "-3")
 			return
 		}
-		ban = fmt.Sprintf("%simgs/customuser/b%d.%s", HELPER_URL, gdpsId, ext)
+		webpPath := fmt.Sprintf("%scustomuser/b%d.webp", getEnv("IMGS", "./imgs/"), gdpsId)
+		if err := ConvertToWebp(banPath, webpPath, 720, 300); err != nil {
+			fmt.Printf("webp conversion failed: %v\n", err)
+			log.Println(err)
+			// если файл сломался то оригинал остаётся, img путь не меняется - деградация без падения
+		} else {
+			ban = fmt.Sprintf("%simgs/customuser/b%d.webp", HELPER_URL, gdpsId)
+		}
 	}
 
 	if err := EditGdpsPictures(gdpsId, img, ban); err != nil {

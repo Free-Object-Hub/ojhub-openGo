@@ -1,10 +1,16 @@
 package main
 
 import (
+	"fmt"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -52,4 +58,52 @@ func SaveFile(file *multipart.FileHeader, path string) error {
 	defer dst.Close()
 	_, err = io.Copy(dst, src)
 	return err
+}
+
+func ConvertToWebp(srcPath, destPath string, maxWidth, maxHeight int) error {
+	width, height, err := imageSize(srcPath)
+	if err != nil {
+		return fmt.Errorf("read image size: %w", err)
+	}
+	args := []string{
+		"-q", "85",
+		"-mt",
+	}
+	// Добавляем resize только если реально нужно уменьшать
+	if width > maxWidth || height > maxHeight {
+		args = append(
+			args,
+			"-resize",
+			fmt.Sprintf("%d", maxWidth),
+			fmt.Sprintf("%d", maxHeight),
+		)
+	}
+	args = append(
+		args,
+		srcPath,
+		"-o",
+		destPath,
+	)
+	cmd := exec.Command("cwebp", args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("cwebp failed: %w, output: %s", err, output)
+	}
+	if err := os.Remove(srcPath); err != nil {
+		log.Println("remove source file: %w", err)
+	}
+	return nil
+}
+
+func imageSize(path string) (int, int, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, 0, err
+	}
+	defer f.Close()
+	cfg, _, err := image.DecodeConfig(f)
+	if err != nil {
+		return 0, 0, err
+	}
+	return cfg.Width, cfg.Height, nil
 }

@@ -136,7 +136,13 @@ func gdpsEditHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 			ApiError(w, 500, "File error", "-3")
 			return
 		}
-		img = fmt.Sprintf("%simgs/customuser/i%d-%d.%s", HELPER_URL, gdpsId, gdps.EditCount, ext)
+		webpPath := fmt.Sprintf("%scustomuser/i%d-%d.webp", getEnv("IMGS", "./imgs/"), gdpsId, gdps.EditCount)
+		if err := ConvertToWebp(imgPath, webpPath, 256, 256); err != nil {
+			fmt.Printf("webp conversion failed: %v\n", err)
+			// если файл сломался то оригинал остаётся, img путь не меняется - деградация без падения
+		} else {
+			img = fmt.Sprintf("%simgs/customuser/i%d-%d.webp", HELPER_URL, gdpsId, gdps.EditCount)
+		}
 	}
 	if banFile != nil {
 		ext := GetFileExt(banFile)
@@ -145,7 +151,13 @@ func gdpsEditHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 			ApiError(w, 500, "File error", "-3")
 			return
 		}
-		ban = fmt.Sprintf("%simgs/customuser/b%d-%d.%s", HELPER_URL, gdpsId, gdps.EditCount, ext)
+		webpPath := fmt.Sprintf("%scustomuser/b%d-%d.webp", getEnv("IMGS", "./imgs/"), gdpsId, gdps.EditCount)
+		if err := ConvertToWebp(banPath, webpPath, 720, 300); err != nil {
+			fmt.Printf("webp conversion failed: %v\n", err)
+			// если файл сломался то оригинал остаётся, img путь не меняется - деградация без падения
+		} else {
+			ban = fmt.Sprintf("%simgs/customuser/b%d-%d.webp", HELPER_URL, gdpsId, gdps.EditCount)
+		}
 	}
 
 	if err := EditGdpsPictures(int64(gdpsId), img, ban); err != nil {

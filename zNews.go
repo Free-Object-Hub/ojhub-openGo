@@ -76,23 +76,33 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 		time.Now().Unix(),
 		title,
 		gdps.Checked,
-		GetFileExt(file),
+		// GetFileExt(file),
+		"webp",
 	)
 	if err != nil {
 		ApiError(w, 500, "Database error", "-8")
 		return
 	}
 	if file != nil {
-		path := fmt.Sprintf(
+		origPath := fmt.Sprintf(
 			// надеюсь что IMGS имеет слеш на конце
 			"%scustomnews/%d.%s",
 			getEnv("IMGS", "./imgs/"),
 			newsID,
 			GetFileExt(file),
 		)
-		err = SaveFile(file, path)
+		err = SaveFile(file, origPath)
 		if err != nil {
 			ApiError(w, 500, "File error", "-9")
+		}
+		webpPath := fmt.Sprintf(
+			"%scustomnews/%d.webp",
+			getEnv("IMGS", "./imgs/"),
+			newsID,
+		)
+		if err := ConvertToWebp(origPath, webpPath, 1000, 1000); err != nil {
+			fmt.Printf("webp conversion failed: %v\n", err)
+			// TODO: тут проблема - в БД уже "webp" записан, а конвертация не удалась
 		}
 	}
 
