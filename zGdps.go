@@ -99,7 +99,7 @@ func GDPSopener(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err := g.Wait(); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.Write([]byte("[\"NONE\"]"))
 		return
 	}
 
