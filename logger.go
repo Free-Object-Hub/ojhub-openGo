@@ -32,6 +32,7 @@ func TGWebhookLog(msg string) error {
 	chatID := os.Getenv("TG_NEWS_RESENDER")
 
 	if botToken == "" || chatID == "" {
+		log.Printf("[TGWebhookLog] ENV MISSING: token_set=%v chat_set=%v", botToken != "", chatID != "")
 		return fmt.Errorf("telegram configuration is missing")
 	}
 
@@ -62,7 +63,8 @@ func TGWebhookLog(msg string) error {
 
 	resp, err := GlobalHTTPClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to send telegram log: %w", err)
+		rlog.Printf("[TGWebhookLog] http request failed: %v", err)
+		eturn fmt.Errorf("failed to send telegram log: %w", err)
 	}
 	defer resp.Body.Close()
 
