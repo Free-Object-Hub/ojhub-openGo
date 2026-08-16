@@ -42,7 +42,7 @@ func TGWebhookLog(msg string) error {
 	data.Set("chat_id", chatID)
 	data.Set("text", message)
 
-	endpoint := "https://api.telegram.org/bot" +
+	endpoint := "https://api.telegram.org/" +
 		botToken +
 		"/sendMessage"
 
