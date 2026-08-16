@@ -63,8 +63,8 @@ func TGWebhookLog(msg string) error {
 
 	resp, err := GlobalHTTPClient.Do(req)
 	if err != nil {
-		rlog.Printf("[TGWebhookLog] http request failed: %v", err)
-		eturn fmt.Errorf("failed to send telegram log: %w", err)
+		log.Printf("[TGWebhookLog] http request failed: %v", err)
+		return fmt.Errorf("failed to send telegram log: %w", err)
 	}
 	defer resp.Body.Close()
 
