@@ -53,6 +53,7 @@ func TGWebhookLog(msg string) error {
 		strings.NewReader(data.Encode()),
 	)
 	if err != nil {
+		log.Println("failed to create telegram request: %w", err)
 		return fmt.Errorf("failed to create telegram request: %w", err)
 	}
 
@@ -69,6 +70,7 @@ func TGWebhookLog(msg string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		log.Println("telegram returned status: ", resp.StatusCode)
 		return fmt.Errorf(
 			"telegram returned status %d",
 			resp.StatusCode,
