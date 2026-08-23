@@ -64,9 +64,9 @@ func WIKIfetchById(ID int) (*Wiki, error) {
 }
 
 func WIKIfetchGuides(ID, page int) ([]Guide, error) {
-	offset := page * 4
+	offset := page * 8
 	var guides []Guide
-	err := DB.Select(&guides, `SELECT * FROM guides WHERE checked = 1 AND wikiChannel = ? ORDER BY ID DESC LIMIT 5 OFFSET ?`, ID, offset)
+	err := DB.Select(&guides, `SELECT * FROM guides WHERE checked = 1 AND wikiChannel = ? ORDER BY ID DESC LIMIT 9 OFFSET ?`, ID, offset)
 	if err != nil {
 		return nil, err
 	}
