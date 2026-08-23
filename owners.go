@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
 
 const (
 	ChannelWiki    = -1
@@ -54,6 +57,8 @@ type WikiOwner struct {
 	ID     int `db:"ID"`
 	WikiId int `db:"wikiId"`
 	UserId int `db:"userId"`
+	// неиспользуемые поля
+	PermLevel int `db:"permLevel"`
 }
 
 func FetchOwnedWiki(wikiId int) ([]WikiOwner, error) {
@@ -61,6 +66,7 @@ func FetchOwnedWiki(wikiId int) ([]WikiOwner, error) {
 	query := "SELECT * FROM wikisoowners WHERE wikiId = ? ORDER BY ID DESC"
 	err := DB.Select(&owners, query, wikiId)
 	if err != nil {
+		log.Println(err)
 		return nil, fmt.Errorf("failed to fetch wiki owners: %w", err)
 	}
 	return owners, nil
