@@ -160,6 +160,7 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "search/new" + php, fullSearch},                 // zSearch.go
 	{"", apiAddr + "wiki/getWikis" + php, wikiSearch},              // zSearch.go
 	{"", apiAddr + "wiki/getWiki" + php, GuidesHandler},            // zWiki.go
+	{"", apiAddr + "wiki/getGuides" + php, GuidesHandler},          // zWiki.go
 	{"", apiAddr + "wiki/getGuide" + php, GuideHandler},            // zWiki.go
 	{"", apiAddr + "vacans/getAll" + php, vacsSearch},              // zSearch.go
 	{"", apiAddr + "vacans/apply" + php, vacApply},                 // zVacApls.go
