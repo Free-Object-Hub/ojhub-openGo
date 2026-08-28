@@ -24,14 +24,6 @@ func GDPSaddNewItem(
 	return result.LastInsertId()
 }
 
-func EditGdpsPictures(gdpsId int64, img, ban string) error {
-	_, err := DB.Exec(`UPDATE gdpses SET img = ?, ban = ? WHERE ID = ?`, img, ban, gdpsId)
-	if err != nil {
-		return fmt.Errorf("failed to edit gdps pictures: %w", err)
-	}
-	return nil
-}
-
 func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 	user, ok := RequireDevice(w, r)
 	if !ok {
@@ -48,15 +40,54 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 	}
 
 	title := r.FormValue("title")
-	description := r.FormValue("description")
-	if title == "" || description == "" {
+	if title == "" {
 		w.Write([]byte("-27"))
 		return
 	}
 	title = ExploitPatch(title)
-	description = ExploitPatch(description)
-	short := ExploitPatch(r.FormValue("short"))
 	language := ExploitPatch(r.FormValue("language"))
+
+	// --- description: новый multi-клиент (language пустой) либо legacy single ---
+	var descriptionToStore string
+	rawDescs := r.Form["description"]
+
+	if language == "" && len(rawDescs) > 0 {
+		multiMap, err := ParseMultiField(rawDescs, MAX_DESC_LEN)
+		if err != nil || len(multiMap) == 0 {
+			log.Println(err)
+			ApiError(w, 400, "Bad description", "-28")
+			return
+		}
+		descJSON, _ := json.Marshal(multiMap)
+		descriptionToStore = string(descJSON)
+	} else {
+		description := ExploitPatch(r.FormValue("description"))
+		if description == "" {
+			w.Write([]byte("-27"))
+			return
+		}
+		descriptionToStore = description
+	}
+
+	// --- short: та же multi/single развилка, отдельный лимит длины ---
+	var shortToStore string
+	rawShorts := r.Form["short"]
+
+	if language == "" && len(rawShorts) > 0 {
+		multiShortMap, err := ParseMultiField(rawShorts, MAX_SHORT_LEN)
+		if err != nil {
+			ApiError(w, 400, "Bad short", "-29")
+			return
+		}
+		if len(multiShortMap) == 0 {
+			shortToStore = ""
+		} else {
+			shortJSON, _ := json.Marshal(multiShortMap)
+			shortToStore = string(shortJSON)
+		}
+	} else {
+		shortToStore = ExploitPatch(r.FormValue("short"))
+	}
 
 	var imgFile, banFile *multipart.FileHeader
 	var img, ban string
@@ -96,7 +127,6 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 	tagsJSON, _ := json.Marshal(tagsList)
 	osJSON, _ := json.Marshal(osList)
 
-	// mergeAndSortTags/createBitmask ждут []int - конвертируем строки
 	tagsInt := stringsToInts(tagsList)
 	osInt := stringsToInts(osList)
 	mask := createBitmask(mergeAndSortTags(tagsInt, osInt))
@@ -107,7 +137,7 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 	}
 
 	gdpsId, err := GDPSaddNewItem(
-		contentType, title, link, img, ban, description, short,
+		contentType, title, link, img, ban, descriptionToStore, shortToStore,
 		string(tagsJSON), string(osJSON), mask, user.UserId, username, language,
 	)
 	if err != nil {
@@ -127,7 +157,6 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 		if err := ConvertToWebp(imgPath, webpPath, 256, 256); err != nil {
 			fmt.Printf("webp conversion failed: %v\n", err)
 			log.Println(err)
-			// если файл сломался то оригинал остаётся, img путь не меняется - деградация без падения
 		} else {
 			img = fmt.Sprintf("%simgs/customuser/i%d.webp", HELPER_URL, gdpsId)
 		}
@@ -144,7 +173,6 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 		if err := ConvertToWebp(banPath, webpPath, 720, 300); err != nil {
 			fmt.Printf("webp conversion failed: %v\n", err)
 			log.Println(err)
-			// если файл сломался то оригинал остаётся, img путь не меняется - деградация без падения
 		} else {
 			ban = fmt.Sprintf("%simgs/customuser/b%d.webp", HELPER_URL, gdpsId)
 		}
@@ -174,10 +202,7 @@ func stringsToInts(s []string) []int {
 	return result
 }
 
-// #region обёртки под каждый канал
 func CampAdd(w http.ResponseWriter, r *http.Request) { gdpsAddHandler(w, r, 0) }
 func ShowAdd(w http.ResponseWriter, r *http.Request) { gdpsAddHandler(w, r, 1) }
 func PereAdd(w http.ResponseWriter, r *http.Request) { gdpsAddHandler(w, r, 2) }
 func TeleAdd(w http.ResponseWriter, r *http.Request) { gdpsAddHandler(w, r, 3) }
-
-// #endregion

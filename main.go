@@ -101,6 +101,22 @@ var (
 	HELPER_URL = "https://objecthub.xyz/"
 )
 
+var LangList = []string{"RU", "EN", "UA"}
+
+func IsValidLang(lang string) bool {
+	for _, l := range LangList {
+		if l == lang {
+			return true
+		}
+	}
+	return false
+}
+
+const (
+	MAX_DESC_LEN  = 5000
+	MAX_SHORT_LEN = 200
+)
+
 type Endpoint struct {
 	// метод нужно указывать с пробелом - "POST "
 	// либо если метод неважен то буквально пустая строка ""
@@ -208,12 +224,14 @@ func main() {
 	// и создать свой кеш прямо в процессе,
 	// потому что экземпляр 1, и держать единый сервис для in-ram cache
 	// мне просто не надо
-	InitDB()    // database.go
-	InitGeoDb() // databese.go
-	InitRedis() // database.go
+	InitDB()           // database.go
+	InitGeoDb()        // databese.go
+	rDb := InitRedis() // database.go
 	defer DB.Close()
 	defer GeoDb.Close()
-	defer RamDB.Close()
+	if rDb {
+		defer RamDB.Close()
+	}
 
 	for _, ep := range endpoints {
 		http.HandleFunc(ep.Path, ep.Handler)

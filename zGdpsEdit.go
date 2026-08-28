@@ -57,6 +57,7 @@ func gdpsEditHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 	}
 
 	// GET-режим: title/description отсутствуют - отдаём текущие данные для формы
+	// description/short отдаются как есть (сырая строка) - фронт сам решает JSON это или legacy plain text
 	if title == "" || description == "" {
 		links := strings.ReplaceAll(gdps.Link, `\"`, `"`)
 		var linksOut any = links
@@ -80,9 +81,48 @@ func gdpsEditHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 	}
 
 	title = ExploitPatch(title)
-	description = ExploitPatch(description)
-	short := ExploitPatch(r.FormValue("short"))
 	language := ExploitPatch(r.FormValue("language"))
+
+	// --- description: новый multi-клиент (language пустой) либо legacy single ---
+	var descriptionToStore string
+	rawDescs := r.Form["description"]
+
+	if language == "" && len(rawDescs) > 0 {
+		multiMap, err := ParseMultiField(rawDescs, MAX_DESC_LEN)
+		if err != nil || len(multiMap) == 0 {
+			ApiError(w, 400, "Bad description", "-28")
+			return
+		}
+		descJSON, _ := json.Marshal(multiMap)
+		descriptionToStore = string(descJSON)
+	} else {
+		descriptionSingle := ExploitPatch(r.FormValue("description"))
+		if descriptionSingle == "" {
+			w.Write([]byte("-27"))
+			return
+		}
+		descriptionToStore = descriptionSingle
+	}
+
+	// --- short: та же multi/single развилка, пустая строка если мапа пуста ---
+	var shortToStore string
+	rawShorts := r.Form["short"]
+
+	if language == "" && len(rawShorts) > 0 {
+		multiShortMap, err := ParseMultiField(rawShorts, MAX_SHORT_LEN)
+		if err != nil {
+			ApiError(w, 400, "Bad short", "-29")
+			return
+		}
+		if len(multiShortMap) == 0 {
+			shortToStore = ""
+		} else {
+			shortJSON, _ := json.Marshal(multiShortMap)
+			shortToStore = string(shortJSON)
+		}
+	} else {
+		shortToStore = ExploitPatch(r.FormValue("short"))
+	}
 
 	var imgFile, banFile *multipart.FileHeader
 	var img, ban string
@@ -123,7 +163,7 @@ func gdpsEditHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 	osJSON, _ := json.Marshal(osList)
 	mask := createBitmask(mergeAndSortTags(stringsToInts(tagsList), stringsToInts(osList)))
 
-	if err := EditGdpsItem(contentType, title, link, img, ban, description, short, string(tagsJSON), string(osJSON), mask, language, gdpsId); err != nil {
+	if err := EditGdpsItem(contentType, title, link, img, ban, descriptionToStore, shortToStore, string(tagsJSON), string(osJSON), mask, language, gdpsId); err != nil {
 		w.Write([]byte("-1"))
 		return
 	}
@@ -139,7 +179,6 @@ func gdpsEditHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 		webpPath := fmt.Sprintf("%scustomuser/i%d-%d.webp", getEnv("IMGS", "./imgs/"), gdpsId, gdps.EditCount)
 		if err := ConvertToWebp(imgPath, webpPath, 256, 256); err != nil {
 			fmt.Printf("webp conversion failed: %v\n", err)
-			// если файл сломался то оригинал остаётся, img путь не меняется - деградация без падения
 		} else {
 			img = fmt.Sprintf("%simgs/customuser/i%d-%d.webp", HELPER_URL, gdpsId, gdps.EditCount)
 		}
@@ -154,7 +193,6 @@ func gdpsEditHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 		webpPath := fmt.Sprintf("%scustomuser/b%d-%d.webp", getEnv("IMGS", "./imgs/"), gdpsId, gdps.EditCount)
 		if err := ConvertToWebp(banPath, webpPath, 720, 300); err != nil {
 			fmt.Printf("webp conversion failed: %v\n", err)
-			// если файл сломался то оригинал остаётся, img путь не меняется - деградация без падения
 		} else {
 			ban = fmt.Sprintf("%simgs/customuser/b%d-%d.webp", HELPER_URL, gdpsId, gdps.EditCount)
 		}

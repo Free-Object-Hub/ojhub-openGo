@@ -44,13 +44,14 @@ func LikesT(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	result := map[string][]int{
-		"p": {},
-		"c": {},
-		"n": {},
-		"g": {},
-		"w": {},
-		"f": {},
-		"v": {},
+		"p":    {},
+		"c":    {},
+		"n":    {},
+		"g":    {},
+		"w":    {},
+		"f":    {},
+		"v":    {},
+		"subs": {},
 	}
 
 	if user.Activated == 0 {
@@ -64,8 +65,7 @@ func LikesT(w http.ResponseWriter, r *http.Request) {
 		&likes,
 		`SELECT whereIz, type, channel
 		FROM likes
-		WHERE userId = ?
-		ORDER BY channel ASC`,
+		WHERE userId = ?`,
 		user.UserId,
 	)
 	if err != nil {
@@ -90,6 +90,25 @@ func LikesT(w http.ResponseWriter, r *http.Request) {
 			return abs(result[k][i]) > abs(result[k][j])
 		})
 	}
+
+	var subRows []int
+	err = DB.Select(
+		&subRows,
+		`SELECT gdpsId FROM gdpsSubs WHERE userId = ?`,
+		user.UserId,
+	)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for k := range result {
+		sort.Slice(result[k], func(i, j int) bool {
+			return abs(result[k][i]) > abs(result[k][j])
+		})
+	}
+
+	result["subs"] = subRows
 
 	json.NewEncoder(w).Encode(result)
 }

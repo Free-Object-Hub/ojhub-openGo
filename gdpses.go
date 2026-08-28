@@ -146,6 +146,44 @@ func CheckGdpsAccess(userID, gdpsID int) (int, error) {
 	return access, nil
 }
 
+func EditGdpsPictures(gdpsId int64, img, ban string) error {
+	_, err := DB.Exec(`UPDATE gdpses SET img = ?, ban = ? WHERE ID = ?`, img, ban, gdpsId)
+	if err != nil {
+		return fmt.Errorf("failed to edit gdps pictures: %w", err)
+	}
+	return nil
+}
+
+// ParseMultiField парсит r.Form[fieldName] (записи вида "lang\ttext") в JSON-словарь.
+// maxLen — лимит длины текста для конкретного поля (разный для description/short).
+func ParseMultiField(raw []string, maxLen int) (map[string]string, error) {
+	result := make(map[string]string)
+	for _, entry := range raw {
+		idx := strings.IndexByte(entry, '\t')
+		if idx == -1 {
+			return nil, fmt.Errorf("malformed field entry: no tab separator")
+		}
+		lang := entry[:idx]
+		text := entry[idx+1:]
+		lang = ExploitPatch(lang)
+		text = ExploitPatch(text)
+		if !IsValidLang(lang) {
+			return nil, fmt.Errorf("unknown language: %s", lang)
+		}
+		if _, dup := result[lang]; dup {
+			return nil, fmt.Errorf("duplicate language: %s", lang)
+		}
+		if len(text) > maxLen {
+			return nil, fmt.Errorf("field too long for lang: %s", lang)
+		}
+		if text == "" {
+			continue
+		}
+		result[lang] = text
+	}
+	return result, nil
+}
+
 type GDPSshort struct {
 	ID       int    `json:"ID"`
 	Title    string `json:"title"`
@@ -163,13 +201,35 @@ type GDPSshort struct {
 	Points   *int   `json:"points,omitempty"`
 }
 
+func truncateDescriptionForPreview(description string, maxLen int) string {
+	var multiMap map[string]string
+	if err := json.Unmarshal([]byte(description), &multiMap); err == nil && len(multiMap) > 0 {
+		truncated := make(map[string]string, len(multiMap))
+		for lang, text := range multiMap {
+			truncated[lang] = truncateRunes(text, maxLen)
+		}
+		result, _ := json.Marshal(truncated)
+		return string(result)
+	}
+	// legacy plain text
+	return truncateRunes(description, maxLen)
+}
+
+func truncateRunes(s string, maxLen int) string {
+	runes := []rune(s)
+	if len(runes) <= maxLen {
+		return s
+	}
+	return string(runes[:maxLen])
+}
+
 func (p GDPS) ToShort(fullText, renderChecked bool) GDPSshort {
 	text := p.Description
 	if !fullText {
 		if p.Short != "" {
 			text = p.Short
 		} else if len(text) > 121 {
-			text = text[:121]
+			text = truncateDescriptionForPreview(p.Description, 121)
 		}
 	}
 
