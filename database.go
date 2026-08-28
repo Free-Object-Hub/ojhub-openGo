@@ -121,7 +121,7 @@ func RamDel(keys string) error {
 	return RamDB.Del(ctxBruh, keys).Err()
 }
 
-func InitRedis() {
+func InitRedis() bool {
 	host := getEnv("RAMDB_HOST", "localhost")
 	port := getEnv("RAMDB_PORT", "6379")
 	password := getEnv("RAMDB_PASSWD", "")
@@ -149,8 +149,10 @@ func InitRedis() {
 	if err := RamDB.Ping(ctx).Err(); err != nil {
 		log.Printf("Failed to connect to Redis: %v (continuing without cache)", err)
 		RamDB = nil
+		return false
 	} else {
 		log.Println("> Redis done")
+		return true
 	}
 }
 
