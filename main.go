@@ -204,7 +204,9 @@ var endpoints = []Endpoint{
 
 	// дальше идут эндпоинты которые на самом деле все ещё обслуживаются php
 	{"", apiAddr + "content/getJoinLog" + php, DropPhp},
-	{"", apiAddr + "search/connectWiki" + php, DropPhp},
+	{"", apiAddr + "search/conntectWiki" + php, DropPhp},
+	{"", apiAddr + "search/conntectContent" + php, DropPhp},
+	{"", apiAddr + "search/deleteWikiFiles" + php, DropPhp},
 	{"", apiAddr + "send/newWiki" + php, DropPhp},
 	{"", apiAddr + "send/editWiki" + php, DropPhp},
 	{"", apiAddr + "wiki/colors" + php, DropPhp},
@@ -212,12 +214,25 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "send/newGuide" + php, DropPhp},
 	{"", apiAddr + "send/editGuide" + php, DropPhp},
 	{"", apiAddr + "wiki/setWikiTag" + php, DropPhp},
+	{"", apiAddr + "wiki/templateGet" + php, DropPhp},
 	{"", apiAddr + "wiki/templatesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/templateSave" + php, DropPhp},
+	{"", apiAddr + "wiki/templateDelete" + php, DropPhp},
+	{"", apiAddr + "wiki/setMainWiki" + php, DropPhp},
 	{"", apiAddr + "wiki/filesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/filesSend" + php, DropPhp},
 	// Админ панель
 	{"", apiAddr + "!newTakeAll" + php, DropPhp},
+	{"", apiAddr + "wordleRU" + php, DropPhp},
+	{"", apiAddr + "wordleEN" + php, DropPhp},
+	{"", apiAddr + "forum/create" + php, DropPhp},
+	{"", apiAddr + "forum/createPost" + php, DropPhp},
+	{"", apiAddr + "forum/getPost" + php, DropPhp},
+	{"", apiAddr + "forum/getPosts" + php, DropPhp},
+	{"", apiAddr + "send/forumPost" + php, DropPhp},
+	{"", apiAddr + "user/setNickname" + php, DropPhp},
+	{"", apiAddr + "user/setSocials" + php, DropPhp},
+	{"", apiAddr + "user/setResume" + php, DropPhp},
 	//{"", apiAddr + "" + php, DropPhp},
 }
 
