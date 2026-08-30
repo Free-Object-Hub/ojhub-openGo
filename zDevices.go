@@ -52,7 +52,7 @@ func DeviceAddTab(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("-1"))
 		return
 	}
-	ip := r.Header.Get("X-Real-Ip")
+	ip := ExtractIP(r)
 	city, err := GetCity(ip)
 	if err != nil {
 		city = [2]string{"Unknown", "Unknown"}
@@ -72,7 +72,7 @@ func DeviceAddTab(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data, err := InitOjhub(
-		r.Header.Get("X-Real-Ip"),
+		ExtractIP(r),
 		user.Token,
 		deviceToken,
 		false,

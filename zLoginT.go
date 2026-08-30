@@ -41,7 +41,7 @@ import (
 )
 
 func FreeBSDcompile(w http.ResponseWriter, r *http.Request) {
-	ip := r.Header.Get("X-Real-Ip")
+	ip := ExtractIP(r)
 	token := GetUserToken(r)
 	device := GetDeviceToken(r)
 	jsonData, err := InitOjhub(ip, token, device, false, false, false)

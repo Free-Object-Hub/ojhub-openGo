@@ -20,19 +20,21 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error parsing form: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	if r.FormValue("g-recaptcha-response") == "" {
-		w.Write([]byte("-3"))
-		return
-	}
-	success, err := reCaptcha(r.FormValue("g-recaptcha-response"))
-	if err != nil {
-		w.Write([]byte("-3"))
-		return
-	}
-	if !success {
-		w.Write([]byte("-3"))
-		return
-	}
+	/*
+		if r.FormValue("g-recaptcha-response") == "" {
+			w.Write([]byte("-3"))
+			return
+		}
+		success, err := reCaptcha(r.FormValue("g-recaptcha-response"))
+		if err != nil {
+			w.Write([]byte("-3"))
+			return
+		}
+		if !success {
+			w.Write([]byte("-3"))
+			return
+		}
+	*/
 
 	username := ExploitPatch(r.FormValue("username"))
 	password := r.FormValue("password")
@@ -57,7 +59,7 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ip := r.Header.Get("X-Real-Ip")
+	ip := ExtractIP(r)
 	city, err := GetCity(ip)
 	if err != nil {
 		http.Error(w, "Error with city", http.StatusInternalServerError)
@@ -192,7 +194,7 @@ func userRegister(w http.ResponseWriter, r *http.Request) {
 	}
 	*/
 
-	ip := r.Header.Get("X-Real-Ip")
+	ip := ExtractIP(r)
 
 	city, err := GetCity(ip)
 	if err != nil {
@@ -241,5 +243,23 @@ func userRegister(w http.ResponseWriter, r *http.Request) {
 			"User data error: "+err.Error(),
 			http.StatusInternalServerError,
 		)
+	}
+}
+
+func userLogout(w http.ResponseWriter, r *http.Request) {
+	user, ok := RequireDeviceForInactiveAccs(w, r)
+	if !ok {
+		return
+	}
+	ip := ExtractIP(r)
+	cityData, err := GetCity(ip)
+	if err != nil {
+		w.Write([]byte("Access denied"))
+		return
+	}
+	err = user.RemoveDevice(r.Header.Get("User-Agent"), ip, cityData[0], cityData[1])
+	if err != nil {
+		w.Write([]byte("Access denied"))
+		return
 	}
 }

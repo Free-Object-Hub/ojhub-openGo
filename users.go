@@ -21,7 +21,7 @@ import (
 )
 
 func ExtractIP(r *http.Request) string {
-	return r.Header.Get("X-Real-IP")
+	return r.Header.Get("X-Real-Ip")
 }
 
 // #region users
@@ -168,13 +168,11 @@ func NewUserToken(username string, password string, email string, activated stri
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
-
 	query := `
 		INSERT INTO users
 			(username, password, mail, code, token, priority)
 		VALUES (?, ?, ?, ?, ?, ?)
 	`
-
 	result, err := DB.Exec(
 		query,
 		username,
@@ -187,12 +185,10 @@ func NewUserToken(username string, password string, email string, activated stri
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
-
 	userID, err := result.LastInsertId()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get created user id: %w", err)
 	}
-
 	return &User{
 		UserId:   int(userID),
 		Username: username,
@@ -418,9 +414,7 @@ func RandomString(length int) (string, error) {
 	if length <= 0 {
 		return "", nil
 	}
-
 	result := make([]byte, length)
-
 	for i := range result {
 		n, err := rand.Int(
 			rand.Reader,
@@ -429,10 +423,8 @@ func RandomString(length int) (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("failed to generate random string: %w", err)
 		}
-
 		result[i] = randomCharset[n.Int64()]
 	}
-
 	return string(result), nil
 }
 
@@ -441,25 +433,19 @@ func GenerateUserToken(username string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to generate token entropy: %w", err)
 	}
-
 	hash := sha256.Sum256([]byte(randomString + username))
 	return hex.EncodeToString(hash[:]), nil
 }
 
 func GenerateUserVerifyCode() (string, error) {
 	const max = uint32(1_000_000)
-
 	limit := math.MaxUint32 - (math.MaxUint32 % max)
-
 	var buf [4]byte
-
 	for {
 		if _, err := rand.Read(buf[:]); err != nil {
 			return "", err
 		}
-
 		n := binary.BigEndian.Uint32(buf[:])
-
 		if n < limit {
 			return fmt.Sprintf("%06d", n%max), nil
 		}
