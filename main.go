@@ -132,7 +132,7 @@ func DropPhp(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(399)
 }
 
-// Обратите внимание - в php 66 эндпоинта, здесь же их всего 44
+// Обратите внимание - в php 97 эндпоинта, здесь же их всего 70
 var endpoints = []Endpoint{
 	{"POST ", apiAddr + "user/login" + php, userLogin},                  // zUserLogin.go
 	{"POST ", apiAddr + "user/logout" + php, userLogout},                // zUserLogin.go
@@ -149,6 +149,9 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "user/devices" + php, OpenDeviceTab},                 // zDevices.go
 	{"", apiAddr + "user/removeDevice" + php, RemoveDevice},             // zDevices.go
 	{"POST ", apiAddr + "user/getAccInfo" + php, GetConfInfo},           // zUserEdit.go
+	{"", apiAddr + "user/setNickname" + php, SetNicknameHandler},        // zUserEdit.go
+	{"", apiAddr + "user/setSocials" + php, SetSocialsHandler},          // zUserEdit.go
+	{"", apiAddr + "user/setResume" + php, SetResumeHandler},            // zUserEdit.go
 	{"POST ", apiAddr + "send/deviceAdd" + php, DeviceAddTab},           // zDevices.go
 	{"", apiAddr + "content/getAlarms" + php, GetAlarms},                // zAlarms.go
 	{"", apiAddr + "content/getAlarm" + php, GetAlarm},                  // zAlarms.go
@@ -185,6 +188,11 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "wiki/getWiki" + php, GuidesHandler},                 // zWiki.go
 	{"", apiAddr + "wiki/getGuides" + php, GuidesHandler},               // zWiki.go
 	{"", apiAddr + "wiki/getGuide" + php, GuideHandler},                 // zWiki.go
+	{"", apiAddr + "forum/create" + php, ForumCreate},                   // zForums.go
+	{"", apiAddr + "forum/createPost" + php, ForumCreatePost},           // zForums.go
+	{"", apiAddr + "send/forumPost" + php, ForumCreatePost},             // zForums.go
+	{"", apiAddr + "forum/getPost" + php, ForumGetPost},                 // zForums.go
+	{"", apiAddr + "forum/getPosts" + php, ForumGetPosts},               // zForums.go
 	{"", apiAddr + "vacans/getAll" + php, vacsSearch},                   // zSearch.go
 	{"", apiAddr + "vacans/apply" + php, vacApply},                      // zVacApls.go
 	{"", apiAddr + "vacans/removeApl" + php, vacUnapply},                // zVacApls.go
@@ -198,6 +206,8 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "content/camp" + php, GDPSopener},                    // zGdps.go
 	{"", apiAddr + "loginT" + php, FreeBSDcompile},                      // zLoginT.go
 	{"", apiAddr + "likesT" + php, LikesT},                              // zLikesT.go
+	{"", apiAddr + "wordleRU" + php, WordleRU},                          // zWordle.go
+	{"", apiAddr + "wordleEN" + php, WordleEN},                          // zWordle.go
 	{"", "/join" + php, GDPSjoin},                                       // zLoader.go
 	{"", "/loader", CliLoader},                                          // zLoader.go
 	{"", "/", IndexParser},                                              // zIndex.go
@@ -223,16 +233,7 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "wiki/filesSend" + php, DropPhp},
 	// Админ панель
 	{"", apiAddr + "!newTakeAll" + php, DropPhp},
-	{"", apiAddr + "wordleRU" + php, DropPhp},
-	{"", apiAddr + "wordleEN" + php, DropPhp},
-	{"", apiAddr + "forum/create" + php, DropPhp},
-	{"", apiAddr + "forum/createPost" + php, DropPhp},
-	{"", apiAddr + "forum/getPost" + php, DropPhp},
-	{"", apiAddr + "forum/getPosts" + php, DropPhp},
-	{"", apiAddr + "send/forumPost" + php, DropPhp},
-	{"", apiAddr + "user/setNickname" + php, DropPhp},
-	{"", apiAddr + "user/setSocials" + php, DropPhp},
-	{"", apiAddr + "user/setResume" + php, DropPhp},
+	{"", apiAddr + "Aaction" + php, DropPhp},
 	//{"", apiAddr + "" + php, DropPhp},
 }
 
