@@ -215,14 +215,6 @@ func truncateDescriptionForPreview(description string, maxLen int) string {
 	return truncateRunes(description, maxLen)
 }
 
-func truncateRunes(s string, maxLen int) string {
-	runes := []rune(s)
-	if len(runes) <= maxLen {
-		return s
-	}
-	return string(runes[:maxLen])
-}
-
 func (p GDPS) ToShort(fullText, renderChecked bool) GDPSshort {
 	text := p.Description
 	if !fullText {

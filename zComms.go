@@ -10,7 +10,6 @@ import (
 )
 
 func LoadMoreComms(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	query := r.URL.Query()
 	commentType, err := strconv.Atoi(r.FormValue("type"))
 	if err != nil {
@@ -56,7 +55,6 @@ func CommentSend(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
