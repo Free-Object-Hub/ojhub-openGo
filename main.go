@@ -188,6 +188,10 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "wiki/getWiki" + php, GuidesHandler},                 // zWiki.go
 	{"", apiAddr + "wiki/getGuides" + php, GuidesHandler},               // zWiki.go
 	{"", apiAddr + "wiki/getGuide" + php, GuideHandler},                 // zWiki.go
+	{"", apiAddr + "send/newWiki" + php, HandleNewWiki},                 // zWikiDashboard.go
+	{"", apiAddr + "send/editWiki" + php, HandleEditWiki},               // zWikiDashboard.go
+	{"", apiAddr + "wiki/colors" + php, HandleWikiColors},               // zWikiDashboard.go
+	{"", apiAddr + "wiki/setMainWiki" + php, HandleSetMainWiki},         // zWikiDashboard.go
 	{"", apiAddr + "forum/create" + php, ForumCreate},                   // zForums.go
 	{"", apiAddr + "forum/createPost" + php, ForumCreatePost},           // zForums.go
 	{"", apiAddr + "send/forumPost" + php, ForumCreatePost},             // zForums.go
@@ -213,28 +217,28 @@ var endpoints = []Endpoint{
 	{"", "/", IndexParser},                                              // zIndex.go
 
 	// дальше идут эндпоинты которые на самом деле все ещё обслуживаются php
+	// лог входов
 	{"", apiAddr + "content/getJoinLog" + php, DropPhp},
+	// линковка проектов с вики, да, 2 разных эндпоинта а не один общий
 	{"", apiAddr + "search/conntectWiki" + php, DropPhp},
 	{"", apiAddr + "search/conntectContent" + php, DropPhp},
-	{"", apiAddr + "search/deleteWikiFiles" + php, DropPhp},
-	{"", apiAddr + "send/newWiki" + php, DropPhp},
-	{"", apiAddr + "send/editWiki" + php, DropPhp},
-	{"", apiAddr + "wiki/colors" + php, DropPhp},
+	// статьи
 	{"", apiAddr + "content/getGuidesAdmin" + php, DropPhp},
 	{"", apiAddr + "send/newGuide" + php, DropPhp},
 	{"", apiAddr + "send/editGuide" + php, DropPhp},
 	{"", apiAddr + "wiki/setWikiTag" + php, DropPhp},
+	// шаблоны
 	{"", apiAddr + "wiki/templateGet" + php, DropPhp},
 	{"", apiAddr + "wiki/templatesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/templateSave" + php, DropPhp},
 	{"", apiAddr + "wiki/templateDelete" + php, DropPhp},
-	{"", apiAddr + "wiki/setMainWiki" + php, DropPhp},
+	// файлы
 	{"", apiAddr + "wiki/filesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/filesSend" + php, DropPhp},
+	{"", apiAddr + "search/deleteWikiFiles" + php, DropPhp}, // какого чёрта удаление файлов лежит в поиске?
 	// Админ панель
 	{"", apiAddr + "!newTakeAll" + php, DropPhp},
 	{"", apiAddr + "Aaction" + php, DropPhp},
-	//{"", apiAddr + "" + php, DropPhp},
 }
 
 func main() {

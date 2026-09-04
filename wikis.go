@@ -226,6 +226,43 @@ func (p Wiki) ToFull() WikiProfile {
 	}
 }
 
+// порт LT2 появился на поздней фазе разработки
+// и то я изначально планировал от него отказаться
+// но обстоятельства недосыпа (4 сентября 23:45)
+// и желание "довайбить" остатки порта openGo были сильнее
+// меня кстати сегодня похвалили в шараге йоу
+type WikiLT2 struct {
+	ID       int    `json:"ID"`
+	Title    string `json:"title"`
+	Text     string `json:"text"`
+	Img      string `json:"ban"`
+	Language string `json:"language"`
+	Date     int    `json:"date"`
+	Likes    [2]int `json:"likes"`
+	UserID   int    `json:"userId"`
+	ConnGdps int    `json:"connGdps"`
+	ForumID  int    `json:"forumId"`
+	MainWiki int    `json:"mainWiki"`
+	Color    string `json:"color"`
+}
+
+func (p Wiki) ToLT2() WikiLT2 {
+	return WikiLT2{
+		ID:       p.ID,
+		Title:    p.Title,
+		Text:     p.Text,
+		Img:      p.Img,
+		Language: p.Language,
+		Date:     p.Date,
+		Likes:    [2]int{p.Likes, p.Disls},
+		UserID:   p.UserID,
+		ConnGdps: p.ConnectedGDPS,
+		ForumID:  p.ForumID,
+		MainWiki: p.MainWiki,
+		Color:    p.Colors,
+	}
+}
+
 func GuidesFetchByIdOrTag(idOrTag string, wikiID int) (*Guide, error) {
 	if id, err := strconv.Atoi(idOrTag); err == nil && id != 0 {
 		return GuidesFetchById(id)
@@ -309,4 +346,46 @@ func renderGuide(g Guide) (GuideRender, error) {
 		Comments:  make([]CommResp, 0),
 		Templates: make(map[string]interface{}),
 	}, nil
+}
+
+func WIKIcreate(userId int, title, text, language, img string, date int64) (*Wiki, error) {
+	res, err := DB.Exec(
+		`INSERT INTO wikis (userId, title, text, language, date, img) VALUES (?, ?, ?, ?, ?, ?)`,
+		userId, title, text, language, date, img,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create wiki: %w", err)
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get inserted wiki id: %w", err)
+	}
+	return WIKIfetchById(int(id))
+}
+
+func WIKIedit(wikiId int, title, text, language, img string) (*Wiki, error) {
+	_, err := DB.Exec(
+		`UPDATE wikis SET checked = 0, title = ?, text = ?, language = ?, img = ? WHERE ID = ?`,
+		title, text, language, img, wikiId,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to edit wiki: %w", err)
+	}
+	return WIKIfetchById(wikiId)
+}
+
+func WIKIsetColor(wikiId int, color string) error {
+	_, err := DB.Exec(`UPDATE wikis SET colors = ? WHERE ID = ?`, color, wikiId)
+	if err != nil {
+		return fmt.Errorf("failed to set wiki color: %w", err)
+	}
+	return nil
+}
+
+func WIKIsetMainWiki(wikiId, guideId int) (int, error) {
+	_, err := DB.Exec(`UPDATE wikis SET mainWiki = ? WHERE ID = ?`, guideId, wikiId)
+	if err != nil {
+		return 0, fmt.Errorf("failed to set main wiki: %w", err)
+	}
+	return guideId, nil
 }
