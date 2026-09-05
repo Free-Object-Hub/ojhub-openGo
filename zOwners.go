@@ -200,3 +200,52 @@ func PermRemove(w http.ResponseWriter, r *http.Request) {
 	resp := []any{access}
 	json.NewEncoder(w).Encode(resp)
 }
+
+func GetJoinLog(w http.ResponseWriter, r *http.Request) {
+	user, ok := RequireToken(w, r)
+	if !ok {
+		w.Write([]byte("Access denied"))
+		return
+	}
+	gdpsId, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		w.Write([]byte("-1"))
+		return
+	}
+	access, err := CheckGdpsAccess(user.UserId, gdpsId)
+	if err != nil || access == 0 {
+		w.Write([]byte("Access denied"))
+		return
+	}
+	gdps, err := GDPSfetchById(gdpsId)
+	if err != nil || gdps == nil {
+		w.Write([]byte("-2"))
+		return
+	}
+	joins, err := FetchJoinLog(gdpsId)
+	if err != nil {
+		w.Write([]byte("-3"))
+		return
+	}
+	userIds := make([]int, 0, len(joins))
+	for _, j := range joins {
+		if j.UserId != 0 {
+			userIds = append(userIds, j.UserId)
+		}
+	}
+	users, err := FetchUsersByIds(userIds)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+	result := make([][]interface{}, 0, len(joins)+1)
+	result = append(result, []interface{}{gdps.Title, "dontRenderMe"})
+	for _, j := range joins {
+		username := "???"
+		if j.UserId != 0 {
+			username = nicknameOrFallback(users[j.UserId])
+		}
+		result = append(result, []interface{}{username, j.JoinDate, j.JoinData})
+	}
+	json.NewEncoder(w).Encode(result)
+}

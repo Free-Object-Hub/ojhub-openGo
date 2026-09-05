@@ -132,7 +132,7 @@ func DropPhp(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(399)
 }
 
-// Обратите внимание - в php 97 эндпоинта, здесь же их всего 70
+// Обратите внимание - в php 97 эндпоинта, здесь же их всего 92
 var endpoints = []Endpoint{
 	{"POST ", apiAddr + "user/login" + php, userLogin},                  // zUserLogin.go
 	{"POST ", apiAddr + "user/logout" + php, userLogout},                // zUserLogin.go
@@ -165,6 +165,7 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "send/showEdit" + php, ShowEdit},                     // zGdpsEdit.go
 	{"", apiAddr + "send/pereEdit" + php, PereEdit},                     // zGdpsEdit.go
 	{"", apiAddr + "send/teleEdit" + php, TeleEdit},                     // zGdpsEdit.go
+	{"", apiAddr + "content/getJoinLog" + php, GetJoinLog},              // zOwners.go
 	{"", apiAddr + "send/bump" + php, GdpsBump},                         // zGdps.go
 	{"", apiAddr + "content/getOwners" + php, GetOwners},                // zOwners.go
 	{"", apiAddr + "send/permAdd" + php, PermAdd},                       // zOwners.go
@@ -192,6 +193,16 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "send/editWiki" + php, HandleEditWiki},               // zWikiDashboard.go
 	{"", apiAddr + "wiki/colors" + php, HandleWikiColors},               // zWikiDashboard.go
 	{"", apiAddr + "wiki/setMainWiki" + php, HandleSetMainWiki},         // zWikiDashboard.go
+	{"", apiAddr + "search/conntectWiki" + php, ConnectWiki},            // zGdpsWikiLinknig.go
+	{"", apiAddr + "search/conntectContent" + php, ConnectContent},      // zGdpsWikiLinknig.go
+	{"", apiAddr + "content/getGuidesAdmin" + php, GetGuidesAdmin},      // zWikiDashboard.go
+	{"", apiAddr + "send/newGuide" + php, NewGuide},                     // zWikiDashboard.go
+	{"", apiAddr + "send/editGuide" + php, EditGuideHandler},            // zWikiDashboard.go
+	{"", apiAddr + "wiki/setWikiTag" + php, SetWikiTagHandler},          // zWikiDashboard.go
+	{"", apiAddr + "wiki/templateGet" + php, TemplateGet},               // zWikiTemplates.go
+	{"", apiAddr + "wiki/templatesGet" + php, TemplatesGet},             // zWikiTemplates.go
+	{"", apiAddr + "wiki/templateSave" + php, TemplateSave},             // zWikiTemplates.go
+	{"", apiAddr + "wiki/templateDelete" + php, TemplateDelete},         // zWikiTemplates.go
 	{"", apiAddr + "forum/create" + php, ForumCreate},                   // zForums.go
 	{"", apiAddr + "forum/createPost" + php, ForumCreatePost},           // zForums.go
 	{"", apiAddr + "send/forumPost" + php, ForumCreatePost},             // zForums.go
@@ -217,21 +228,6 @@ var endpoints = []Endpoint{
 	{"", "/", IndexParser},                                              // zIndex.go
 
 	// дальше идут эндпоинты которые на самом деле все ещё обслуживаются php
-	// лог входов
-	{"", apiAddr + "content/getJoinLog" + php, DropPhp},
-	// линковка проектов с вики, да, 2 разных эндпоинта а не один общий
-	{"", apiAddr + "search/conntectWiki" + php, DropPhp},
-	{"", apiAddr + "search/conntectContent" + php, DropPhp},
-	// статьи
-	{"", apiAddr + "content/getGuidesAdmin" + php, DropPhp},
-	{"", apiAddr + "send/newGuide" + php, DropPhp},
-	{"", apiAddr + "send/editGuide" + php, DropPhp},
-	{"", apiAddr + "wiki/setWikiTag" + php, DropPhp},
-	// шаблоны
-	{"", apiAddr + "wiki/templateGet" + php, DropPhp},
-	{"", apiAddr + "wiki/templatesGet" + php, DropPhp},
-	{"", apiAddr + "wiki/templateSave" + php, DropPhp},
-	{"", apiAddr + "wiki/templateDelete" + php, DropPhp},
 	// файлы
 	{"", apiAddr + "wiki/filesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/filesSend" + php, DropPhp},

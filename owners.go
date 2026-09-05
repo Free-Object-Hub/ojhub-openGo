@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 )
 
 const (
@@ -96,11 +97,13 @@ func DeleteOwnerWiki(wikiId, userId int) error {
 
 // #endregion
 // #region joinlog (type -4, только чтение через fetchOwned)
-// FIXME: сделать нормальную структуру а не набросок клода
 type JoinLogEntry struct {
-	ID     int `db:"ID"`
-	GdpsId int `db:"gdpsId"`
-	UserId int `db:"userId"`
+	ID       int    `db:"ID"`
+	GdpsId   int    `db:"gdpsId"`
+	UserId   int    `db:"userId"`
+	Username string `db:"username"`
+	JoinDate int    `db:"joinDate"`
+	JoinData string `db:"joinData"`
 }
 
 func FetchJoinLog(gdpsId int) ([]JoinLogEntry, error) {
@@ -111,6 +114,41 @@ func FetchJoinLog(gdpsId int) ([]JoinLogEntry, error) {
 		return nil, fmt.Errorf("failed to fetch join log: %w", err)
 	}
 	return entries, nil
+}
+
+func FetchUsersByIds(ids []int) (map[int]*User, error) {
+	if len(ids) == 0 {
+		return map[int]*User{}, nil
+	}
+	placeholders := make([]string, len(ids))
+	args := make([]interface{}, len(ids))
+	for i, id := range ids {
+		placeholders[i] = "?"
+		args[i] = id
+	}
+	query := fmt.Sprintf(`SELECT * FROM users WHERE userId IN (%s)`, strings.Join(placeholders, ","))
+	var users []User
+	if err := DB.Select(&users, query, args...); err != nil {
+		return nil, err
+	}
+	result := make(map[int]*User, len(users))
+	for i := range users {
+		result[users[i].UserId] = &users[i]
+	}
+	return result, nil
+}
+
+func nicknameOrFallback(u *User) string {
+	if u == nil {
+		return "???"
+	}
+	if u.Nickname != "" {
+		return u.Nickname
+	}
+	if u.Username != "" {
+		return u.Username
+	}
+	return "???"
 }
 
 // #endregion
