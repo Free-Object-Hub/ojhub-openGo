@@ -226,13 +226,9 @@ var endpoints = []Endpoint{
 	{"", "/join" + php, GDPSjoin},                                       // zLoader.go
 	{"", "/loader", CliLoader},                                          // zLoader.go
 	{"", "/", IndexParser},                                              // zIndex.go
-
-	// дальше идут эндпоинты которые на самом деле все ещё обслуживаются php
-	// файлы
 	{"", apiAddr + "wiki/filesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/filesSend" + php, DropPhp},
 	{"", apiAddr + "search/deleteWikiFiles" + php, DropPhp}, // какого чёрта удаление файлов лежит в поиске?
-	// Админ панель
 	{"", apiAddr + "!newTakeAll" + php, DropPhp},
 	{"", apiAddr + "Aaction" + php, DropPhp},
 }

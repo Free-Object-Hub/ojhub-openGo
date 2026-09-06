@@ -109,23 +109,23 @@ func VacsEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		w.Write([]byte("-2"))
+		w.Write([]byte("-5"))
 		return
 	}
-	vacId, err := strconv.Atoi(r.FormValue("id"))
+	vacId, err := strconv.Atoi(r.PostFormValue("id"))
 	if err != nil || vacId == 0 {
-		w.Write([]byte("-2"))
+		w.Write([]byte("-5"))
 		return
 	}
 	vacancy, err := VACSfetchById(vacId, user.UserId)
 	if err != nil {
-		w.Write([]byte("-2"))
+		w.Write([]byte("-4"))
 		return
 	}
 	gdpsId := vacancy.GdpsID
 	gdps, err := GDPSfetchById(gdpsId)
 	if err != nil {
-		w.Write([]byte("-2"))
+		w.Write([]byte("-3"))
 		return
 	}
 	access, err := CheckGdpsAccess(user.UserId, gdpsId)
