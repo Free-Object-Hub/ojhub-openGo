@@ -14,6 +14,32 @@ import (
 	"time"
 )
 
+const (
+	GDPSban    = "Забанен ПРОЕКТ - "
+	GDPSunban  = "Разбанен ПРОЕКТ - "
+	GDPSdelete = "Удалён ПРОЕКТ - "
+	GDPSlgbt1  = "это ЛГБТ ПРОЕКТ - "
+	GDPSlgbt2  = "это НЕ ЛГБТ ПРОЕКТ - "
+
+	GUIDban    = "Забанен ГАЙД - "
+	GUIDunban  = "Разбанен ГАЙД - "
+	GUIDdelete = "Удалён ГАЙД - "
+	GUIDlgbt1  = "это ЛГБТ ГАЙД - "
+	GUIDlgbt2  = "это НЕ ЛГБТ ГАЙД - "
+
+	WIKIban    = "Забанен ВИКИ - "
+	WIKIunban  = "Разбанен ВИКИ - "
+	WIKIdelete = "Удалён ВИКИ - "
+	WIKIlgbt1  = "это ЛГБТ ВИКИ - "
+	WIKIlgbt2  = "это НЕ ЛГБТ ВИКИ - "
+
+	VACban    = "Забанена ВАКАНСИЯ - "
+	VACunban  = "Разбанена ВАКАНСИЯ - "
+	VACdelete = "Удалена ВАКАНСИЯ - "
+	VAClgbt1  = "это ЛГБТ ВАКАНСИЯ - "
+	VAClgbt2  = "это НЕ ЛГБТ ВАКАНСИЯ - "
+)
+
 var GlobalHTTPClient = &http.Client{
 	Timeout: 5 * time.Second,
 	Transport: &http.Transport{

@@ -226,11 +226,11 @@ var endpoints = []Endpoint{
 	{"", "/join" + php, GDPSjoin},                                       // zLoader.go
 	{"", "/loader", CliLoader},                                          // zLoader.go
 	{"", "/", IndexParser},                                              // zIndex.go
+	{"", apiAddr + "!newTakeAll" + php, AdminTakeAll},                   // zAdmin.go
+	{"", apiAddr + "Aaction" + php, Aaction},                            // zAdmin.go
 	{"", apiAddr + "wiki/filesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/filesSend" + php, DropPhp},
 	{"", apiAddr + "search/deleteWikiFiles" + php, DropPhp}, // какого чёрта удаление файлов лежит в поиске?
-	{"", apiAddr + "!newTakeAll" + php, DropPhp},
-	{"", apiAddr + "Aaction" + php, DropPhp},
 }
 
 func main() {
