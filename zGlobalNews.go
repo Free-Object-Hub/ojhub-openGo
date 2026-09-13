@@ -21,9 +21,9 @@ func GlobalNews(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	rendered := make([]NewsResp, len(news))
+	rendered := make([][]interface{}, len(news))
 	for i, n := range news {
-		rendered[i] = n.NewsRender()
+		rendered[i] = n.NewsRenderLegacy()
 	}
 	if err := json.NewEncoder(w).Encode(rendered); err != nil {
 		http.Error(w, "News data error", http.StatusInternalServerError)
@@ -47,9 +47,9 @@ func LocalNews(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	rendered := make([]NewsResp, len(news))
+	rendered := make([][]interface{}, len(news))
 	for i, n := range news {
-		rendered[i] = n.NewsRender()
+		rendered[i] = n.NewsRenderLegacy()
 	}
 	if err := json.NewEncoder(w).Encode(rendered); err != nil {
 		http.Error(w, "News data error", http.StatusInternalServerError)
@@ -57,8 +57,8 @@ func LocalNews(w http.ResponseWriter, r *http.Request) {
 }
 
 type NewsOneResp struct {
-	Gdps     map[string]NewsResp `json:"gdps"`
-	Comments []CommResp          `json:"comments"`
+	Gdps     map[string][]interface{} `json:"gdps"`
+	Comments []CommResp               `json:"comments"`
 }
 
 func NewsGetOne(w http.ResponseWriter, r *http.Request) {
@@ -90,8 +90,8 @@ func NewsGetOne(w http.ResponseWriter, r *http.Request) {
 	}
 	//
 	jsonData := NewsOneResp{
-		Gdps: map[string]NewsResp{
-			"n" + strconv.Itoa(news.ID): news.NewsRender(),
+		Gdps: map[string][]interface{}{
+			"n" + strconv.Itoa(news.ID): news.NewsRenderLegacy(),
 		},
 		Comments: comms,
 	}

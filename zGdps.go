@@ -71,9 +71,9 @@ func GDPSopener(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return err
 		}
-		news := make([]NewsResp, 0, len(newsPre))
+		news := make([][]interface{}, 0, len(newsPre))
 		for _, n := range newsPre {
-			news = append(news, n.NewsRender())
+			news = append(news, n.NewsRenderLegacy())
 		}
 		newsJSON, err = json.Marshal(news)
 		if err != nil {

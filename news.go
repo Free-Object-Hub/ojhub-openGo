@@ -133,6 +133,34 @@ func (p News) NewsRender() NewsResp {
 	}
 }
 
+func (p News) NewsRenderLegacy() []interface{} {
+	gdpsId := ChannelIdsToString(p.GdpsChannel) + strconv.Itoa(p.GdpsId)
+	userName := p.UserName
+	if userName == "" {
+		userName = p.NickName
+	}
+	decodedText, err := base64.StdEncoding.DecodeString(p.Text)
+	text := p.Text
+	if err == nil {
+		text = string(decodedText)
+	}
+
+	return []interface{}{
+		p.ID,
+		p.Title,
+		text,
+		p.UserId,
+		userName,
+		gdpsId,
+		p.GdpsTitle,
+		p.Date,
+		[3]int{p.Likes, p.Disls, p.CommsCount},
+		0, // isLiked, мёртвое поле
+		p.HasFile,
+		p.GdpsImg,
+	}
+}
+
 func RenderNewsMap(newsPre []News) map[string]NewsResp {
 	news := make(map[string]NewsResp, len(newsPre))
 	for _, n := range newsPre {

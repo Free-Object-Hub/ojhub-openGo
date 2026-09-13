@@ -101,9 +101,9 @@ func publicInit() (json.RawMessage, error) {
 			return fmt.Sprintf("%s%d", ChannelIdsToString(p.Channel), p.ID)
 		},
 	)
-	newsShorts := make([]NewsResp, 0, len(cachedNews))
-	for _, p := range cachedNews {
-		newsShorts = append(newsShorts, p.NewsRender())
+	newsShorts := make([][]interface{}, 0, len(cachedNews))
+	for _, n := range cachedNews {
+		newsShorts = append(newsShorts, n.NewsRenderLegacy())
 	}
 	gdpsJSON, err := json.Marshal(GDPSes)
 	if err != nil {
