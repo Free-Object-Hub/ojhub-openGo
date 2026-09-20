@@ -226,6 +226,7 @@ var endpoints = []Endpoint{
 	{"", "/join" + php, GDPSjoin},                                       // zLoader.go
 	{"", "/loader", CliLoader},                                          // zLoader.go
 	{"", "/", IndexParser},                                              // zIndex.go
+	{"", apiAddr + "challenge" + php, AltchaChallenge},                  // captcha.go
 	{"", apiAddr + "!newTakeAll" + php, AdminTakeAll},                   // zAdmin.go
 	{"", apiAddr + "Aaction" + php, Aaction},                            // zAdmin.go
 	{"", apiAddr + "wiki/filesGet" + php, DropPhp},
@@ -241,6 +242,7 @@ func main() {
 	InitDB()           // database.go
 	InitGeoDb()        // databese.go
 	rDb := InitRedis() // database.go
+	InitAltcha()       // captcha.go
 	defer DB.Close()
 	defer GeoDb.Close()
 	if rDb {

@@ -20,21 +20,11 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error parsing form: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	/*
-		if r.FormValue("g-recaptcha-response") == "" {
-			w.Write([]byte("-3"))
-			return
-		}
-		success, err := reCaptcha(r.FormValue("g-recaptcha-response"))
-		if err != nil {
-			w.Write([]byte("-3"))
-			return
-		}
-		if !success {
-			w.Write([]byte("-3"))
-			return
-		}
-	*/
+
+	if !verifyAltcha(r.FormValue("altcha")) {
+		w.Write([]byte("-3"))
+		return
+	}
 
 	username := ExploitPatch(r.FormValue("username"))
 	password := r.FormValue("password")
@@ -109,18 +99,7 @@ func userRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	recaptcha := r.FormValue("g-recaptcha-response")
-	if recaptcha == "" {
-		w.Write([]byte("-2"))
-		return
-	}
-	success, err := reCaptcha(recaptcha)
-	if err != nil {
-		log.Println("reCAPTCHA error:", err)
-		w.Write([]byte("-2"))
-		return
-	}
-	if !success {
+	if !verifyAltcha(r.FormValue("altcha")) {
 		w.Write([]byte("-2"))
 		return
 	}
