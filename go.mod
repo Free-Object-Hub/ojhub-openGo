@@ -4,9 +4,11 @@ go 1.26.4
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
+	github.com/SherClockHolmes/webpush-go v1.4.0 // indirect
 	github.com/altcha-org/altcha-lib-go v1.0.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/go-sql-driver/mysql v1.10.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/jmoiron/sqlx v1.4.0 // indirect
 	github.com/mileusna/useragent v1.3.5 // indirect
 	github.com/oschwald/geoip2-golang/v2 v2.2.0 // indirect

@@ -32,6 +32,7 @@ func AltchaChallenge(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "challenge error", http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(ch)
 }
 
@@ -40,6 +41,10 @@ func verifyAltcha(payloadRaw string) bool {
 	if err != nil || len(decoded) == 0 {
 		return false
 	}
-	ok, err := altcha.VerifySolution(string(decoded), AltchaSecret, true)
+	var payload altcha.Payload
+	if err := json.Unmarshal(decoded, &payload); err != nil {
+		return false
+	}
+	ok, err := altcha.VerifySolution(payload, AltchaSecret, true)
 	return err == nil && ok
 }

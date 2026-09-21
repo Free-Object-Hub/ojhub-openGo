@@ -81,7 +81,9 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -248,23 +250,50 @@ func main() {
 	if rDb {
 		defer RamDB.Close()
 	}
-
+	mux := http.NewServeMux()
 	for _, ep := range endpoints {
-		http.HandleFunc(ep.Path, ep.Handler)
+		mux.HandleFunc(ep.Path, ep.Handler)
 		log.Println("==> Loading", ep.Path)
 	}
-	server := &http.Server{
-		Addr: ":8080",
+	registerStaticRoutes(mux)     // standalone.go: /imgs/, /cli/, /sw.js из IMGS и VERS_DIR
+	handler := blockDotfiles(mux) // standalone.go
+	httpAddr := ":80"
+	tlsAddr := ":443"
+	certFile := "cert.pem"
+	keyFile := "key.pem"
+	server := &http.Server{Handler: handler}
+	// Пытаемся поднять TLS, но не падаем если порт занят/сертификат недоступен —
+	// тогда просто слушаем httpAddr как раньше.
+	ln, tlsErr := net.Listen("tcp", tlsAddr)
+	var tlsLn net.Listener
+	if tlsErr == nil {
+		cert, certErr := tls.LoadX509KeyPair(certFile, keyFile)
+		if certErr != nil {
+			ln.Close()
+			log.Printf("Cant load SSL! (%v), Switching to default http on %s", certErr, httpAddr)
+		} else {
+			tlsLn = tls.NewListener(ln, &tls.Config{Certificates: []tls.Certificate{cert}})
+		}
+	} else {
+		log.Printf("TLS %s Claimed! (%v), Switching to default http on%s", tlsAddr, tlsErr, httpAddr)
 	}
-	// Запускаем сервер отдельно,
-	// чтобы main мог дождаться сигнала завершения.
 	go func() {
-		log.Println("> Starting on :8080")
-		if err := server.ListenAndServe(); err != nil &&
+		log.Println("> Starting on", httpAddr)
+		httpServer := &http.Server{Addr: httpAddr, Handler: handler}
+		if err := httpServer.ListenAndServe(); err != nil &&
 			err != http.ErrServerClosed {
-			log.Fatal(err)
+			log.Println("HTTP error:", err)
 		}
 	}()
+	if tlsLn != nil {
+		go func() {
+			log.Println("> Starting TLS on", tlsAddr)
+			if err := server.Serve(tlsLn); err != nil &&
+				err != http.ErrServerClosed {
+				log.Fatal(err)
+			}
+		}()
+	}
 	// Ждём Ctrl+C / SIGTERM
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(

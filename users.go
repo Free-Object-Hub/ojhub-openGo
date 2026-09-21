@@ -10,6 +10,7 @@ import (
 	"io"
 	"math"
 	"math/big"
+	"net"
 	"net/http"
 	"net/mail"
 	"os"
@@ -21,7 +22,13 @@ import (
 )
 
 func ExtractIP(r *http.Request) string {
-	return r.Header.Get("X-Real-Ip")
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+	return host
+	// код ниже включать если вы используете nginx
+	// return r.Header.Get("X-Real-Ip")
 }
 
 // #region users

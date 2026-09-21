@@ -17,8 +17,11 @@ export TG_NEWS_RESENDER="-1003033986460"
 export TG_BOT_TOKEN="bot0:LOL"
 # export IMGS="/usr/local/ojhub/public/imgs/" # единственная настройка из dev среды
 export IMGS="/home/miobomb/ojhub/public/imgs/"
+export VERS_DIR="/home/miobomb/ojhub-cli/"
 
-export CLI_VER="0.97.7"
+export CLI_VER="0.98.1"
+
+export ALTCHA_SECRET="" # делайте сами
 
 #go126 run .
 /home/miobomb/go/bin/air
