@@ -80,16 +80,9 @@ TODO:
 package main
 
 import (
-	"context"
-	"crypto/tls"
 	"log"
-	"net"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-	//
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -257,60 +250,13 @@ func main() {
 	}
 	registerStaticRoutes(mux)     // standalone.go: /imgs/, /cli/, /sw.js из IMGS и VERS_DIR
 	handler := blockDotfiles(mux) // standalone.go
-	httpAddr := ":80"
-	tlsAddr := ":443"
-	certFile := "cert.pem"
-	keyFile := "key.pem"
-	server := &http.Server{Handler: handler}
-	// Пытаемся поднять TLS, но не падаем если порт занят/сертификат недоступен —
-	// тогда просто слушаем httpAddr как раньше.
-	ln, tlsErr := net.Listen("tcp", tlsAddr)
-	var tlsLn net.Listener
-	if tlsErr == nil {
-		cert, certErr := tls.LoadX509KeyPair(certFile, keyFile)
-		if certErr != nil {
-			ln.Close()
-			log.Printf("Cant load SSL! (%v), Switching to default http on %s", certErr, httpAddr)
-		} else {
-			tlsLn = tls.NewListener(ln, &tls.Config{Certificates: []tls.Certificate{cert}})
-		}
-	} else {
-		log.Printf("TLS %s Claimed! (%v), Switching to default http on%s", tlsAddr, tlsErr, httpAddr)
-	}
-	go func() {
-		log.Println("> Starting on", httpAddr)
-		httpServer := &http.Server{Addr: httpAddr, Handler: handler}
-		if err := httpServer.ListenAndServe(); err != nil &&
-			err != http.ErrServerClosed {
-			log.Println("HTTP error:", err)
-		}
-	}()
-	if tlsLn != nil {
-		go func() {
-			log.Println("> Starting TLS on", tlsAddr)
-			if err := server.Serve(tlsLn); err != nil &&
-				err != http.ErrServerClosed {
-				log.Fatal(err)
-			}
-		}()
-	}
-	// Ждём Ctrl+C / SIGTERM
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(
-		signalChan,
-		os.Interrupt,
-		syscall.SIGTERM,
+
+	// nginx больше не стоит перед openGo — сам держим :80 (только под ACME
+	// HTTP-01 challenge) и :443 (TLS), сертификат выпускается и обновляется
+	// автоматически через Let's Encrypt (см. autocert.go).
+	StartServerWithAutocert(
+		handler,
+		[]string{"objecthub.xyz", "www.objecthub.xyz"},
+		"/var/db/ojhub-autocert",
 	)
-	<-signalChan
-	log.Println("> Shutting down...")
-	// Даём текущим HTTP-запросам закончиться.
-	ctx, cancel := context.WithTimeout(
-		context.Background(),
-		10*time.Second,
-	)
-	defer cancel()
-	if err := server.Shutdown(ctx); err != nil {
-		log.Println("Shutdown error:", err)
-	}
-	log.Println("> Shutdown complete")
 }
