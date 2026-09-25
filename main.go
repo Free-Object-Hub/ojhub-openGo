@@ -82,6 +82,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -227,6 +228,7 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "wiki/filesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/filesSend" + php, DropPhp},
 	{"", apiAddr + "search/deleteWikiFiles" + php, DropPhp}, // какого чёрта удаление файлов лежит в поиске?
+	{"", apiAddr + "vless" + php, DropPhp},
 }
 
 func main() {
@@ -254,9 +256,14 @@ func main() {
 	// nginx больше не стоит перед openGo — сам держим :80 (только под ACME
 	// HTTP-01 challenge) и :443 (TLS), сертификат выпускается и обновляется
 	// автоматически через Let's Encrypt (см. autocert.go).
-	StartServerWithAutocert(
-		handler,
-		[]string{"objecthub.xyz", "www.objecthub.xyz"},
-		"/var/db/ojhub-autocert",
-	)
+	if os.Getenv("USE_TLS") == "1" {
+		StartServerWithAutocert(
+			handler,
+			[]string{"objecthub.xyz", "www.objecthub.xyz"},
+			"/var/db/ojhub-autocert",
+		)
+	} else {
+		log.Println("> USE_TLS=0, starting plain HTTP on :80")
+		log.Fatal(http.ListenAndServe(":80", handler))
+	}
 }

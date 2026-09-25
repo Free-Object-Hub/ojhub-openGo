@@ -76,8 +76,23 @@ func (v clientVersion) isWorking() bool {
 }
 
 var versions = []clientVersion{
+
 	{
-		Ver: "0.98.1", Date: "?? ??? 2026", Desc: "GHE 2.2 and Jails init",
+		Ver: "0.98.2", Date: "?? ??? 2026", Desc: "",
+		Lifecycle: LifecycleDev, State: StateWorking,
+		CSS: []asset{
+			{Href: "main.css", Query: "?ver=21"},
+			{Href: "window.css", Query: "?ver=21"},
+		},
+		JS: []asset{
+			{Href: "newHelper.js", Query: "?ver=29", Defer: true},
+			{Href: "nhConfig.js", Query: "?ver=29", Defer: true},
+			{Href: "ojhub.js", Query: "?ver=28", Defer: true},
+		},
+	},
+
+	{
+		Ver: "0.98.1", Date: "15 Sep 2026", Desc: "GHE 2.2 and Jails init",
 		Lifecycle: LifecycleStable, State: StateWorking,
 		CSS: []asset{
 			{Href: "main.css", Query: "?ver=21"},
@@ -89,6 +104,7 @@ var versions = []clientVersion{
 			{Href: "ojhub.js", Query: "?ver=28", Defer: true},
 		},
 	},
+
 	{
 		Ver: "0.98", Date: "28 Aug 2026", Desc: "",
 		Lifecycle: LifecycleSupported, State: StateWorking,
@@ -102,6 +118,7 @@ var versions = []clientVersion{
 			{Href: "ojhub.js", Query: "?ver=29", Defer: true},
 		},
 	},
+
 	{
 		// п.10: Go-лоадер перестал сопровождаться с выходом openRust, и на тот момент
 		// 0.97.7 всё ещё была сырой поделкой — значит не Stable/working, а Legacy+Incompile.
@@ -117,6 +134,7 @@ var versions = []clientVersion{
 			{Href: "ojhub.js", Query: "?ver=24", Defer: true},
 		},
 	},
+
 	{
 		// п.2: nodejs-based мёртвые версии остаются в верхней таблице как Incompile,
 		// а не проваливаются в lostmedia — медиа у них не потеряны, просто не собираются.
@@ -132,6 +150,7 @@ var versions = []clientVersion{
 			{Href: "ojhub.js", Query: "?ver=22", Defer: true},
 		},
 	},
+
 	{
 		Ver: "0.97.5", Date: "10 Jun 2026", Desc: "nodejs-based",
 		Lifecycle: LifecycleArchived, State: StateIncompile,
@@ -145,10 +164,12 @@ var versions = []clientVersion{
 			{Href: "ojhub.js", Query: "?ver=22", Defer: true},
 		},
 	},
+
 	{
 		Ver: "0.97.4", Date: "9 Jun 2026", Desc: "newHelper.js 2.1 release",
 		Lifecycle: LifecycleArchived, State: StateLostMedia,
 	},
+
 	{
 		Ver: "0.97.33", Date: "31 Jan 2026", Desc: "latest-php",
 		Lifecycle: LifecycleArchived, State: StateWorking,
@@ -167,12 +188,19 @@ var versions = []clientVersion{
 			`<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Huninn&family=Manrope:wght@200..800&family=News+Cycle:wght@400;700&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">`,
 		},
 	},
+
 	{Ver: "0.97.32", Date: "23 Jan 2026", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.97.31", Date: "2 Jan 2026", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.97.3", Date: "20 Dec 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.97.2", Date: "6 Dec 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.97.1", Date: "26 Nov 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.97", Date: "17 Nov 2025", Desc: "newHelper.js 2.0 release", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{
 		Ver: "0.96.3", Date: "12 Sep 2025", Desc: "wiki isnt working",
 		Lifecycle: LifecycleArchived, State: StateWorking,
@@ -184,14 +212,23 @@ var versions = []clientVersion{
 			{Href: "ojhub.js", Query: "?ver=18&helper", Defer: true},
 		},
 	},
+
 	{Ver: "0.96.2", Date: "10 Sep 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.96.1", Date: "3 Sep 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.96", Date: "20 Aug 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.95.4", Date: "14 Aug 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.95.3", Date: "12 Aug 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.95.2", Date: "10 Aug 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.95.1", Date: "20 Jul 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.95", Date: "19 Jul 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{
 		Ver: "0.942", Date: "1 Jul 2025", Desc: "accounts and profiles isnt working",
 		Lifecycle: LifecycleArchived, State: StateWorking,
@@ -203,15 +240,25 @@ var versions = []clientVersion{
 			`<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:ital,wght@0,400..700;1,400..700&family=Huninn&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">`,
 		},
 	},
+
 	{Ver: "0.941", Date: "8 Jun 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.94", Date: "1 Jun 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.932", Date: "23 May 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.931", Date: "21 May 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.93", Date: "21 May 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.922", Date: "17 May 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.913", Date: "2 Apr 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.91", Date: "22 Mar 2025", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{Ver: "0.9", Date: "4 Sep 2024", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
+
 	{
 		Ver: "GHE1.9", Date: "24 Nov 2024", Desc: "GDPS Helper 1.901, not object hub",
 		Lifecycle: LifecycleArchived, State: StateWorking,
@@ -222,6 +269,7 @@ var versions = []clientVersion{
 			`<script defer>setTimeout(()=>document.body.style="background-color:rgb(12,12,3)",100)</script>`,
 		},
 	},
+
 	{Ver: "0.8", Date: "28 Aug 2024", Desc: "Initial release", Lifecycle: LifecycleArchived, State: StateLostMedia},
 }
 
