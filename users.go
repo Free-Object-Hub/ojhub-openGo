@@ -68,14 +68,17 @@ type UserPublic struct {
 	Socials  string `json:"socials"`
 }
 
-func (u User) PublicProfile() UserPublic {
-	displayName := u.Username
+func (u User) GetNick() string {
 	if u.Nickname != "" {
-		displayName = u.Nickname
+		return u.Nickname
 	}
+	return u.Username
+}
+
+func (u User) PublicProfile() UserPublic {
 	return UserPublic{
 		ID:       u.UserId,
-		Username: displayName,
+		Username: u.GetNick(),
 		IsActive: u.Activated,
 		Role:     u.Priority,
 		Resume:   u.Resume,
@@ -84,11 +87,6 @@ func (u User) PublicProfile() UserPublic {
 }
 
 func (u User) PrivateProfile(renderToken bool) UserResponse {
-	displayName := u.Username
-	if u.Nickname != "" {
-		displayName = u.Nickname
-	}
-	//
 	token := ""
 	if renderToken {
 		token = u.Token
@@ -96,7 +94,7 @@ func (u User) PrivateProfile(renderToken bool) UserResponse {
 	//
 	return UserResponse{
 		ID:       u.UserId,
-		Username: displayName,
+		Username: u.GetNick(),
 		IsActive: u.Activated,
 		Role:     u.Priority,
 		Resume:   u.Resume,
