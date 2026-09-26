@@ -120,6 +120,20 @@ var versions = []clientVersion{
 	},
 
 	{
+		Ver: "0.97.8", Date: "?? ??? 2026", Desc: "openRust AND action write init, broken at now",
+		Lifecycle: LifecycleDev, State: StateWorking,
+		CSS: []asset{
+			{Href: "main.css", Query: "?ver=20"},
+			{Href: "window.css", Query: "?ver=20"},
+		},
+		JS: []asset{
+			{Href: "newHelper.js", Query: "?ver=23", Defer: true},
+			{Href: "nhConfig.js", Query: "?ver=24", Defer: true},
+			{Href: "ojhub.js", Query: "?ver=24", Defer: true},
+		},
+	},
+
+	{
 		// п.10: Go-лоадер перестал сопровождаться с выходом openRust, и на тот момент
 		// 0.97.7 всё ещё была сырой поделкой — значит не Stable/working, а Legacy+Incompile.
 		Ver: "0.97.7", Date: "27 Jul 2026", Desc: "openGo init",
