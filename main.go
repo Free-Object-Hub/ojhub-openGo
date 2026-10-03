@@ -229,7 +229,12 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "wiki/filesSend" + php, DropPhp},
 	{"", apiAddr + "search/deleteWikiFiles" + php, DropPhp}, // какого чёрта удаление файлов лежит в поиске?
 	{"", apiAddr + "vless" + php, DropPhp},
-	{"", apiAddr + "user/works" + php, WorksGet}, // zWorks.go
+	{"", apiAddr + "user/works" + php, WorksGet},                    // zWorks.go
+	{"", apiAddr + "user/workAdd" + php, workAddHandler},            // zWorks.go
+	{"", apiAddr + "user/workEdit" + php, workEditHandler},          // zWorks.go
+	{"POST ", apiAddr + "user/workDelete" + php, workDeleteHandler}, // zWorks.go
+	{"POST ", apiAddr + "user/workVerify" + php, workVerifyHandler}, // zWorks.go
+
 }
 
 func main() {

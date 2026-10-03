@@ -21,6 +21,7 @@ type Works struct {
 
 type WorksRow struct {
 	ID           int            `db:"ID"`
+	UserID       int            `db:"userId"`
 	Title        string         `db:"title"`
 	Text         string         `db:"text"`
 	Tags         string         `db:"tags"`
@@ -53,14 +54,17 @@ func (r WorksRow) RenderWork() []interface{} {
 	}
 }
 
-func WORKfetchById(ID int) (*Works, error) {
-	var work Works
-	query := `SELECT * FROM works WHERE ID = ?`
-	err := DB.Get(&work, query, ID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get work by ID: %w", err)
+func WORKfetchById(ID int) (*WorksRow, error) {
+	var row WorksRow
+	query := `SELECT w.ID, w.userId, w.title, w.text, w.tags, w.linkType, w.gdps, w.gdpsChecked, w.date,
+			g.title AS gTitle, g.channel AS gChannel
+		FROM works w
+		LEFT JOIN gdpses g ON w.linkType = 0 AND CAST(w.gdps AS UNSIGNED) = g.ID
+		WHERE w.ID = ?`
+	if err := DB.Get(&row, query, ID); err != nil {
+		return nil, fmt.Errorf("failed to get work row: %w", err)
 	}
-	return &work, nil
+	return &row, nil
 }
 
 func WORKfetchByUserId(userId int) ([]WorksRow, error) {
@@ -69,7 +73,7 @@ func WORKfetchByUserId(userId int) ([]WorksRow, error) {
 			g.title AS gTitle, g.channel AS gChannel
 		FROM works w
 		LEFT JOIN gdpses g ON w.linkType = 0 AND CAST(w.gdps AS UNSIGNED) = g.ID
-		WHERE w.userId = ?`
+		WHERE w.userId = ? ORDER BY ID DESC`
 	if err := DB.Select(&rows, query, userId); err != nil {
 		return nil, fmt.Errorf("failed to get works by userId: %w", err)
 	}
@@ -103,6 +107,18 @@ func EditWork(workId, userId int, title, text string, linkType int, gdps string)
 	)
 	if err != nil {
 		return 0, fmt.Errorf("failed to edit work: %w", err)
+	}
+	rows, err := result.RowsAffected()
+	return int(rows), err
+}
+
+func DeleteWork(workId, userId int) (int, error) {
+	result, err := DB.Exec(
+		`DELETE FROM works WHERE ID = ? AND userId = ?`,
+		workId, userId,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete work: %w", err)
 	}
 	rows, err := result.RowsAffected()
 	return int(rows), err
