@@ -78,7 +78,7 @@ func (v clientVersion) isWorking() bool {
 var versions = []clientVersion{
 
 	{
-		Ver: "0.98.2", Date: "?? ??? 2026", Desc: "",
+		Ver: "0.98.2", Date: "?? ??? 2026", Desc: "portfolio init",
 		Lifecycle: LifecycleDev, State: StateWorking,
 		CSS: []asset{
 			{Href: "main.css", Query: "?ver=21"},
@@ -274,7 +274,7 @@ var versions = []clientVersion{
 	{Ver: "0.9", Date: "4 Sep 2024", Desc: "", Lifecycle: LifecycleArchived, State: StateLostMedia},
 
 	{
-		Ver: "GHE1.9", Date: "24 Nov 2024", Desc: "GDPS Helper 1.901, not object hub",
+		Ver: "GHE1.9", Date: "24 Nov 2024", Desc: "GDPS Helper 1.901, not object hub, patched for protocol V133R3",
 		Lifecycle: LifecycleArchived, State: StateWorking,
 		CSS: []asset{{Href: "main.css"}},
 		JS:  []asset{{Href: "newHelper.js", Defer: true}},
@@ -284,7 +284,27 @@ var versions = []clientVersion{
 		},
 	},
 
-	{Ver: "0.8", Date: "28 Aug 2024", Desc: "Initial release", Lifecycle: LifecycleArchived, State: StateLostMedia},
+	{
+		Ver: "0.8", Date: "28 Aug 2024", Desc: "Initial release",
+		Lifecycle: LifecycleArchived, State: StateWorking,
+		CSS: []asset{{Href: "main.css"}},
+		JS:  []asset{{Href: "newHelper.js", Defer: true}},
+		Extra: []string{
+			`<script defer>setTimeout(()=>document.body.style="background-color:rgb(8,3,12)",100)</script>`,
+		},
+	},
+
+	{
+		Ver: "GH1.7.1", Date: "8 Jun 2024", Desc: "GDPS Helper 1.7.1, not object hub",
+		Lifecycle: LifecycleArchived, State: StateWorking,
+		CSS: []asset{{Href: "main.css"}},
+		JS:  []asset{{Href: "newHelper.js", Defer: true}},
+		Extra: []string{
+			`<script defer>setTimeout(()=>document.body.style="background-color:rgb(12,12,3)",100)</script>`,
+		},
+	},
+
+	//
 }
 
 func findVersion(v string) (clientVersion, bool) {
@@ -347,7 +367,7 @@ func renderRow(v clientVersion) string {
 	verCell := html.EscapeString(v.Ver)
 	if v.isWorking() {
 		verCell = fmt.Sprintf(
-			`<button onclick="(document.cookie='cli_ver=%s;path=/;max-age=%d');location.pathname=''">%s</button>`,
+			`<button class=loginbtn onclick="(document.cookie='cli_ver=%s;path=/;max-age=%d');location.pathname=''">%s</button>`,
 			html.EscapeString(v.Ver), 60*60*24*365, html.EscapeString(v.Ver),
 		)
 	}
@@ -383,17 +403,38 @@ func CliLoader(w http.ResponseWriter, r *http.Request) {
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
-	<title>OJHUB LOADER v1.30</title>
+	<title>OJHUB LOADER v1.40</title>
+		<style>
+		:root{
+		--def-font:16px; --def-btn-size:16px;
+		--def-border:8px; --def-border-large:16px; --def-border-small:4px;
+		--def-text-indent:8px;
+		--color-bg:#090609; --color-main:#612a9d; --color-light:#8200ff;
+		--color-white:#DFD3EB;
+		}
+		html,body{margin:0}
+		body{background:var(--color-bg);color:var(--color-white);font-family:system-ui,sans-serif;font-size:var(--def-font)}
+		h1,h2{font-family:system-ui,sans-serif;font-weight:bold;margin:.5em 0;text-align:center}
+		h1{font-size:calc(var(--def-font)*2)}
+		h2{font-size:calc(var(--def-font)*1.5)}
+		p{font-size:var(--def-font);margin:var(--def-text-indent) 0;color:var(--color-white)}
+		table{border-collapse:collapse}
+		th,td{font-size:var(--def-font);color:var(--color-white);padding:4px 8px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+		th{font-weight:bold}
+		.loginbtn{padding:calc(var(--def-btn-size)*.5) calc(var(--def-btn-size)*.75);border:none;border-radius:calc(var(--def-btn-size)*.5);background:var(--color-main);color:var(--color-white);font-size:var(--def-font);cursor:pointer}
+		.loginbtn:hover{background:var(--color-light)}
+		</style>
+	<link rel=stylesheet href="./cli/%s/main.css">
 </head>
-<body style="display:flex;justify-content:center;align-items:center;min-height:100vh;flex-direction:column">
-	<h1>OJHUB LOADER v1.30</h1>
+<body style="display:flex;justify-content:center;align-items:center;min-height:100vh;flex-direction:column;background:var(--color-bg, #090609)">
+	<h1>OJHUB LOADER v1.40</h1>
 	<p>selected: %s</p>
 
 	<h2>Avaliable</h2>
 	<table border="1">
 		<tr><th>ver</th><th>status</th><th>date</th><th>desc</th></tr>
 		<tr>
-			<td><button onclick="(document.cookie='cli_ver=;path=/;max-age=0');location.pathname=''">stable</button></td>
+			<td><button class=loginbtn onclick="(document.cookie='cli_ver=;path=/;max-age=0');location.pathname=''">stable</button></td>
 			<td></td><td></td><td></td>
 		</tr>
 		%s
@@ -405,5 +446,5 @@ func CliLoader(w http.ResponseWriter, r *http.Request) {
 		%s
 	</table>
 </body>
-</html>`, html.EscapeString(current), alive, lost)
+</html>`, html.EscapeString(current), html.EscapeString(current), alive, lost)
 }
