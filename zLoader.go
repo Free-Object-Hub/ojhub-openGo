@@ -78,16 +78,15 @@ func (v clientVersion) isWorking() bool {
 var versions = []clientVersion{
 
 	{
-		Ver: "0.98.2", Date: "?? ??? 2026", Desc: "portfolio init",
+		Ver: "0.98.2", Date: "?? ??? 2026", Desc: "portfolio init AND easy-css init",
 		Lifecycle: LifecycleDev, State: StateWorking,
 		CSS: []asset{
-			{Href: "main.css", Query: "?ver=21"},
-			{Href: "window.css", Query: "?ver=21"},
+			{Href: "main.css", Query: "?ver=22"},
 		},
 		JS: []asset{
-			{Href: "newHelper.js", Query: "?ver=29", Defer: true},
-			{Href: "nhConfig.js", Query: "?ver=29", Defer: true},
-			{Href: "ojhub.js", Query: "?ver=28", Defer: true},
+			{Href: "newHelper.js", Query: "?ver=30", Defer: true},
+			{Href: "nhConfig.js", Query: "?ver=30", Defer: true},
+			{Href: "ojhub.js", Query: "?ver=30", Defer: true},
 		},
 	},
 
