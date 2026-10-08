@@ -47,6 +47,9 @@ func fullSearch(w http.ResponseWriter, r *http.Request) {
 	}
 	token := GetUserToken(r)
 	userId := 0
+
+	// Костыля для отдельных каналов
+	// В вакансиях честно передаём userId
 	if token != "" && channel == -5 {
 		user, err := GetUserByToken(token)
 		if err != nil {
@@ -55,6 +58,14 @@ func fullSearch(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		userId = user.UserId
+	}
+	// В гайдах у нас под userId идут вики айди
+	if channel == -2 {
+		userId, err = strconv.Atoi(query.Get("wikiId"))
+		if err != nil {
+			http.Error(w, "find error "+err.Error(), http.StatusBadRequest)
+			return
+		}
 	}
 	pageStr := query.Get("page")
 	page := 0
@@ -84,6 +95,8 @@ func fullSearch(w http.ResponseWriter, r *http.Request) {
 	switch channel {
 	case -5:
 		prefix = "v"
+	case -2:
+		prefix = "g"
 	case -1:
 		prefix = "w"
 	case 0:
@@ -119,6 +132,14 @@ func fullSearch(w http.ResponseWriter, r *http.Request) {
 			result = GenerateOrderedMap(shortWikis, func(vac Vacan) string {
 				return "v" + strconv.Itoa(int(vac.ID))
 			})
+		}
+	case -2:
+		if guides, ok := data.([]Guide); ok {
+			rows := make([][]interface{}, 0, len(guides))
+			for _, g := range guides {
+				rows = append(rows, renderGuideMini(g))
+			}
+			result = rows
 		}
 	case -1:
 		if wikis, ok := data.([]Wiki); ok {

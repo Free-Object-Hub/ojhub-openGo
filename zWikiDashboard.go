@@ -108,27 +108,57 @@ func HandleSetMainWiki(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	wikiId, err := strconv.Atoi(r.FormValue("wiki"))
+	guideId, err := strconv.Atoi(r.FormValue("guide"))
 	if err != nil {
 		w.Write([]byte("-1"))
 		return
 	}
-	access, err := CheckWikiAccess(user.UserId, wikiId)
-	if err != nil || access == 0 {
-		w.Write([]byte("-2"))
-		return
-	}
-	guide, err := GuidesFetchByTag(r.FormValue("guide"), wikiId)
+	guide, err := GuidesFetchById(guideId)
 	if err != nil || guide == nil {
 		w.Write([]byte("-1"))
 		return
 	}
-	guideId, err := WIKIsetMainWiki(wikiId, guide.ID)
+	access, err := CheckWikiAccess(user.UserId, guide.WikiChannel)
+	if err != nil || access == 0 {
+		w.Write([]byte("-2"))
+		return
+	}
+	mainId, err := WIKIsetMainWiki(guide.WikiChannel, guide.ID)
 	if err != nil {
 		w.Write([]byte("-1"))
 		return
 	}
-	w.Write([]byte(strconv.Itoa(guideId)))
+	w.Write([]byte(strconv.Itoa(mainId)))
+}
+
+func HandleCheckWiki(w http.ResponseWriter, r *http.Request) {
+	user, ok := RequireDevice(w, r)
+	if !ok {
+		return
+	}
+	guideId, err := strconv.Atoi(r.FormValue("guide"))
+	if err != nil {
+		w.Write([]byte("-1"))
+		return
+	}
+	guide, err := GuidesFetchById(guideId)
+	if err != nil || guide == nil {
+		w.Write([]byte("-1"))
+		return
+	}
+	access, err := CheckWikiAccess(user.UserId, guide.WikiChannel)
+	if err != nil || access == 0 {
+		w.Write([]byte("-2"))
+		return
+	}
+	// переворот флага + новое значение одним запросом (MariaDB 10.5+)
+	var checked int
+	err = DB.QueryRow(`UPDATE guides SET checked = IF(checked = 1, 0, 1) WHERE ID = ? RETURNING checked`, guide.ID).Scan(&checked)
+	if err != nil {
+		w.Write([]byte("-1"))
+		return
+	}
+	w.Write([]byte(strconv.Itoa(checked)))
 }
 
 func GetGuidesAdmin(w http.ResponseWriter, r *http.Request) {

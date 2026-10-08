@@ -341,6 +341,7 @@ func renderGuide(g Guide) (GuideRender, error) {
 			g.Aftertext,
 			g.WikiTag,
 			wiki.Colors,
+			g.Checked,
 		},
 		GuideData: guideData,
 		Comments:  make([]CommResp, 0),

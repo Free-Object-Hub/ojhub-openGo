@@ -125,8 +125,6 @@ func NewWikiFinder(method, typeFilter, page int, tags, oss []int, name string, l
 		queryBuilder.WriteString(" ORDER BY g.likes DESC")
 	case 2:
 		queryBuilder.WriteString(" ORDER BY g.disls")
-	case 3:
-		queryBuilder.WriteString(" ORDER BY g.points DESC")
 	}
 	limit := 9
 	offset := 0
@@ -140,6 +138,58 @@ func NewWikiFinder(method, typeFilter, page int, tags, oss []int, name string, l
 	var wikis []Wiki
 	err := DB.Select(&wikis, query, args...)
 	return wikis, err
+}
+
+func NewGuidFinder(wikiId, method, typeFilter, page int, tags, oss []int, name string, lgbtBan int) ([]Guide, error) {
+	var queryBuilder strings.Builder
+	var args []interface{}
+	queryBuilder.WriteString(`
+		SELECT g.*
+		FROM guides g
+		WHERE g.checked = 1 AND wikiChannel = ?
+	`)
+	args = append(args, wikiId)
+	// Фильтр по названию
+	if name != "" {
+		queryBuilder.WriteString(" AND LOWER(g.title) LIKE LOWER(?)")
+		args = append(args, "%"+name+"%")
+	}
+	// Фильтр по тегам через битовую маску
+	if len(tags) > 0 || len(oss) > 0 {
+		mergedTags := mergeAndSortTags(tags, oss)
+		bitmask := createBitmask(mergedTags)
+		if bitmask != 0 {
+			queryBuilder.WriteString(" AND (g.mask & ?) = ?")
+			args = append(args, bitmask, bitmask)
+		}
+	}
+	// Сортировка
+	switch method {
+	case 0:
+		queryBuilder.WriteString(" ORDER BY g.ID DESC")
+	case 1:
+		queryBuilder.WriteString(" ORDER BY g.likes DESC")
+	case 2:
+		queryBuilder.WriteString(" ORDER BY g.disls")
+	}
+	// Пагинация: 9 элементов, 8 новых при следующей странице.
+	limit := 9
+	offset := 0
+	if page > 0 {
+		offset = page * 8
+	}
+	queryBuilder.WriteString(fmt.Sprintf(
+		" LIMIT %d OFFSET %d",
+		limit,
+		offset,
+	))
+	var guides []Guide
+	err := DB.Select(
+		&guides,
+		queryBuilder.String(),
+		args...,
+	)
+	return guides, err
 }
 
 func NewVacsFinder(userID, method, typeFilter, page int, tags, oss []int, name string, lgbtBan int) ([]Vacancy, error) {
@@ -179,8 +229,6 @@ func NewVacsFinder(userID, method, typeFilter, page int, tags, oss []int, name s
 		queryBuilder.WriteString(" ORDER BY g.likes DESC")
 	case 2:
 		queryBuilder.WriteString(" ORDER BY g.disls")
-	case 3:
-		queryBuilder.WriteString(" ORDER BY g.points DESC")
 	}
 	// Пагинация: 9 элементов, 8 новых при следующей странице.
 	limit := 9
@@ -202,26 +250,26 @@ func NewVacsFinder(userID, method, typeFilter, page int, tags, oss []int, name s
 	return vacs, err
 }
 
-func NewProjectsFinder(userId, method, typeFilter, page int, tags, oss []int, name string, lgbtBan int) (interface{}, error) {
-	switch typeFilter {
+func NewProjectsFinder(userId, method, channel, page int, tags, oss []int, name string, lgbtBan int) (interface{}, error) {
+	switch channel {
 	case -5:
 		// Вакансии
 		return NewVacsFinder(
 			userId,
 			method,
-			typeFilter,
+			channel,
 			page,
 			tags,
 			oss,
 			name,
 			lgbtBan,
 		)
-	// FIXME: выделить канал под поиск гайдов
 	case -2:
-		// Все проекты
-		return NewGdpsFinder(
+		// Гайды
+		return NewGuidFinder(
+			userId,
 			method,
-			-1,
+			channel,
 			page,
 			tags,
 			oss,
@@ -232,7 +280,7 @@ func NewProjectsFinder(userId, method, typeFilter, page int, tags, oss []int, na
 		// Вики
 		return NewWikiFinder(
 			method,
-			typeFilter,
+			channel,
 			page,
 			tags,
 			oss,
@@ -243,17 +291,24 @@ func NewProjectsFinder(userId, method, typeFilter, page int, tags, oss []int, na
 		// Проекты конкретного канала
 		return NewGdpsFinder(
 			method,
-			typeFilter,
+			channel,
 			page,
 			tags,
 			oss,
 			name,
 			lgbtBan,
 		)
+	// меняем ошибку на поиск всех каналов потому что GDPS Helper + старые клиенты не слали канал
 	default:
-		return nil, fmt.Errorf(
-			"неверный тип фильтра: %d",
-			typeFilter,
+		// Все проекты
+		return NewGdpsFinder(
+			method,
+			-1,
+			page,
+			tags,
+			oss,
+			name,
+			lgbtBan,
 		)
 	}
 }
