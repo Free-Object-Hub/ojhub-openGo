@@ -3,28 +3,28 @@ package main
 /*
  * Loader 1.10
  *
- * Author: Claude code, с промптами и патчами MIOBOMB (2026)
+ * Author: Claude code, with prompts and patches from MIOBOMB (2026)
  *
- * Ojhub Loader, штука которая подставляет в index роут нужные html теги для загрузки
- * разных версий сайта. Перед вами же реализация загрузчика сайта на go.
- * В отличии от nodejs загрузчика он умеет подставлять кастомные теги для каждой версии,
- * отсюда и версия 1.10 у openGo.
- * Для понимания в nodejs "/" маршруте все теги были захардкожены и в них просто подставлялась
- * кука с версией, это ломало 0.97.33 в Chromium браузерах, здесь такого уже нет.
- * ^^^ устарело
+ * Ojhub Loader, the thing that injects the needed html tags for loading
+ * different versions of the site into the index route. Before you is the go implementation of the site loader.
+ * Unlike the nodejs loader it can inject custom tags for each version,
+ * hence version 1.10 in openGo.
+ * For understanding: in nodejs the "/" route had all tags hardcoded and just substituted
+ * the cookie with the version into them, this broke 0.97.33 in Chromium browsers, that's no longer the case here.
+ * ^^^ outdated
  *
- * Слияние улучшений openRust обратно в openGo:
- * - два независимых статуса вместо одного (жизненный цикл + техническое состояние сборки)
- * - две таблицы: живые версии сверху (включая incompile — они хоть и не собираются,
- *   но не являются "мёртвыми" в смысле потери медиа), lostmedia снизу
- * - полноценная HTML-страница вместо фрагмента (как всегда было в openGo)
- * - структура asset{} для CSS/JS сохранена как есть, никакого хардкода строкой
- * - порядок колонок таблицы (ver, status, date, desc) сохранён как в оригинале openGo
- * - экранирование через html.EscapeString оставлено везде, даже где избыточно
- * - CLI_VER теперь реально используется как дефолт версии, с фоллбеком на "stable"
- *   вместо панической остановки, если версии в CLI_VER не существует
- * - исправлен баг с очисткой куки (was: cli_ver='\'\'' — буквальная строка из
- *   экранированных кавычек вместо пустого значения)
+ * Merging openRust improvements back into openGo:
+ * - two independent statuses instead of one (lifecycle + technical build state)
+ * - two tables: live versions on top (including incompile — they don't build,
+ *   but are not "dead" in the sense of lost media), lostmedia below
+ * - a full HTML page instead of a fragment (as it always was in openGo)
+ * - asset{} struct for CSS/JS preserved as is, no hardcoding strings
+ * - column order of the table (ver, status, date, desc) preserved as in the original openGo
+ * - escaping via html.EscapeString kept everywhere, even where redundant
+ * - CLI_VER is now actually used as the default version, with fallback to "stable"
+ *   instead of panicking if the version in CLI_VER doesn't exist
+ * - fixed the bug with cookie clearing (was: cli_ver='\'\'' — a literal string of
+ *   escaped quotes instead of an empty value)
  */
 
 import (
@@ -34,7 +34,7 @@ import (
 	"os"
 )
 
-// LifecycleStatus — где версия находится в жизненном цикле продукта
+// LifecycleStatus — where the version is in the product lifecycle
 type LifecycleStatus string
 
 const (
@@ -45,7 +45,7 @@ const (
 	LifecycleArchived  LifecycleStatus = "archived"
 )
 
-// BuildState — техническое состояние сборки конкретной версии
+// BuildState — technical build state of a specific version
 type BuildState string
 
 const (
@@ -69,8 +69,8 @@ type clientVersion struct {
 	Extra           []string
 }
 
-// isWorking — версия кликабельна в лоадере только если реально собирается и запускается.
-// Incompile-версии видны (сверху, живые), но кнопки не имеют — как и раньше в Go.
+// isWorking — a client version is clickable in the loader only if it actually builds and runs.
+// Incompile versions are visible (on top, alive), but have no button — as before in Go.
 func (v clientVersion) isWorking() bool {
 	return v.State == StateWorking
 }
@@ -133,8 +133,8 @@ var versions = []clientVersion{
 	},
 
 	{
-		// п.10: Go-лоадер перестал сопровождаться с выходом openRust, и на тот момент
-		// 0.97.7 всё ещё была сырой поделкой — значит не Stable/working, а Legacy+Incompile.
+		// p.10: the Go loader stopped being maintained with the release of openRust, and at that point
+		// 0.97.7 was still a raw build — so not Stable/working, but Legacy+Incompile.
 		Ver: "0.97.7", Date: "27 Jul 2026", Desc: "openGo init",
 		Lifecycle: LifecycleLegacy, State: StateWorking,
 		CSS: []asset{
@@ -149,8 +149,8 @@ var versions = []clientVersion{
 	},
 
 	{
-		// п.2: nodejs-based мёртвые версии остаются в верхней таблице как Incompile,
-		// а не проваливаются в lostmedia — медиа у них не потеряны, просто не собираются.
+		// p.2: nodejs-based dead versions remain in the top table as Incompile,
+		// and don't fall into lostmedia — their media is not lost, they just don't build.
 		Ver: "0.97.6", Date: "16 Jun 2026", Desc: "latest nodejs-based",
 		Lifecycle: LifecycleArchived, State: StateIncompile,
 		CSS: []asset{
@@ -278,7 +278,7 @@ var versions = []clientVersion{
 		CSS: []asset{{Href: "main.css"}},
 		JS:  []asset{{Href: "newHelper.js", Defer: true}},
 		Extra: []string{
-			`<style id="stule">:root{--color-main:rgb(157,97,42);--color-light:rgb(255,134,0);--color-weekly:rgb(189,99,0);--color-weekly-alpha:rgba(189,99,0,.6);--color-black:rgb(29,28,22);--color-black-alpha:rgba(29,28,22,.6);--color-profile:rgb(32,31,24);--color-profile-alpha:rgb(32,31,24,.6);}</style>`,
+			`<style id="stule">:root{--color-main:rgb(157,97,42);--color-light:rgb(255,134,0);--color-weekly:rgb(189,99,0);--color-weekly-alpha:rgba(189,99,0,.6);--color-black:rgb(29,28,22);--color-black-alpha:rgba(29,28,22,.6);--color-profile:rgb(32,31,24);--color-profile-alpha:rgba(32,31,24,.6);}</style>`,
 			`<script defer>setTimeout(()=>document.body.style="background-color:rgb(12,12,3)",100)</script>`,
 		},
 	},
@@ -317,9 +317,9 @@ func findVersion(v string) (clientVersion, bool) {
 
 var LoaderDefVer = os.Getenv("CLI_VER")
 
-// п.9: CLI_VER теперь реально читается (как в openRust default_ver/default_version),
-// но без паники если версии там нет — просто фоллбек на "stable", сервер не должен
-// падать из-за опечатки в env var.
+// p.9: CLI_VER is now actually read (like in openRust default_ver/default_version),
+// but without panicking if the version isn't there — just fallback to "stable", the server shouldn't
+// crash due to a typo in an env var.
 func defaultVer() string {
 	if v := LoaderDefVer; v != "" {
 		if _, ok := findVersion(v); ok {
@@ -357,9 +357,9 @@ func stateLabel(s BuildState) string {
 	return string(s)
 }
 
-// renderRow — одна строка таблицы, порядок колонок как в оригинальном openGo:
-// ver | status | date | desc. Раз статусов теперь два — оба идут в одной ячейке
-// "status", через слэш, чтобы не ломать исходный порядок колонок.
+// renderRow — one table row, column order as in the original openGo:
+// ver | status | date | desc. Since there are now two statuses — both go into one "status"
+// cell, separated by a slash, so as not to break the original column order.
 func renderRow(v clientVersion) string {
 	status := fmt.Sprintf("%s / %s", lifecycleLabel(v.Lifecycle), stateLabel(v.State))
 
@@ -377,8 +377,8 @@ func renderRow(v clientVersion) string {
 	)
 }
 
-// CliLoader — п.4: полноценная самостоятельная страница, как и было в openGo
-// (в отличие от Rust-варианта тут менять поведение не нужно — оно уже такое).
+// CliLoader — p.4: a full standalone page, as it was in openGo
+// (unlike the Rust variant there's no need to change behavior here — it's already like that).
 func CliLoader(w http.ResponseWriter, r *http.Request) {
 	current := defaultVer()
 	if c, err := r.Cookie("cli_ver"); err == nil {

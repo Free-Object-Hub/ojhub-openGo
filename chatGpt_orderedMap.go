@@ -7,14 +7,14 @@ import (
 
 /*
  * OrderedMap
- * Author: ChatGPT 5 mini (по запросу MIOBOMB)
+ * Author: ChatGPT 5 mini (at MIOBOMB's request)
  *
- * Костыль для openGo, который реализует старое поведение
- * у объектов в json-ответе
+ * A crutch for openGo that implements the old behavior
+ * of objects in json response
  *
- * FIXME: убедиться что чатгпт не дал мне слишком много "удобных функций на будущее"
- *        или "полезного поведения"
- * FIXME: когда openGo будет готова к продакшну удалить лишние "удобные методы"
+ * FIXME: make sure chatgpt didn't give me too many "convenient functions for the future"
+ *        or "useful behavior"
+ * FIXME: when openGo is ready for production remove the extra "convenient methods"
  */
 
 type OrderedEntry[T any] struct {
@@ -34,8 +34,8 @@ func NewOrderedMap[T any]() *OrderedMap[T] {
 	}
 }
 
-// Set добавляет элемент или заменяет существующий.
-// При замене порядок сохраняется.
+// Set adds an element or replaces an existing one.
+// On replacement the order is preserved.
 func (o *OrderedMap[T]) Set(key string, value T) {
 	if o.index == nil {
 		o.index = make(map[string]int)
@@ -54,8 +54,8 @@ func (o *OrderedMap[T]) Set(key string, value T) {
 	})
 }
 
-// Add добавляет элемент без проверки.
-// Полезно, если гарантируется уникальность ключей.
+// Add adds an element without checking.
+// Useful if key uniqueness is guaranteed.
 func (o *OrderedMap[T]) Add(key string, value T) {
 	if o.index == nil {
 		o.index = make(map[string]int)
@@ -97,7 +97,7 @@ func (o OrderedMap[T]) Delete(key string) {
 		o.entries[idx+1:]...,
 	)
 
-	// перестраиваем индексы
+	// rebuild indices
 	for i := idx; i < len(o.entries); i++ {
 		o.index[o.entries[i].Key] = i
 	}
@@ -111,14 +111,14 @@ func (o OrderedMap[T]) Empty() bool {
 	return len(o.entries) == 0
 }
 
-// Range идёт в порядке добавления.
+// Range iterates in order of addition.
 func (o OrderedMap[T]) Range(fn func(key string, value T)) {
 	for _, item := range o.entries {
 		fn(item.Key, item.Val)
 	}
 }
 
-// Keys возвращает ключи в порядке вставки.
+// Keys returns keys in insertion order.
 func (o OrderedMap[T]) Keys() []string {
 	keys := make([]string, 0, len(o.entries))
 
@@ -129,7 +129,7 @@ func (o OrderedMap[T]) Keys() []string {
 	return keys
 }
 
-// Values возвращает значения в порядке вставки.
+// Values returns values in insertion order.
 func (o OrderedMap[T]) Values() []T {
 	values := make([]T, 0, len(o.entries))
 
@@ -143,7 +143,7 @@ func (o OrderedMap[T]) Values() []T {
 /*
  * OrderedMap generator
  *
- * Делает из обычного среза PHP-подобный объект:
+ * Makes a PHP-like object from a regular slice:
  *
  * []T
  *   |
@@ -153,8 +153,8 @@ func (o OrderedMap[T]) Values() []T {
  *   "prefix+id": T
  * }
  *
- * Используется для совместимости с API Object Hub,
- * где ключи объектов имеют формат:
+ * Used for compatibility with Object Hub API,
+ * where object keys have the format:
  *
  * c123
  * s456
@@ -179,14 +179,14 @@ func GenerateOrderedMap[T any](
 	return result
 }
 
-// MarshalJSON делает настоящий JSON object:
+// MarshalJSON makes a real JSON object:
 //
 //	{
 //	  "c123": {...},
 //	  "s456": {...}
 //	}
 //
-// но в порядке добавления.
+// but in order of addition.
 func (o OrderedMap[T]) MarshalJSON() ([]byte, error) {
 	var b strings.Builder
 

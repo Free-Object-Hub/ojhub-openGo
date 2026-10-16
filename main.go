@@ -1,85 +1,86 @@
 /*
 Object Hub openGo
 Contributors:
-MIOBOMB - архитектура + начало работы + весёлая работа
-DenisC - Весь алгоритм работы поиска
+MIOBOMB - architecture + initial work + fun work
+DenisC - Entire search operation algorithm
 //
 Author: MIOBOMB (2026)
-ojhub-opengo - открытая реализация бекенда Object Hub на Go(lang)
-Так как php/node бекенды этого сайта работают на freebsd мы намеренно
-отказались от докеров и прочей инфраструктуры с целью тотальной портируемости
-этой реализации бекенда, ибо наш freebsd сервер не умеет крутить Docker,
-и многие "модные" технологии из мира линукса, такие как проклятый SystemD.
-Ну и из личного, я - MIOBOMB, и у меня FreeBSD стоит на десктопе,
-у вас вероятно стоит Windows, и у кого то ещё не настроен WSL2.
+ojhub-opengo - open implementation of Object Hub backend in Go(lang)
+Since php/node backends of this site run on freebsd we deliberately
+abandoned dockers and other infrastructure for the purpose of total portability
+of this backend implementation, because our freebsd server cannot run Docker,
+and many "fashionable" technologies from the linux world, such as the cursed SystemD.
+And personally, I am MIOBOMB, and I have FreeBSD on my desktop,
+you probably have Windows, and someone else hasn't set up WSL2 yet.
 //
-ЦЕЛЬ ПРОЕКТА НА БЛИЖАЙШИЕ 2 МЕСЯЦА:
-Замена самых горячих участков на Golang, и избавление от nodejs части бекенда
-с возвратом php на те места, которые go какое то время обслуживать не сможет
+PROJECT GOAL FOR THE NEXT 2 MONTHS:
+Replacing the hottest sections with Golang, and getting rid of the nodejs part of the backend
+with returning php to those places that go cannot serve for some time
 //
-ДОЛГОСРОЧНАЯ ЦЕЛЬ ПРОЕКТА:
-openGo целится на 100% совместимость и заменяемость php бекенда,
-вплоть до того, что маршруты, входные и выходные данные не изменятся никак.
-Учтите что для такой реализации эндпоинтов вам придётся разбираться в
-исходном коде клиента! За основу openGo была взята версия 0.97.33 и 0.97.7,
-потому так удастся воссоздать 100% эмуляцию php бекенда.
+LONG-TERM PROJECT GOAL:
+openGo aims for 100% compatibility and replaceability of the php backend,
+to the point that routes, input and output data will not change at all.
+Note that for such an implementation of endpoints you will have to understand
+the client's source code! openGo was based on version 0.97.33 and 0.97.7,
+because that way it will be possible to recreate 100% emulation of the php backend.
 //
 FIXME:
-подумать над интеграцией nginx и redis в openGo бинарник
-когда openGo будет близок к 100% готовности
+think about integrating nginx and redis into the openGo binary
+when openGo is close to 100% readiness
 
-СТИЛЬ КОДА И АРХИТЕКТУРЫ:
- 1. openGo ставит своей целью максимальную скорость и простоту работы.
-    По этой причине вы можете встретить глобальный ctxBruh в redis,
-    который на самом деле нельзя трогать, потому что он просто затычка
-    чтобы redis драйвер не ругался.
-    Исходя из того же пункта весь openGo выполнен как монолит, никаких
-    микросервисов или grpc тут нет, ибо главная задача - 100% эмуляция
-    php бекенда.
- 2. Странности лучше стандартов
-    Если мне одному (или вдруг другой парочке контрибьюторов) будет
-    удобно копаться в самопальной архитектуре, а не лезть в
-    идиомы go или "корпоративный код", то я лучше сделаю так как мне надо.
-    Все эндпоинты будут лежать в package main, а их название файлов будет "z*.go".
-    Сделано это исключительно для удобства чтоб не мучиться с пакетами.
- 3. Портируемость
-    openGo должен запускаться везде - от windows или прода на freebsd,
-    вплоть до haiku Os или того хуже termux на ксяоми за 5 тыщ с барахолки.
-    Портируемость преследует openGo даже в архитектуре, в будущем я
-    планирую добавить небольшой слой абстракции для горячей замены
-    net/http на какой нибуть fasthttp или что то в таком духе.
-    Или вовсе добавить ещё более толстый слой ради горячей замены
-    nginx на встроенные в go средства работы с проксированием и статикой.
- 4. Совместимость
-    openGo должен заменять php бекенд на горячую, не ломая ничего в логике клиента.
-    Это значит что вам придётся реверсить старый php код (который слава богу ещё не
-    "страшное легаси с классами шрёдингера") и повторять его поведение точь в точь
-    в go-хандлерах. Это в моменте может быть тяжелее, но в долгосрочной перспективе
-    условная версия 0.96.3 (от сентября 2025) даже не заметит что она внезапно
-    начала работать внутри ojhub-loader-openGo и отправляет запросы на openGo бекенд
- 5. Анти тестируемость
-    Вы спросите "ты чё несёшь?", а я отвечу "наш тест - работает ли этот эндпоинт в клиенте,
-    и если не работает значит что то не так". Мне просто не нужно городить все эти
-    моканья или как там пишут тесты. Мне за глаза просто работоспособности
-    на всех текущих 5 версиях object hub.
- 6. Мерзость
-    openGo будет очень сильно зависеть от redis в тех местах где он даст выигрыш.
-    Я же пошёл дальше и вместо "анмаршалинг => манипуляции => маршалинг" я
-    буду отдавать голые байты из redis в ответ, иногда позволяя себе
-    играться с настоящей строкой и прыгая по её индексам.
-    В теории это даст выигрыш в 1-5%, на практике мне не придётся
-    городить лишние json.Marshal и просто склеивать строки ручками,
-    прям как во времеза ojhub-php-build-120
+CODE AND ARCHITECTURE STYLE:
+ 1. openGo aims for maximum speed and simplicity of operation.
+    For this reason you may encounter a global ctxBruh in redis,
+    which actually cannot be touched, because it is just a stub
+    so that the redis driver doesn't complain.
+    Based on the same point, all of openGo is made as a monolith, no
+    microservices or grpc here, because the main task is 100% emulation
+    of the php backend.
+ 2. Weirdness is better than standards
+    If it is convenient for me alone (or suddenly for another couple of contributors)
+    to dig into a self-made architecture, rather than climb into
+    go idioms or "corporate code", then I'd rather do it my way.
+    All endpoints will lie in package main, and their file names will be "z*.go".
+    This is done exclusively for convenience so as not to suffer with packages.
+ 3. Portability
+    openGo must run everywhere - from windows or prod on freebsd,
+    all the way to haiku Os or worse termux on a xiaomi for 5 thousand from a flea market.
+    Portability pursues openGo even in architecture, in the future I
+    plan to add a small layer of abstraction for hot-swapping
+    net/http with some fasthttp or something in that spirit.
+    Or even add an even thicker layer for hot-swapping
+    nginx with go's built-in means of working with proxying and static files.
+ 4. Compatibility
+    openGo must replace the php backend on the fly, without breaking anything in client logic.
+    This means you will have to reverse the old php code (which thank god is not yet
+    "scary legacy with schrodinger's classes") and repeat its behavior exactly
+    in go handlers. This may be harder in the moment, but in the long term
+    a conditional version 0.96.3 (from September 2025) will not even notice that it suddenly
+    started working inside ojhub-loader-openGo and sends requests to the openGo backend
+ 5. Anti-testability
+    You will ask "what are you talking about?", and I will answer "our test is whether this endpoint works in the client,
+    and if it doesn't work then something is wrong". I just don't need to build all these
+    mockings or whatever they write tests with. For me, just working capability
+    on all current 5 versions of object hub is more than enough.
+ 6. Nastiness
+    openGo will depend very heavily on redis in those places where it gives a win.
+    I went further and instead of "unmarshalling => manipulations => marshalling" I
+    will return bare bytes from redis in response, sometimes allowing myself
+    to play with the actual string and jump by its indices.
+    In theory this will give a 1-5% win, in practice I won't have to
+    build unnecessary json.Marshal and just glue strings by hand,
+    just like in the times of ojhub-php-build-120
 
 TODO:
- 1. починить lgbtBan значения для стран где ЛГВТ запрещён
-    (чтобы в поиске не было проектов про лгвт и вообще чтобы меня египтяне не посадили на бутылку)
- 2. добавить redis когда появится нагрузка
-    (я поленился его добавить потому что у меня даже 5 rps - событие)
+ 1. fix lgbtBan values for countries where LGBT is prohibited
+    (so that there are no projects about LGBT in search and generally so that Egyptians don't put me on a bottle)
+ 2. add redis when load appears
+    (I was too lazy to add it because even 5 rps is an event for me)
 */
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -87,14 +88,15 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// последний номер сборки клиента с php реализацией бекенда - 133
-// openGo будет использовать те же маршруты что и php
-// ниже вы найдёте прокси механизм который это и отрабатывает
+// last build number of client with php backend implementation - 133
+// openGo will use the same routes as php
+// below you will find the proxy mechanism that handles this
 var (
-	HELPER_VER = "133"
-	apiAddr    = "/server/" + HELPER_VER + "/"
-	php        = ".php"
-	HELPER_URL = "https://objecthub.xyz/"
+	HELPER_VER   = "133"
+	REVISION_NUM = "3"
+	apiAddr      = "/server/" + HELPER_VER + "/"
+	php          = ".php"
+	HELPER_URL   = "https://objecthub.xyz/"
 )
 
 var LangList = []string{"RU", "EN", "UA"}
@@ -114,21 +116,21 @@ const (
 )
 
 type Endpoint struct {
-	// метод нужно указывать с пробелом - "POST "
-	// либо если метод неважен то буквально пустая строка ""
-	// опять же ради удобства регистрации маршрутов
+	// method must be specified with a space - "POST "
+	// or if method is unimportant then literally empty string ""
+	// again for convenience of route registration
 	Method  string
 	Path    string
 	Handler func(http.ResponseWriter, *http.Request)
 }
 
 func DropPhp(w http.ResponseWriter, r *http.Request) {
-	// пока на продакшне стоит nginx даём ему сигнал
-	// "399 => окей иду в php вместо go"
+	// while nginx is on production we give it a signal
+	// "399 => okay I'm going to php instead of go"
 	w.WriteHeader(399)
 }
 
-// Обратите внимание - в php 97 эндпоинта, здесь же их всего 92
+// Note - in php there are 97 endpoints, here there are only 92
 var endpoints = []Endpoint{
 	{"POST ", apiAddr + "user/login" + php, userLogin},                  // zUserLogin.go
 	{"POST ", apiAddr + "user/logout" + php, userLogout},                // zUserLogin.go
@@ -227,7 +229,7 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "Aaction" + php, Aaction},                            // zAdmin.go
 	{"", apiAddr + "wiki/filesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/filesSend" + php, DropPhp},
-	{"", apiAddr + "search/deleteWikiFiles" + php, DropPhp}, // какого чёрта удаление файлов лежит в поиске?
+	{"", apiAddr + "search/deleteWikiFiles" + php, DropPhp}, // why the hell is file deletion in search?
 	{"", apiAddr + "vless" + php, DropPhp},
 	{"", apiAddr + "user/works" + php, WorksGet},                    // zWorks.go
 	{"", apiAddr + "user/workAdd" + php, workAddHandler},            // zWorks.go
@@ -238,10 +240,11 @@ var endpoints = []Endpoint{
 }
 
 func main() {
-	// пока что я использую redis. Но в будущем я вполне могу
-	// и создать свой кеш прямо в процессе,
-	// потому что экземпляр 1, и держать единый сервис для in-ram cache
-	// мне просто не надо
+	fmt.Printf("Object Hub openGo, Protocol %s Revision %s\n", HELPER_VER, REVISION_NUM)
+	// for now I use redis. But in the future I may well
+	// create my own cache right in the process,
+	// because instance is 1, and I simply don't need to keep
+	// a single service for in-ram cache
 	InitDB()           // database.go
 	InitGeoDb()        // databese.go
 	rDb := InitRedis() // database.go
@@ -254,14 +257,14 @@ func main() {
 	mux := http.NewServeMux()
 	for _, ep := range endpoints {
 		mux.HandleFunc(ep.Path, ep.Handler)
-		log.Println("==> Loading", ep.Path)
+		//log.Println("==> Loading", ep.Path)
 	}
-	registerStaticRoutes(mux)     // standalone.go: /imgs/, /cli/, /sw.js из IMGS и VERS_DIR
+	registerStaticRoutes(mux)     // standalone.go: /imgs/, /cli/, /sw.js from IMGS and VERS_DIR
 	handler := blockDotfiles(mux) // standalone.go
 
-	// nginx больше не стоит перед openGo — сам держим :80 (только под ACME
-	// HTTP-01 challenge) и :443 (TLS), сертификат выпускается и обновляется
-	// автоматически через Let's Encrypt (см. autocert.go).
+	// nginx no longer stands before openGo — we hold :80 ourselves (only for ACME
+	// HTTP-01 challenge) and :443 (TLS), certificate is issued and renewed
+	// automatically via Let's Encrypt (see autocert.go).
 	if os.Getenv("USE_TLS") == "1" {
 		StartServerWithAutocert(
 			handler,

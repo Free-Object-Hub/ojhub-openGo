@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// FIXME: заменить это на более топорные выдатчики ошибок
+// FIXME: replace this with more crude error handlers
 type APIError struct {
 	Error string `json:"error"`
 	Code  string `json:"code"`
@@ -44,7 +44,7 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 	if user.Activated == 0 {
 		return
 	}
-	// FIXME: что тут делать с ошибкой
+	// FIXME: what to do with the error here
 	check, err := CheckGdpsAccess(user.UserId, gdpsID)
 	if err != nil {
 		ApiError(w, 404, "check not found", "-6")
@@ -69,6 +69,14 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 	text := base64.StdEncoding.EncodeToString(
 		[]byte(textPre),
 	)
+
+	if file != nil {
+		if err := CheckImage(file); err != nil {
+			ApiError(w, 400, "Bad image", "-9")
+			return
+		}
+	}
+
 	newsID, err := NEWSpost(
 		user.UserId,
 		gdpsID,
@@ -84,25 +92,9 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if file != nil {
-		origPath := fmt.Sprintf(
-			// надеюсь что IMGS имеет слеш на конце
-			"%scustomnews/%d.%s",
-			getEnv("IMGS", "./imgs/"),
-			newsID,
-			GetFileExt(file),
-		)
-		err = SaveFile(file, origPath)
-		if err != nil {
-			ApiError(w, 500, "File error", "-9")
-		}
-		webpPath := fmt.Sprintf(
-			"%scustomnews/%d.webp",
-			getEnv("IMGS", "./imgs/"),
-			newsID,
-		)
-		if err := ConvertToWebp(origPath, webpPath, 1000, 1000); err != nil {
-			fmt.Printf("webp conversion failed: %v\n", err)
-			// TODO: тут проблема - в БД уже "webp" записан, а конвертация не удалась
+		webpPath := fmt.Sprintf("%scustomnews/%d.webp", getEnv("IMGS", "./imgs/"), newsID)
+		if err := SaveAsWebp(file, webpPath, 1000, 1000); err != nil {
+			log.Println("news image:", err)
 		}
 	}
 

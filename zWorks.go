@@ -36,10 +36,10 @@ func WorksGet(w http.ResponseWriter, r *http.Request) {
 }
 
 const (
-	workTitleMax    = 100  // TODO: сверь с длиной колонки title
-	workTextMax     = 2000 // TODO: сверь с типом колонки text
-	workLinkMax     = 255  // TODO: сверь с колонкой gdps
-	worksPerUserMax = 30   // TODO: свой лимит
+	workTitleMax    = 100  // TODO: check against the title column length
+	workTextMax     = 2000 // TODO: check against the text column type
+	workLinkMax     = 255  // TODO: check against the gdps column
+	worksPerUserMax = 30   // TODO: own limit
 )
 
 func workAddHandler(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +94,7 @@ func workAddHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("Project not found"))
 			return
 		}
-		link = strconv.FormatUint(gid, 10) // без "007" и "+5"
+		link = strconv.FormatUint(gid, 10) // without "007" and "+5"
 	case 1:
 		u, err := url.Parse(link)
 		if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
@@ -134,12 +134,12 @@ func workEditHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
-	// ErrNotMultipart не ошибка: GET-запрос формы (helperRequest) может прийти urlencoded
+	// ErrNotMultipart is not an error: a GET request for the form (helperRequest) may come urlencoded
 	if err := r.ParseMultipartForm(1 << 20); err != nil && err != http.ErrNotMultipart {
 		ApiError(w, 400, "Bad form", "-7")
 		return
 	}
-	// FormValue смотрит и в тело, и в query, так что работает и для первого запроса, и для onsubmit с ?id=
+	// FormValue looks in both the body and the query, so it works both for the first request and for onsubmit with ?id=
 	workId, err := strconv.Atoi(r.FormValue("id"))
 	if err != nil {
 		ApiError(w, 400, "Bad id", "-7")
@@ -147,18 +147,18 @@ func workEditHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	work, err := WORKfetchById(workId)
 	if err != nil || work.UserID != user.UserId {
-		// не найдена и чужая отвечают одинаково, чтобы не светить существование
+		// not found and someone else's respond the same, so as not to reveal existence
 		w.Write([]byte("-2"))
 		return
 	}
 	title := r.FormValue("title")
 	text := r.FormValue("text")
-	// GET-режим: title/text отсутствуют, отдаём текущие данные для формы
+	// GET mode: title/text are missing, return current data for the form
 	if title == "" || text == "" {
 		resp := map[string]any{
 			"title":    work.Title,
 			"text":     work.Text,
-			"tags":     work.Tags, // сырая JSON-строка, клиент сам делает JSON.parse
+			"tags":     work.Tags, // raw JSON string, the client does JSON.parse itself
 			"linkType": work.LinkType,
 			"gdps":     work.LinkOrGdpsId,
 		}
@@ -214,7 +214,7 @@ func workEditHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// теги пока не трогаем (задел на будущее), см. EditWork
+	// tags are not touched for now (room for the future), see EditWork
 	if _, err := EditWork(workId, user.UserId, title, text, linkType, link); err != nil {
 		log.Println("workEdit:", err)
 		w.Write([]byte("-1"))
@@ -250,7 +250,7 @@ func workDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if rows == 0 {
-		// не найдена или чужая, отвечаем одинаково
+		// not found or someone else's, respond the same
 		w.Write([]byte("-1"))
 		return
 	}
@@ -278,7 +278,7 @@ func workVerifyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if rows == 0 {
-		// нет работы, это внешняя ссылка или ты не автор проекта
+		// no work, this is an external link or you're not the project author
 		w.Write([]byte("-2"))
 		return
 	}
@@ -287,5 +287,5 @@ func workVerifyHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("-1"))
 		return
 	}
-	w.Write([]byte(strconv.Itoa(work.OwnerChecked))) // новое состояние: 0 или 1
+	w.Write([]byte(strconv.Itoa(work.OwnerChecked))) // new state: 0 or 1
 }

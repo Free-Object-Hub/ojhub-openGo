@@ -1,10 +1,10 @@
 package main
 
 /*
- * Wordle модуль
+ * Wordle module
  * Author: Claude
- * Порт сделанный чат ботом за 2 минуты
- * Да, вайбкод, но всего за 2 минуты ведь!
+ * Port made by a chat bot in 2 minutes
+ * Yes, vibe-coded, but in just 2 minutes though!
  */
 
 import (
@@ -27,8 +27,8 @@ var wordleENWords = []string{
 	"BURNER", "FLOWER", "HFJONE", "NEEDLE", "CHEESY", "THANOS", "PENCIL",
 }
 
-// в этой версии функции намеренно сломан протокол потому что
-// PHP-оригинал нихуёво так нагружал процессор
+// in this version the function deliberately has a broken protocol because
+// the PHP original loaded the CPU quite a bit
 func getDailyIndex(words []string, day int64) int {
 	x := uint64(day)
 	x = (x ^ (x >> 33)) * 0xff51afd7ed558ccd
@@ -37,12 +37,12 @@ func getDailyIndex(words []string, day int64) int {
 	return int(x % uint64(len(words)))
 }
 
-// wordleGuess — общая логика сравнения букв, переиспользуется RU и EN.
+// wordleGuess — shared letter comparison logic, reused by RU and EN.
 func wordleGuess(userWord, secretWord string) string {
 	userLetters := []rune(userWord)
 	secretLetters := []rune(secretWord)
 	result := make([]int, len(secretLetters))
-	// точное совпадение
+	// exact match
 	for i := 0; i < len(secretLetters) && i < len(userLetters); i++ {
 		if userLetters[i] == secretLetters[i] {
 			result[i] = 2
@@ -50,7 +50,7 @@ func wordleGuess(userWord, secretWord string) string {
 			userLetters[i] = 0
 		}
 	}
-	// буква есть, но не на своём месте
+	// letter is present, but not in its place
 	for i := 0; i < len(userLetters); i++ {
 		if userLetters[i] != 0 {
 			for j := 0; j < len(secretLetters); j++ {
@@ -69,7 +69,7 @@ func wordleGuess(userWord, secretWord string) string {
 	return sb.String()
 }
 
-// wordleHandler — общий handler-фабрикатор для RU/EN эндпоинтов.
+// wordleHandler — shared handler factory for RU/EN endpoints.
 func wordleHandler(words []string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()

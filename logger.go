@@ -1,10 +1,12 @@
 package main
 
-// МОДУЛЬ НАВАЙБКОЖЕН chatGpt!
-// я его не верифал вообще
+// MODULE VIBE-CODED BY chatGpt!
+// I didn't verify it at all
+// 11:10:2026 No, Claude patched it
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,6 +15,15 @@ import (
 	"strings"
 	"time"
 )
+
+// scrubErr removes the URL (and therefore the bot token) from http.Client / url.Parse errors.
+func scrubErr(err error) error {
+	var ue *url.Error
+	if errors.As(err, &ue) {
+		return fmt.Errorf("%s: %w", ue.Op, ue.Err)
+	}
+	return err
+}
 
 const (
 	GDPSban    = "Забанен ПРОЕКТ - "
@@ -50,8 +61,8 @@ var GlobalHTTPClient = &http.Client{
 	},
 }
 
-// TGWebhookLog отправляет технический лог в Telegram.
-// Ошибка отправки лога не должна ломать основной запрос.
+// TGWebhookLog sends a technical log to Telegram.
+// A log sending error must not break the main request.
 func TGWebhookLog(msg string) error {
 	log.Println(msg)
 	botToken := os.Getenv("TG_BOT_TOKEN")
@@ -79,6 +90,7 @@ func TGWebhookLog(msg string) error {
 		strings.NewReader(data.Encode()),
 	)
 	if err != nil {
+		err = scrubErr(err)
 		log.Println("failed to create telegram request: %w", err)
 		return fmt.Errorf("failed to create telegram request: %w", err)
 	}
@@ -90,6 +102,7 @@ func TGWebhookLog(msg string) error {
 
 	resp, err := GlobalHTTPClient.Do(req)
 	if err != nil {
+		err = scrubErr(err)
 		log.Printf("[TGWebhookLog] http request failed: %v", err)
 		return fmt.Errorf("failed to send telegram log: %w", err)
 	}

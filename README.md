@@ -1,43 +1,43 @@
 # ojhub-openGo
 
-ojhub-opengo - открытая реализация бекенда Object Hub на Go, которая уже вытеснила nodejs бекенд и работает в продакшне.  
+ojhub-opengo - open implementation of Object Hub backend in Go, which has already replaced the nodejs backend and runs in production.
 
-# Кто мы вообще такие?
-Object hub - платформа для Object Show Community, с упором на собственный вики движок и СМИ. Мы намеренно отказались от популярных веб стандартов в пользу производительности сайта - в теории Интерфейс клиента Object hub работает в стабильные 60 фпс даже на слабых Chromebook'ах (потому что весь движок был написан на Athlon 64 X2)!
+# Who are we anyway?
+Object hub - a platform for the Object Show Community, with emphasis on its own wiki engine and media. We deliberately abandoned popular web standards in favor of site performance - in theory the Object hub client interface runs at a stable 60 fps even on weak Chromebooks (because the entire engine was written on an Athlon 64 X2)!
 
-# Почему openGo
-nodejs 150 мегабайт озу idle, openGo 13 мегабайт idle, как говорится - думайте.  
-Поправка от середины сентября - openGo стал Standalone, но его idle все ещё 25 мегабайт
+# Why openGo
+nodejs 150 megabytes RAM idle, openGo 13 megabytes idle, as they say - think about it.  
+Correction from mid-September - openGo became Standalone, but its idle is still 25 megabytes
 
-# Небольшая справочная информация
-openGo был сделан за 8 дней на основе чудом найденного прототипа на почти мёртвом HDD.  
-За эти 8 дней я навайбкодил 50% Object hub API и выкатил его в продакшн.  
-Так как php/node бекенды этого сайта работают на FreeBSD мы намеренно отказались от излишей инфраструктуры с целью тотальной портируемости этой реализации бекенда.  
+# A bit of reference information
+openGo was made in 8 days based on a miraculously found prototype on an almost dead HDD.  
+In these 8 days I vibe-coded 50% of Object hub API and rolled it out to production.  
+Since the php/node backends of this site run on FreeBSD we deliberately abandoned excessive infrastructure for the purpose of total portability of this backend implementation.
 
-## Почему русский язык?
-Движок Object hub исторически создавался ещё когда мне (MIOBOMB) было 15 лет и я почти не понимал английский, причины по которым комментарии в коде и документации все ещё пишутся на русском:
-- Исторический пласт (всё везде итак на русском)  
-- Я все ещё не силён в английском  
-- Сохранение относительно единого стиля везде  
+## Why Russian language?
+The Object hub engine was historically created back when I (MIOBOMB) was 15 years old and I barely understood English, the reasons why comments in code and documentation are still written in Russian:
+- Historical layer (everything is already in Russian everywhere)  
+- I'm still not strong in English  
+- Maintaining a relatively unified style everywhere  
 
-## Текущая инфраструктура:
+## Current infrastructure:
 - Go 1.26
-- Mariadb 11.8, но можно любую другую современную версию
-- redis 8.8.0, но можно аболютно любой другой драйвер (см. InitRedis функцию) или вообще не использовать RamDB
+- Mariadb 11.8, but any other modern version can be used
+- (optional) redis 8.8.0
 
-## Долгосрочная цель (почти закрыта):
-- Минимальное потребление ресурсов
-- Высокая портируемость
-- 100% совместимость с legacy-php
-- 100% совместимость с поддерживаемыми версиями object hub
-- Нормальная и задокументированная инфраструктура
+## Long-term goal (almost closed):
+- Minimal resource consumption
+- High portability
+- 100% compatibility with legacy-php
+- 100% compatibility with supported versions of object hub
+- Normal and documented infrastructure
 - MaxMind GeoLite2
 
-## чек-лист (мне chatgpt предложил добавить)
-- Продакшн? да
-- Loader 1.10? Уже 1.30
-- Полезные ссылки? ну, сори я ещё не силён в организации репозиториев
-- Сколько api готово? 92 / 97 эндпоинтов
-- Что будет портировано следующим? вики файлы
-- Что будет исправлено дальше? добавлю redis там где поленился потому что "ай нагрузка всё равно никакая"
-- Что я сделаю когда настроение будет? install.sh скрипт, с поддержкой freebsd, debian linux, termux
+## checklist (chatgpt suggested I add)
+- Production? yes
+- Loader 1.10? Already 1.40
+- Useful links? well, sorry I'm still not good at organizing repositories
+- How much API is ready? 92 / 97 endpoints
+- What will be ported next? wiki files
+- What will be fixed next? I'll add redis where I was lazy because "eh the load is nothing anyway"
+- What will I do when I'm in the mood? install.sh script, with support for freebsd, debian linux, termux

@@ -1,22 +1,34 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"strings"
+	"strconv"
+	"time"
+)
+
+const (
+	maxImageBytes  = 5 << 20
+	maxImageSide   = 6000
+	maxImagePixels = 16_000_000
+)
+
+var (
+	ErrBadImage = errors.New("bad image")
+	cwebpSem    = make(chan struct{}, 2)
 )
 
 func ParseMultipart(r *http.Request) (*multipart.Form, *multipart.FileHeader, error) {
-	err := r.ParseMultipartForm(32 << 20) // 32MB
+	err := r.ParseMultipartForm(32 << 20)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -28,82 +40,75 @@ func ParseMultipart(r *http.Request) (*multipart.Form, *multipart.FileHeader, er
 	return r.MultipartForm, file, nil
 }
 
-func GetFileExt(file *multipart.FileHeader) string {
-	if file == nil {
-		return ""
+func inspectImage(fh *multipart.FileHeader) (image.Config, string, error) {
+	if fh.Size > maxImageBytes {
+		return image.Config{}, "", ErrBadImage
 	}
-	ext := filepath.Ext(file.Filename)
-	if len(ext) > 0 {
-		return strings.TrimPrefix(
-			strings.ToLower(ext),
-			".",
-		)
+	f, err := fh.Open()
+	if err != nil {
+		return image.Config{}, "", err
 	}
-	return ""
+	defer f.Close()
+	cfg, format, err := image.DecodeConfig(f)
+	if err != nil || (format != "png" && format != "jpeg") {
+		return image.Config{}, "", ErrBadImage
+	}
+	if cfg.Width < 1 || cfg.Height < 1 ||
+		cfg.Width > maxImageSide || cfg.Height > maxImageSide ||
+		cfg.Width*cfg.Height > maxImagePixels {
+		return image.Config{}, "", ErrBadImage
+	}
+	return cfg, format, nil
 }
 
-func SaveFile(file *multipart.FileHeader, path string) error {
-	if file == nil {
-		return nil
+// CheckImage — cheap check BEFORE writing to the DB.
+func CheckImage(fh *multipart.FileHeader) error {
+	_, _, err := inspectImage(fh)
+	return err
+}
+
+// SaveAsWebp — the only path by which an uploaded file gets into IMGS.
+func SaveAsWebp(fh *multipart.FileHeader, destPath string, maxW, maxH int) error {
+	cfg, format, err := inspectImage(fh)
+	if err != nil {
+		return err
 	}
-	src, err := file.Open()
+	src, err := fh.Open()
 	if err != nil {
 		return err
 	}
 	defer src.Close()
-	dst, err := os.Create(path)
+
+	tmp, err := os.CreateTemp("", "up-*."+format)
 	if err != nil {
 		return err
 	}
-	defer dst.Close()
-	_, err = io.Copy(dst, src)
-	return err
-}
+	defer os.Remove(tmp.Name())
+	n, err := io.Copy(tmp, io.LimitReader(src, maxImageBytes+1))
+	if cerr := tmp.Close(); err == nil {
+		err = cerr
+	}
+	if err != nil {
+		return err
+	}
+	if n > maxImageBytes {
+		return ErrBadImage
+	}
 
-func ConvertToWebp(srcPath, destPath string, maxWidth, maxHeight int) error {
-	width, height, err := imageSize(srcPath)
+	args := []string{"-q", "85", "-mt"}
+	if cfg.Width > maxW || cfg.Height > maxH {
+		args = append(args, "-resize", strconv.Itoa(maxW), strconv.Itoa(maxH))
+	}
+	args = append(args, tmp.Name(), "-o", destPath)
+
+	cwebpSem <- struct{}{}
+	defer func() { <-cwebpSem }()
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "cwebp", args...).CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("read image size: %w", err)
-	}
-	args := []string{
-		"-q", "85",
-		"-mt",
-	}
-	// Добавляем resize только если реально нужно уменьшать
-	if width > maxWidth || height > maxHeight {
-		args = append(
-			args,
-			"-resize",
-			fmt.Sprintf("%d", maxWidth),
-			fmt.Sprintf("%d", maxHeight),
-		)
-	}
-	args = append(
-		args,
-		srcPath,
-		"-o",
-		destPath,
-	)
-	cmd := exec.Command("cwebp", args...)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("cwebp failed: %w, output: %s", err, output)
-	}
-	if err := os.Remove(srcPath); err != nil {
-		log.Println("remove source file: %w", err)
+		os.Remove(destPath)
+		return fmt.Errorf("cwebp: %w: %s", err, out)
 	}
 	return nil
-}
-
-func imageSize(path string) (int, int, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return 0, 0, err
-	}
-	defer f.Close()
-	cfg, _, err := image.DecodeConfig(f)
-	if err != nil {
-		return 0, 0, err
-	}
-	return cfg.Width, cfg.Height, nil
 }

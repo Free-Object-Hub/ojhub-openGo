@@ -20,15 +20,15 @@ func firstQueryValue(q url.Values, keys ...string) string {
 }
 
 func futureLinkFormat(r *http.Request) (string, int, bool) {
-	// запомни читатель - этот формат будущее, он наоборот в будущем начнёт
-	// доминировать над всех архитектурой роутинга,
-	// даже если это сломает старые клиенты
+	// remember reader - this format is the future, it will on the contrary in the future start
+	// dominating over the entire routing architecture,
+	// even if it breaks old clients
 	//
 	// FIXME:
-	// 1. сделать парсер для гайдов
-	// 2. придумать что делать с ссылками формата:
+	// 1. make a parser for guides
+	// 2. figure out what to do with links of the format:
 	// "?wiki/{wikiId}/page/{guideId}"
-	// да, это тот самый фикс ми который будет висеть ещё не один год
+	// yes, this is the very fixme that will hang for more than one year
 	for key := range r.URL.Query() {
 		parts := strings.SplitN(key, "/", 2)
 		if len(parts) != 2 {
@@ -45,7 +45,7 @@ func futureLinkFormat(r *http.Request) (string, int, bool) {
 
 func buildMetaTags(r *http.Request) string {
 	metaTitle := "Object hub"
-	metaDescription := "Удобный сервис для поиска и размещения своих обджект шоу и кемпов!"
+	metaDescription := "A convenient service for finding and hosting your object shows and camps!"
 	metaImage := "https://objecthub.xyz/imgs/hubbig.png"
 	//
 	route, id, ok := futureLinkFormat(r)
@@ -64,7 +64,7 @@ func buildMetaTags(r *http.Request) string {
 		q := r.URL.Query()
 		if _, ok := q["Wikis"]; ok {
 			metaTitle = "Object Hub Wiki"
-			metaDescription = "Object Hub Wiki - не Mediawiki! добро пожаловать на наш вики движок!"
+			metaDescription = "Object Hub Wiki - not Mediawiki! welcome to our wiki engine!"
 		}
 		if gdpsID := firstQueryValue(q, "camp", "show", "pere", "tele"); gdpsID != "" {
 			if id, err := strconv.Atoi(gdpsID); err == nil {
@@ -120,7 +120,7 @@ func IndexParser(w http.ResponseWriter, r *http.Request) {
 			verName = c.Value
 		}
 	}
-	cv, _ := findVersion(verName) // defaultVer гарантированно есть в versions
+	cv, _ := findVersion(verName) // defaultVer is guaranteed to be in versions
 	//
 	v := html.EscapeString(cv.Ver)
 	//

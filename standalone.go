@@ -16,7 +16,7 @@ import (
 func startServer(handler http.Handler, httpAddr, tlsAddr, certFile, keyFile string) {
 	ln, err := net.Listen("tcp", tlsAddr)
 	if err != nil {
-		log.Printf("TLS-порт %s занят или недоступен (%v), работаем по HTTP на %s", tlsAddr, err, httpAddr)
+		log.Printf("TLS port %s is busy or unavailable (%v), running over HTTP on %s", tlsAddr, err, httpAddr)
 		if err := http.ListenAndServe(httpAddr, handler); err != nil {
 			log.Fatal(err)
 		}
@@ -25,7 +25,7 @@ func startServer(handler http.Handler, httpAddr, tlsAddr, certFile, keyFile stri
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
 		ln.Close()
-		log.Printf("Не смогли загрузить сертификат (%v), работаем по HTTP на %s", err, httpAddr)
+		log.Printf("Could not load certificate (%v), running over HTTP on %s", err, httpAddr)
 		if err := http.ListenAndServe(httpAddr, handler); err != nil {
 			log.Fatal(err)
 		}
@@ -35,10 +35,10 @@ func startServer(handler http.Handler, httpAddr, tlsAddr, certFile, keyFile stri
 	server := &http.Server{Handler: handler}
 	go func() {
 		if err := http.ListenAndServe(httpAddr, handler); err != nil {
-			log.Printf("HTTP слушатель упал: %v", err)
+			log.Printf("HTTP listener crashed: %v", err)
 		}
 	}()
-	log.Printf("TLS на %s, HTTP на %s", tlsAddr, httpAddr)
+	log.Printf("TLS on %s, HTTP on %s", tlsAddr, httpAddr)
 	if err := server.Serve(tlsLn); err != nil {
 		log.Fatal(err)
 	}
@@ -65,11 +65,16 @@ func (n noListingFS) Open(name string) (http.File, error) {
 	return f, nil
 }
 
-func staticHandler(prefix, dir, cacheControl string) http.Handler {
+func staticHandler(prefix, dir, cacheControl, csp string) http.Handler {
 	fileServer := http.FileServer(noListingFS{http.Dir(dir)})
 	stripped := http.StripPrefix(prefix, fileServer)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", cacheControl)
+		h := w.Header()
+		h.Set("Cache-Control", cacheControl)
+		h.Set("X-Content-Type-Options", "nosniff")
+		if csp != "" {
+			h.Set("Content-Security-Policy", csp)
+		}
 		stripped.ServeHTTP(w, r)
 	})
 }
@@ -146,15 +151,16 @@ func gzipMiddleware(next http.Handler) http.Handler {
 func registerStaticRoutes(mux *http.ServeMux) {
 	imgsDir := os.Getenv("IMGS")
 	if imgsDir == "" {
-		log.Fatal("IMGS не задана — без неё раздача /imgs/ не поднимется")
+		log.Fatal("IMGS is not set — without it /imgs/ serving will not come up")
 	}
 	versDir := os.Getenv("VERS_DIR")
 	if versDir == "" {
-		log.Fatal("VERS_DIR не задана — без неё раздача /cli/ не поднимется")
+		log.Fatal("VERS_DIR is not set — without it /cli/ serving will not come up")
 	}
-	mux.Handle("/imgs/", staticHandler("/imgs/", imgsDir, "public, no-transform, max-age=2592000"))
-	mux.Handle("/cli/", staticHandler("/cli/", versDir, "public, no-transform, max-age=2592000"))
-	// sw.js лежит внутри VERS_DIR (там же, где остальной клиентский код)
+	const imgsCSP = "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+	mux.Handle("/imgs/", staticHandler("/imgs/", imgsDir, "public, no-transform, max-age=2592000", imgsCSP))
+	mux.Handle("/cli/", staticHandler("/cli/", versDir, "public, no-transform, max-age=2592000", ""))
+	// sw.js lies inside VERS_DIR (same place as the rest of the client code)
 	mux.HandleFunc("/sw.js", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/javascript")
 		w.Header().Set("Cache-Control", "no-cache")

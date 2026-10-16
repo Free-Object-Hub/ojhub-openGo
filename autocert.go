@@ -13,12 +13,12 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 )
 
-// StartServerWithAutocert поднимает :80 (только под ACME HTTP-01 challenge,
-// без обычного http-фоллбека, как было раньше — теперь nginx перед openGo нет,
-// поэтому :80 нельзя занимать чем-то другим) и :443 с TLS-сертификатом,
-// который autocert сам выпускает и обновляет через Let's Encrypt.
-// Кэш сертификатов лежит в cacheDir, чтобы не перевыпускать их на каждый рестарт
-// (у Let's Encrypt лимиты на количество выпусков в неделю на домен).
+// StartServerWithAutocert brings up :80 (only for ACME HTTP-01 challenge,
+// without the usual http fallback, as it was before — now there is no nginx before openGo,
+// so :80 cannot be occupied by anything else) and :443 with TLS certificate,
+// which autocert itself issues and renews via Let's Encrypt.
+// The certificate cache is in cacheDir, so as not to reissue them on every restart
+// (Let's Encrypt has limits on the number of issuances per week per domain).
 func StartServerWithAutocert(handler http.Handler, hosts []string, cacheDir string) {
 	certManager := &autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
@@ -49,7 +49,7 @@ func StartServerWithAutocert(handler http.Handler, hosts []string, cacheDir stri
 		}
 	}()
 
-	// Ждём Ctrl+C / SIGTERM
+	// Waiting for Ctrl+C / SIGTERM
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
 	<-signalChan

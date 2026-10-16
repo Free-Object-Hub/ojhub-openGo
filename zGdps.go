@@ -16,7 +16,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// TODO: сделать lgbtBan
+// TODO: do lgbtBan
 func GDPSopener(w http.ResponseWriter, r *http.Request) {
 	idPre := r.URL.Query().Get("id")
 
@@ -80,7 +80,7 @@ func GDPSopener(w http.ResponseWriter, r *http.Request) {
 			return err
 		}
 		return RamSet(
-			fmt.Sprintf(":news:%d", id),
+			fmt.Sprintf("news:%d", id),
 			string(newsJSON),
 			10*time.Minute,
 		)
@@ -112,7 +112,7 @@ func GDPSopener(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(resp))
 }
 
-// возвращает (points, canBumpNow) - false в canBumpNow означает "checked != 1", как false в php
+// returns (points, canBumpNow) - false in canBumpNow means "checked != 1", like false in php
 func GdpsSetPoint(gdpsId int, date, currentDate int64) (int64, bool, error) {
 	gdps, err := GDPSfetchById(gdpsId)
 	if err != nil {
@@ -228,8 +228,8 @@ func GDPSjoin(w http.ResponseWriter, r *http.Request) {
 	if gdps.Freejoin == 0 {
 		userID := 0
 
-		// Если есть авторизация через token — здесь нужно получить
-		// пользователя твоим существующим способом.
+		// If there is authorization via token — here you need to get
+		// the user with your existing method
 		if token := r.URL.Query().Get("token"); token != "" {
 			if user, err := GetUserByToken(token); err == nil && user != nil {
 				userID = user.UserId
@@ -256,7 +256,7 @@ func GDPSjoin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// Если token передан, пробуем авторизацию через него.
+	// If token is passed, try authorization via it
 	if token := r.FormValue("token"); token != "" {
 		user, err := GetUserByToken(token)
 		if err == nil && user != nil {
@@ -267,7 +267,7 @@ func GDPSjoin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// Здесь нужно показать форму логина.
+	// Here you need to show the login form
 	writeGDPSLoginPage(w, targetURL)
 }
 

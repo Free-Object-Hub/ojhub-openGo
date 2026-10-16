@@ -1,11 +1,11 @@
 package main
 
 /*
- * НЕТ, это не middleware!
- * в привычном вам смысле.
+ * NO, this is not middleware!
+ * in the usual sense you're used to.
  *
- * Это просто функции которые выглядят как middleware, но в прямом смысле им не являются
- * Ну и ещё тут сложены прочие хелперы
+ * These are just functions that look like middleware, but in the literal sense they are not
+ * And also various other helpers are collected here
  */
 
 import (
@@ -16,11 +16,11 @@ import (
 )
 
 /*
-Object Hub 0.97.3 и старше являются версиями PHP поколения,
-они из-за ограниченности helperRequest слали token и device токены
-в body, все версии старого поколения работали примерно так.
-nodejs миграция заставила меня задуматься "а может пусть токен в хедере будет?",
-что я собственно и сделал. Отсюда такой косяк костылей ради совместимости
+Object Hub 0.97.3 and older are PHP generation versions,
+due to the limitations of helperRequest they sent token and device tokens
+in the body, all versions of the old generation worked roughly like this.
+The nodejs migration made me think "maybe let the token be in the header?",
+which is what I did. Hence such a mess of crutches for compatibility
 */
 func GetUserToken(r *http.Request) string {
 	token := r.Header.Get("User-Token")
@@ -42,7 +42,7 @@ func ExploitPatch(s string) string {
 	return html.EscapeString(s)
 }
 
-// логика
+// logic
 func RequireToken(w http.ResponseWriter, r *http.Request) (*User, bool) {
 	token := GetUserToken(r)
 	if token == "" {

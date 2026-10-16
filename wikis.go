@@ -1,9 +1,9 @@
 package main
 
 /*
- * Обратите внимание! во всех рендерах вики поле Date закомментировано, хотя прописано.
- * Сделано это потому что legacy-php возвращал поле date, но клиент его не использовал
- * Всего лишь сохранение контракта с примесью микро-оптимизаций
+ * Note! in all wiki renders the Date field is commented out, although it is declared.
+ * This is done because legacy-php returned the date field, but the client did not use it
+ * Just preserving the contract with a dash of micro-optimizations
  */
 
 import (
@@ -226,11 +226,11 @@ func (p Wiki) ToFull() WikiProfile {
 	}
 }
 
-// порт LT2 появился на поздней фазе разработки
-// и то я изначально планировал от него отказаться
-// но обстоятельства недосыпа (4 сентября 23:45)
-// и желание "довайбить" остатки порта openGo были сильнее
-// меня кстати сегодня похвалили в шараге йоу
+// the LT2 port appeared at a late phase of development
+// and even then I initially planned to abandon it
+// but the circumstances of sleep deprivation (September 4, 23:45)
+// and the desire to "vibe-finish" the remnants of the openGo port were stronger
+// by the way I got praised at college today yo
 type WikiLT2 struct {
 	ID       int    `json:"ID"`
 	Title    string `json:"title"`
@@ -307,7 +307,7 @@ func renderGuideMini(g Guide) []interface{} {
 		},
 		g.Img,
 		g.WikiTag,
-		0, // liked — старая система лайков больше не используется
+		0, // liked — the old like system is no longer used
 	}
 }
 

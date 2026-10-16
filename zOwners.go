@@ -20,7 +20,7 @@ func GetOwners(w http.ResponseWriter, r *http.Request) {
 	var title string
 	var usernames [][2]any
 	if channelType == -1 {
-		wiki, err := WIKIfetchById(id) // предполагаю что такая функция уже есть
+		wiki, err := WIKIfetchById(id)
 		if err != nil {
 			http.Error(w, "wiki not found", http.StatusNotFound)
 			return

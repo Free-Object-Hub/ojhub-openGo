@@ -1,27 +1,27 @@
 package main
 
 /*
-InitOjhub чинит сломанное!
+InitOjhub fixes what's broken!
 
-А теперь серьёзно. Раньше в php/node я мог позволить себе
-короткие функции инициализации за счёт динамичности языков.
-В openGo я такого позволить себе уже не могу!
-По этому мне пришлось расколоть старый loginToken на
-publicInit и privateInit, которые намернно кешируют битый Json.
-В свою очередь OjhubInit будет склеивать эти 2 битых Json'а
-в старый добрый массив loginT.php, который читается любым клиентом
-Object hub начиная с GDPS Helper 1.7
+And now seriously. Previously in php/node I could afford
+short initialization functions thanks to the dynamism of the languages.
+In openGo I can no longer afford this!
+That's why I had to split the old loginToken into
+publicInit and privateInit, which deliberately cache the broken Json.
+In turn, OjhubInit will glue these 2 broken Jsons
+into the good old loginT.php array, which is read by any client
+of Object hub starting from GDPS Helper 1.7
 
-ОБРАТИТЕ ВНИМАНИЕ!
-В этом коде ОООООЧЕНЬ много ручной сборки json. Делаю я это чтобы намеренно
-избегать парсинга json - го заметно быстрее factcgi/v8, тут это будет ощущаться
-Так что если вы собираетесь добавлять новые поля в UserResponse, пройдитесь по чеклисту:
-1. users.go => изменена структура
-2. пропатчен GreatGuestState
-Зачем я себя так мучаю и ломаю всю типизацию тут?
-Этот эндпоинт при скачках трафика будет самым жарким местом, конечно от захлёбывания базы данных
-мне подобная оптимизация наврядли поможет, но тратить лишние такты процессора на кучу json.Marshal
-я точно не хочу.
+NOTE!
+In this code there is VEEEEERY much manual json assembly. I do this to deliberately
+avoid json parsing - go is noticeably faster than factcgi/v8, here it will be felt
+So if you're going to add new fields to UserResponse, go through the checklist:
+1. users.go => structure changed
+2. GreatGuestState patched
+Why do I torture myself like this and break all the typing here?
+This endpoint under traffic spikes will be the hottest spot, of course such optimization
+is unlikely to help me with the database choking, but spending extra CPU cycles on a bunch of json.Marshal
+I definitely don't want to.
 */
 
 import (
@@ -133,7 +133,7 @@ func extractUserID(cached string) (int, error) {
 	start += len(prefix)
 	end := strings.IndexByte(cached[start:], ',')
 	if end == -1 {
-		// На случай, если ID оказался последним полем объекта.
+		// In case the ID turned out to be the last field of the object.
 		end = strings.IndexByte(cached[start:], '}')
 		if end == -1 {
 			return 0, errors.New("invalid user cache format")
@@ -283,7 +283,7 @@ func privateInit(ip string, token string, device string, showToken bool, ignoreD
 	return userResp, nil
 }
 
-// порт loginT и loginToken из php/node, теперь это "инициализация сайта" а не какой то "вход по токену"
+// port of loginT and loginToken from php/node, now it's "site initialization" and not some "login by token"
 func InitOjhub(ip string, token string, device string, showToken bool, ignoreDevice bool, bypassCache bool) (json.RawMessage, error) {
 	var (
 		public  json.RawMessage

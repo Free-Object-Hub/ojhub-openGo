@@ -15,7 +15,7 @@ var LikeTypes = map[int]LikeTypeData{
 	9:  {"forumPosts", 0, 9},
 	11: {"vacans", 0, 11},
 
-	// FIXME: придумать что делать с каналами комментариев тут
+	// FIXME: figure out what to do with comment channels here
 	3:  {"comments", 0, 1},  // gdpses
 	4:  {"comments", 1, 4},  // texures
 	6:  {"comments", 2, 5},  // guides
@@ -33,7 +33,7 @@ var CommLikeTypes = map[int]LikeTypeData{
 	5: {"comments", 5, 12}, // vacs
 }
 
-// мне лень рефакторить бекенд на внятные константы, пусть магия останется
+// I'm too lazy to refactor the backend to sensible constants, let the magic stay
 var channelPrefixes = map[int]string{
 	0: "c",
 	1: "s",

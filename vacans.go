@@ -1,6 +1,6 @@
 package main
 
-// XXX: этот модуль целиком и полностью был портирован chatgpt, я просто привёл его к моему стилю кода
+// XXX: this module was entirely and completely ported by chatgpt, I just brought it to my code style
 
 import (
 	"database/sql"
@@ -16,8 +16,8 @@ var (
 	ErrAlreadyApplied  = errors.New("already applied")
 )
 
-// Vacancy — запись вакансии + связанные данные,
-// необходимые публичному API.
+// Vacancy — vacancy record + related data,
+// necessary for the public API.
 type Vacancy struct {
 	ID      int    `db:"ID"`
 	Title   string `db:"title"`
@@ -32,26 +32,26 @@ type Vacancy struct {
 	HasLgbt int    `db:"hasLgbt"`
 	Date    int    `db:"date"`
 	Status  int    `db:"status"`
-	// Статистика.
+	// Statiscics.
 	Likes      int `db:"likes"`
 	Dislikes   int `db:"disls"`
 	CommsCount int `db:"commsCount"`
-	// Связанный GDPS.
+	// Releated GDPS.
 	GTitle   *string `db:"gTitle"`
 	GChannel *int    `db:"gChannel"`
-	// ID отклика текущего пользователя.
-	// Никаких likes/isLiked здесь больше нет.
+	// ID of the current user's apply.
+	// No likes/isLiked here anymore.
 	Applied *int `db:"applied"`
 }
 
-// VacancyApply — отклик пользователя на вакансию.
+// VacancyApply — user's apply to a vacancy.
 type VacancyApply struct {
 	ID     int `db:"ID"`
 	VacID  int `db:"vacId"`
 	UserID int `db:"userId"`
 	Date   int `db:"date"`
 	Status int `db:"status"`
-	// Данные пользователя, если отклики получаем через JOIN users.
+	// User data, if applies are fetched via JOIN users.
 	Username string `db:"uUsername"`
 	Nickname string `db:"uNickname"`
 	Resume   string `db:"uResume"`

@@ -18,10 +18,10 @@ func HandleNewWiki(w http.ResponseWriter, r *http.Request) {
 	title := r.FormValue("title")
 	if title == "" {
 		// Claude:
-		// PHP-эталон: isset($_POST['title']) как единственный гейт,
-		// без title хендлер вообще ничего не делает и не пишет ответ
+		// PHP reference: isset($_POST['title']) as the only gate,
+		// without title the handler does nothing at all and writes no response
 		// MIOBOMB:
-		// да поебать пусть -2 возвращает лол
+		// fuck it, let it return -2 lol
 		w.Write([]byte("-2"))
 		return
 	}
@@ -78,9 +78,9 @@ func HandleEditWiki(w http.ResponseWriter, r *http.Request) {
 
 func HandleWikiColors(w http.ResponseWriter, r *http.Request) {
 	// Claude:
-	// унифицировано с остальными, было fetchByToken без device
+	// unified with the others, was fetchByToken without device
 	// MIOBOMB:
-	// раньше можно было просто украв токен изменить цвета
+	// previously you could just steal a token and change the colors
 	user, ok := RequireDevice(w, r)
 	if !ok {
 		return
@@ -151,7 +151,7 @@ func HandleCheckWiki(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("-2"))
 		return
 	}
-	// переворот флага + новое значение одним запросом (MariaDB 10.5+)
+	// flag flip + new value in a single query (MariaDB 10.5+)
 	var checked int
 	err = DB.QueryRow(`UPDATE guides SET checked = IF(checked = 1, 0, 1) WHERE ID = ? RETURNING checked`, guide.ID).Scan(&checked)
 	if err != nil {
@@ -190,8 +190,8 @@ func GetGuidesAdmin(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewGuide(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseMultipartForm(32 << 20); err != nil { // 32MB буфер в памяти
-		// на случай если клиент всё же шлёт urlencoded, а не multipart
+	if err := r.ParseMultipartForm(32 << 20); err != nil { // 32MB buffer in memory
+		// in case the client still sends urlencoded, not multipart
 		r.ParseForm()
 	}
 	user, ok := RequireDevice(w, r)
@@ -228,8 +228,8 @@ func NewGuide(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditGuideHandler(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseMultipartForm(32 << 20); err != nil { // 32MB буфер в памяти
-		// на случай если клиент всё же шлёт urlencoded, а не multipart
+	if err := r.ParseMultipartForm(32 << 20); err != nil { // 32MB buffer in memory
+		// in case the client still sends urlencoded, not multipart
 		r.ParseForm()
 	}
 	guidId, err := strconv.Atoi(r.URL.Query().Get("id"))

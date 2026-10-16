@@ -154,8 +154,8 @@ func EditGdpsPictures(gdpsId int64, img, ban string) error {
 	return nil
 }
 
-// ParseMultiField парсит r.Form[fieldName] (записи вида "lang\ttext") в JSON-словарь.
-// maxLen — лимит длины текста для конкретного поля (разный для description/short).
+// ParseMultiField parses r.Form[fieldName] (entries of the form "lang\ttext") into a JSON dictionary.
+// maxLen — text length limit for a specific field (different for description/short).
 func ParseMultiField(raw []string, maxLen int) (map[string]string, error) {
 	result := make(map[string]string)
 	for _, entry := range raw {
@@ -270,7 +270,7 @@ type GDPSfull struct {
 	Wiki     int         `json:"wiki"`
 }
 
-// пишем такие костыли ради совместимости с 50+ проектами у которых ссылка ещё осталась в формате простой строки
+// we write such crutches for compatibility with 50+ projects that still have the link in plain string format
 func ParseGdpsLinks(raw string) interface{} {
 	raw = strings.ReplaceAll(raw, `\"`, `"`)
 	if strings.HasPrefix(raw, "{") {

@@ -31,8 +31,6 @@ func vacApply(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, applyID)
 }
 
-// FIXME: сделать "дешборд совместимым" АКА добавить логику для работы
-// авторов проектов (чтобы они могли удалять отклики на своих вакансиях)
 func vacUnapply(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	user, ok := RequireDevice(w, r)
@@ -44,7 +42,7 @@ func vacUnapply(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid apply ID", http.StatusBadRequest)
 		return
 	}
-	// сначала пробуем удалить как свой собственный отклик
+	// first try to remove as your own apply
 	err = RemoveVacancyApply(applyID, user.UserId)
 	if err == nil {
 		fmt.Fprint(w, "1")
@@ -54,7 +52,7 @@ func vacUnapply(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to remove vacancy apply", http.StatusInternalServerError)
 		return
 	}
-	// не свой отклик - проверяем права владельца через vacId->gdpsId
+	// not your own apply - check owner rights via vacId->gdpsId
 	realGdpsId, err := GetGdpsIdByApplyId(applyID)
 	if err != nil {
 		http.Error(w, "Apply not found", http.StatusNotFound)

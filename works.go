@@ -84,7 +84,7 @@ func WORKfetchByUserId(userId int) ([]WorksRow, error) {
 }
 
 func AddWork(userId int, title, text, tags string, mask, linkType int, gdps string) (int, error) {
-	// пока что создам работы без тегов, я не хочу мучать клиент ещё большими костылями
+	// for now I'll create works without tags, I don't want to torture the client with even more crutches
 	tags = "[]"
 	mask = 0
 	result, err := DB.Exec(

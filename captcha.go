@@ -11,10 +11,10 @@ import (
 	altcha "github.com/altcha-org/altcha-lib-go"
 )
 
-// AltchaSecret — глобальный секрет для ALTCHA, как и DB/GeoDb/RamDB
+// AltchaSecret — global secret for ALTCHA, like DB/GeoDb/RamDB
 var AltchaSecret string
 
-// InitAltcha — вызывается из main() рядом с InitDB()/InitGeoDb()/InitRedis()
+// InitAltcha — called from main() next to InitDB()/InitGeoDb()/InitRedis()
 func InitAltcha() {
 	AltchaSecret = os.Getenv("ALTCHA_SECRET")
 	if AltchaSecret == "" {

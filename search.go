@@ -1,13 +1,13 @@
 package main
 
 /*
- * GDPS Helper Finder (расширенный)
+ * GDPS Helper Finder (extended)
  * Author: DenisC
- * Contributor: MIOBOMB (расширение поиска до логики деления на каналы и openGo порт
- *              (да, логика битмаски тоже за авторством DenisC)
+ * Contributor: MIOBOMB (extension of search to channel-splitting logic and openGo port
+ *              (yes, the bitmask logic is also by DenisC)
  *
- * Старый добрый костыльный, но очень надёжный поиск почти прямиком из GDPS Helper 1.7
- * Его судьба в openGo не самая завидная - ради удобства и гибкости мне пришлось нарушить DRY
+ * The good old crutchy but very reliable search almost straight from GDPS Helper 1.7
+ * Its fate in openGo is not the most enviable - for the sake of convenience and flexibility I had to violate DRY
  */
 
 import (
@@ -34,9 +34,9 @@ func mergeAndSortTags(tags, oss []int) []int {
 	return unique
 }
 
-// createBitmask создает битовую маску из ID тегов
-// если вы как и я не знаете почему оно работает -
-// я вас понимаю
+// createBitmask creates a bitmask from tag IDs
+// if you, like me, don't know why it works -
+// I understand you
 func createBitmask(tagIDs []int) int {
 	mask := 0
 	for _, tagID := range tagIDs {
@@ -62,12 +62,12 @@ func NewGdpsFinder(method, typeFilter, page int, tags, oss []int, name string, l
 	if lgbtBan != 0 {
 		queryBuilder.WriteString(" AND g.hasLgbt = 0")
 	}
-	// Фильтр по названию
+	// Filter by name
 	if name != "" {
 		queryBuilder.WriteString(" AND LOWER(g.title) LIKE LOWER(?)")
 		args = append(args, "%"+name+"%")
 	}
-	// Фильтр по тегам ЧЕРЕЗ БИТМАСКУ
+	// Filter by tags VIA BITMASK
 	if len(tags) > 0 || len(oss) > 0 {
 		mergedTags := mergeAndSortTags(tags, oss)
 		bitmask := createBitmask(mergedTags)
@@ -112,12 +112,12 @@ func NewWikiFinder(method, typeFilter, page int, tags, oss []int, name string, l
 	if lgbtBan != 0 {
 		queryBuilder.WriteString(" AND g.hasLgbt = 0")
 	}
-	// Фильтр по названию
+	// Filter by name
 	if name != "" {
 		queryBuilder.WriteString(" AND LOWER(g.title) LIKE LOWER(?)")
 		args = append(args, "%"+name+"%")
 	}
-	// FIXME: либо добавить методы в вики поиск, либо удалить их отсюда
+	// FIXME: either add methods to wiki search, or remove them from here
 	switch method {
 	case 0:
 		queryBuilder.WriteString(" ORDER BY g.ID DESC")
@@ -149,12 +149,12 @@ func NewGuidFinder(wikiId, method, typeFilter, page int, tags, oss []int, name s
 		WHERE g.checked = 1 AND wikiChannel = ?
 	`)
 	args = append(args, wikiId)
-	// Фильтр по названию
+	// Filter by name
 	if name != "" {
 		queryBuilder.WriteString(" AND LOWER(g.title) LIKE LOWER(?)")
 		args = append(args, "%"+name+"%")
 	}
-	// Фильтр по тегам через битовую маску
+	// Filter by tags via bitmask
 	if len(tags) > 0 || len(oss) > 0 {
 		mergedTags := mergeAndSortTags(tags, oss)
 		bitmask := createBitmask(mergedTags)
@@ -163,7 +163,7 @@ func NewGuidFinder(wikiId, method, typeFilter, page int, tags, oss []int, name s
 			args = append(args, bitmask, bitmask)
 		}
 	}
-	// Сортировка
+	// Sorting
 	switch method {
 	case 0:
 		queryBuilder.WriteString(" ORDER BY g.ID DESC")
@@ -172,7 +172,7 @@ func NewGuidFinder(wikiId, method, typeFilter, page int, tags, oss []int, name s
 	case 2:
 		queryBuilder.WriteString(" ORDER BY g.disls")
 	}
-	// Пагинация: 9 элементов, 8 новых при следующей странице.
+	// Pagination: 9 elements, 8 new ones on the next page.
 	limit := 9
 	offset := 0
 	if page > 0 {
@@ -203,16 +203,16 @@ func NewVacsFinder(userID, method, typeFilter, page int, tags, oss []int, name s
 		WHERE g.checked = 1
 	`)
 	args = append(args, userID)
-	// Фильтр LGBT
+	// LGBT filter
 	if lgbtBan != 0 {
 		queryBuilder.WriteString(" AND g.hasLgbt = 0")
 	}
-	// Фильтр по названию
+	// Filter by name
 	if name != "" {
 		queryBuilder.WriteString(" AND LOWER(g.title) LIKE LOWER(?)")
 		args = append(args, "%"+name+"%")
 	}
-	// Фильтр по тегам через битовую маску
+	// Filter by tags via bitmask
 	if len(tags) > 0 || len(oss) > 0 {
 		mergedTags := mergeAndSortTags(tags, oss)
 		bitmask := createBitmask(mergedTags)
@@ -221,7 +221,7 @@ func NewVacsFinder(userID, method, typeFilter, page int, tags, oss []int, name s
 			args = append(args, bitmask, bitmask)
 		}
 	}
-	// Сортировка
+	// Sorting
 	switch method {
 	case 0:
 		queryBuilder.WriteString(" ORDER BY g.ID DESC")
@@ -230,7 +230,7 @@ func NewVacsFinder(userID, method, typeFilter, page int, tags, oss []int, name s
 	case 2:
 		queryBuilder.WriteString(" ORDER BY g.disls")
 	}
-	// Пагинация: 9 элементов, 8 новых при следующей странице.
+	// Pagination: 9 elements, 8 new ones on the next page.
 	limit := 9
 	offset := 0
 	if page > 0 {
@@ -253,7 +253,7 @@ func NewVacsFinder(userID, method, typeFilter, page int, tags, oss []int, name s
 func NewProjectsFinder(userId, method, channel, page int, tags, oss []int, name string, lgbtBan int) (interface{}, error) {
 	switch channel {
 	case -5:
-		// Вакансии
+		// Vacancies
 		return NewVacsFinder(
 			userId,
 			method,
@@ -265,7 +265,7 @@ func NewProjectsFinder(userId, method, channel, page int, tags, oss []int, name 
 			lgbtBan,
 		)
 	case -2:
-		// Гайды
+		// Guides
 		return NewGuidFinder(
 			userId,
 			method,
@@ -277,7 +277,7 @@ func NewProjectsFinder(userId, method, channel, page int, tags, oss []int, name 
 			lgbtBan,
 		)
 	case -1:
-		// Вики
+		// Wiki
 		return NewWikiFinder(
 			method,
 			channel,
@@ -288,7 +288,7 @@ func NewProjectsFinder(userId, method, channel, page int, tags, oss []int, name 
 			lgbtBan,
 		)
 	case 0, 1, 2, 3:
-		// Проекты конкретного канала
+		// Projects of a specific channel
 		return NewGdpsFinder(
 			method,
 			channel,
@@ -298,9 +298,9 @@ func NewProjectsFinder(userId, method, channel, page int, tags, oss []int, name 
 			name,
 			lgbtBan,
 		)
-	// меняем ошибку на поиск всех каналов потому что GDPS Helper + старые клиенты не слали канал
+	// change the error to search of all channels because GDPS Helper + old clients didn't send channel
 	default:
-		// Все проекты
+		// All projects
 		return NewGdpsFinder(
 			method,
 			-1,

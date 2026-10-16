@@ -27,7 +27,7 @@ func ExtractIP(r *http.Request) string {
 		return r.RemoteAddr
 	}
 	return host
-	// код ниже включать если вы используете nginx
+	// enable the code below if you use nginx
 	// return r.Header.Get("X-Real-Ip")
 }
 
@@ -114,7 +114,7 @@ func GetUserByToken(token string) (*User, error) {
 	return &user, nil
 }
 
-// функция чисто для удобства, чтобы не слать 2 запроса к бд
+// function purely for convenience, so as not to send 2 requests to the db
 func GetUserByTokenAndDevice(token string, staticFp string) (*User, error) {
 	var user User
 	query := `SELECT u.* FROM users u INNER JOIN devices d on d.userId = u.userId WHERE u.token = ? AND d.staticFp = ?`

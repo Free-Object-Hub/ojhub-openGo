@@ -1,8 +1,8 @@
 package main
 
 /*
- * Форум-модуль
- * Порт с PHP forum/create, forum/createPost, forum/getPost, forum/getPosts, send/forumPost
+ * Forum module
+ * Port from PHP forum/create, forum/createPost, forum/getPost, forum/getPosts, send/forumPost
  */
 
 import (
@@ -23,7 +23,7 @@ type ForumPost struct {
 	Username   string
 	UserId     int64
 	Title      string
-	Text       string // base64, как и в PHP-оригинале
+	Text       string // base64, as in the PHP original
 	Date       int64
 	Likes      int
 	Disls      int

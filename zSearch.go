@@ -48,8 +48,8 @@ func fullSearch(w http.ResponseWriter, r *http.Request) {
 	token := GetUserToken(r)
 	userId := 0
 
-	// Костыля для отдельных каналов
-	// В вакансиях честно передаём userId
+	// Crutches for separate channels
+	// In vacancies we honestly pass userId
 	if token != "" && channel == -5 {
 		user, err := GetUserByToken(token)
 		if err != nil {
@@ -59,7 +59,7 @@ func fullSearch(w http.ResponseWriter, r *http.Request) {
 		}
 		userId = user.UserId
 	}
-	// В гайдах у нас под userId идут вики айди
+	// In guides our userId is actually the wiki id
 	if channel == -2 {
 		userId, err = strconv.Atoi(query.Get("wikiId"))
 		if err != nil {

@@ -162,7 +162,7 @@ func VacsRemove(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("-2"))
 		return
 	}
-	gdpsId := vacancy.GdpsID // <-- то же самое, gdpsId из вакансии
+	gdpsId := vacancy.GdpsID // <-- same thing, gdpsId from the vacancy
 	access, err := CheckGdpsAccess(user.UserId, gdpsId)
 	if err != nil || (access == 0 && user.Priority == 0) {
 		w.Write([]byte("-2"))

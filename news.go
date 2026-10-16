@@ -25,7 +25,7 @@ type News struct {
 	Checked     int    `db:"checked"`
 	CommsCount  int    `db:"commsCount"`
 	HasFile     string `db:"hasFile"`
-	// legacy поля которые мне лень удалять
+	// legacy fields I'm too lazy to remove
 	Lusername string `db:"username,omitempty"`
 }
 
@@ -93,13 +93,13 @@ type NewsResp struct {
 	Text     string `json:"text"`
 	UserId   int    `json:"author"`
 	UserName string `json:"username"`
-	// гдпсайди строка потому что там буква канала перед ней идёт (c123, s234, p345, t456...)
+	// gdpsId is a string because there's a channel letter before it (c123, s234, p345, t456...)
 	GdpsId    string `json:"gdpsId"`
 	GdpsTitle string `json:"gdpsTitle"`
 	GdpsImg   string `json:"gdpsImg"`
 	Date      int    `json:"date"`
 	Likes     [3]int `json:"likes"`
-	// там не 0/1 а формат файла (png,jpg,webp...)
+	// there it's not 0/1 but the file format (png,jpg,webp...)
 	HasFile string `json:"hasFile"`
 }
 
@@ -155,7 +155,7 @@ func (p News) NewsRenderLegacy() []interface{} {
 		p.GdpsTitle,
 		p.Date,
 		[3]int{p.Likes, p.Disls, p.CommsCount},
-		0, // isLiked, мёртвое поле
+		0, // isLiked, dead field
 		p.HasFile,
 		p.GdpsImg,
 	}

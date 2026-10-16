@@ -163,7 +163,7 @@ func userRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/*TODO: почта
+	/*TODO: email
 	if err := SendUserVerifyMail(
 		user,
 		email,

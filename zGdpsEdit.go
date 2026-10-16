@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -19,6 +20,16 @@ func EditGdpsItem(
 	)
 	if err != nil {
 		return fmt.Errorf("failed to edit gdps: %w", err)
+	}
+	return nil
+}
+
+func firstFile(f *multipart.Form, key string) *multipart.FileHeader {
+	if f == nil {
+		return nil
+	}
+	if fs := f.File[key]; len(fs) > 0 {
+		return fs[0]
 	}
 	return nil
 }
@@ -56,8 +67,8 @@ func gdpsEditHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 		description = r.FormValue("description")
 	}
 
-	// GET-режим: title/description отсутствуют - отдаём текущие данные для формы
-	// description/short отдаются как есть (сырая строка) - фронт сам решает JSON это или legacy plain text
+	// GET mode: title/description are missing - return current data for the form
+	// description/short are returned as is (raw string) - the frontend decides itself whether it's JSON or legacy plain text
 	if title == "" || description == "" {
 		links := strings.ReplaceAll(gdps.Link, `\"`, `"`)
 		var linksOut any = links
@@ -83,7 +94,7 @@ func gdpsEditHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 	title = ExploitPatch(title)
 	language := ExploitPatch(r.FormValue("language"))
 
-	// --- description: новый multi-клиент (language пустой) либо legacy single ---
+	// --- description: new multi-client (empty language) or legacy single ---
 	var descriptionToStore string
 	rawDescs := r.Form["description"]
 
@@ -104,7 +115,7 @@ func gdpsEditHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 		descriptionToStore = descriptionSingle
 	}
 
-	// --- short: та же multi/single развилка, пустая строка если мапа пуста ---
+	// --- short: same multi/single fork, empty string if the map is empty ---
 	var shortToStore string
 	rawShorts := r.Form["short"]
 
@@ -124,21 +135,33 @@ func gdpsEditHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 		shortToStore = ExploitPatch(r.FormValue("short"))
 	}
 
-	var imgFile, banFile *multipart.FileHeader
-	var img, ban string
+	imgFile := firstFile(r.MultipartForm, "img")
+	banFile := firstFile(r.MultipartForm, "ban")
 
-	if files := r.MultipartForm.File["img"]; len(files) > 0 {
-		imgFile = files[0]
-		img = "FILE"
-	} else {
-		img = ExploitPatch(r.FormValue("img"))
+	// by default what's already in the DB stays
+	img, ban := gdps.Img, gdps.Ban
+	if imgFile == nil {
+		if v := ExploitPatch(r.FormValue("img")); v != "" {
+			img = v
+		}
+	}
+	if banFile == nil {
+		if v := ExploitPatch(r.FormValue("ban")); v != "" {
+			ban = v
+		}
 	}
 
-	if files := r.MultipartForm.File["ban"]; len(files) > 0 {
-		banFile = files[0]
-		ban = "FILE"
-	} else {
-		ban = ExploitPatch(r.FormValue("ban"))
+	if imgFile != nil {
+		if err := CheckImage(imgFile); err != nil {
+			ApiError(w, 400, "Bad image", "-3")
+			return
+		}
+	}
+	if banFile != nil {
+		if err := CheckImage(banFile); err != nil {
+			ApiError(w, 400, "Bad image", "-3")
+			return
+		}
 	}
 
 	links := r.Form["links[]"]
@@ -168,34 +191,25 @@ func gdpsEditHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 		return
 	}
 
-	// editCount берётся ДО инкремента (как в php - $gdps->editCount, старое значение)
+	imgsDir := getEnv("IMGS", "./imgs/")
+	// editCount is taken BEFORE the increment (as in php)
 	if imgFile != nil {
-		ext := GetFileExt(imgFile)
-		imgPath := fmt.Sprintf("%scustomuser/i%d-%d.%s", getEnv("IMGS", "./imgs/"), gdpsId, gdps.EditCount, ext)
-		if err := SaveFile(imgFile, imgPath); err != nil {
+		p := fmt.Sprintf("%scustomuser/i%d-%d.webp", imgsDir, gdpsId, gdps.EditCount)
+		if err := SaveAsWebp(imgFile, p, 256, 256); err != nil {
+			log.Println("img:", err)
 			ApiError(w, 500, "File error", "-3")
 			return
 		}
-		webpPath := fmt.Sprintf("%scustomuser/i%d-%d.webp", getEnv("IMGS", "./imgs/"), gdpsId, gdps.EditCount)
-		if err := ConvertToWebp(imgPath, webpPath, 256, 256); err != nil {
-			fmt.Printf("webp conversion failed: %v\n", err)
-		} else {
-			img = fmt.Sprintf("%simgs/customuser/i%d-%d.webp", HELPER_URL, gdpsId, gdps.EditCount)
-		}
+		img = fmt.Sprintf("%simgs/customuser/i%d-%d.webp", HELPER_URL, gdpsId, gdps.EditCount)
 	}
 	if banFile != nil {
-		ext := GetFileExt(banFile)
-		banPath := fmt.Sprintf("%scustomuser/b%d-%d.%s", getEnv("IMGS", "./imgs/"), gdpsId, gdps.EditCount, ext)
-		if err := SaveFile(banFile, banPath); err != nil {
+		p := fmt.Sprintf("%scustomuser/b%d-%d.webp", imgsDir, gdpsId, gdps.EditCount)
+		if err := SaveAsWebp(banFile, p, 720, 300); err != nil {
+			log.Println("ban:", err)
 			ApiError(w, 500, "File error", "-3")
 			return
 		}
-		webpPath := fmt.Sprintf("%scustomuser/b%d-%d.webp", getEnv("IMGS", "./imgs/"), gdpsId, gdps.EditCount)
-		if err := ConvertToWebp(banPath, webpPath, 720, 300); err != nil {
-			fmt.Printf("webp conversion failed: %v\n", err)
-		} else {
-			ban = fmt.Sprintf("%simgs/customuser/b%d-%d.webp", HELPER_URL, gdpsId, gdps.EditCount)
-		}
+		ban = fmt.Sprintf("%simgs/customuser/b%d-%d.webp", HELPER_URL, gdpsId, gdps.EditCount)
 	}
 
 	if err := EditGdpsPictures(int64(gdpsId), img, ban); err != nil {

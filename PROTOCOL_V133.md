@@ -1,459 +1,157 @@
 # Object Hub Protocol V133 R3
   
-ВНИМАНИЕ!!! ЭТОТ ДОКУМЕНТ НЕ ДОПИСАН, НЕ УДИВЛЯЙТЕСЬ БИТЫМ ССЫЛКАМ  
-Версия 133 протокола Object hub, новые ревизии обратно совместимы для целевых клиентов  
-Первая версия клиента на этом протоколе - 0.97.4  
-Это будет не описание работы бекенда, а описание ПРОТОКОЛА, точно также как и X11 протокол, не знающий что такое видеокарта  
+WARNING!!! THIS DOCUMENT IS NOT FINISHED, DON'T BE SURPRISED BY BROKEN LINKS  
+Version 133 of Object Hub protocol, new revisions are backward compatible for target clients  
+First client version on this protocol - 0.97.4  
+This will not be a description of backend operation, but a description of the PROTOCOL, just like X11 protocol, which doesn't know what a video card is  
   
-Здесь также может быть подробное описание расхождений протокола с проектом Object Hub openGo  
+Here also may be detailed description of protocol divergences from Object Hub openGo project  
   
-# Содержание  
+# Contents  
 
-- Ревизии
+- Revisions
 - - R0
 - - R1
 - - R2
 - - R3
-- Философия
-- История
-- - Исторически-выросшие-проблемы
-- Функциональные-домены
-- Мета-домены
-- - Авторизация
-- - Init-эндпоинт
-- - Лайки
-- - Комментарии
+- Philosophy
+- History
+- - Historically-grown problems
+- Functional domains
+- Meta domains
+- - Authorization
+- - Init endpoint
+- - Likes
+- - Comments
   
 
-# Ревизии
+# Revisions
   
-Ревизия - обратно совместимое расширение протокола  
-Ревизии обозначаются как R<N>  
+A revision is a backward-compatible extension of the protocol  
+Revisions are designated as R<N>  
   
-Добавление нового функционала в бекенд неминуемо ведёт к увеличению номера ревизии  
-Если обратная совместимость хоть в какой то части протокола нарушается при создании новой ревизии - это уже новая версия, а не ревизия  
+Adding new functionality to the backend inevitably leads to an increase in the revision number  
+If backward compatibility is violated in any part of the protocol when creating a new revision - this is already a new version, not a revision  
   
 ## R0
-Каноничная ревизия версии 133, вышедшая вместе с Object Hub 0.97.4 NODE\_BETA1  
+Canonical revision of version 133, released together with Object Hub 0.97.4 NODE\_BETA1  
   
 ## R1
-Выпущена с релизом 0.97.4 NODE\_BETA3  
-Расширения:  
-- Поддержка отправки user&device токенов через body, рядом с headers. Добавлено с целью сохранить совместимость с 132й версией протокола  
-- эндпоинт likesT.php - hashset отдающий вообще все все записи статусов лайка пользователя, используется для сверки установки лайка на клиенте (версия 133 первоначально не должна была сверять лайки на сервере, но добавить клиентский кеш я забыл и пришлось расширять ревизию)  
+Released with release 0.97.4 NODE\_BETA3  
+Extensions:  
+- Support for sending user&device tokens via body, next to headers. Added to preserve compatibility with 132nd version of protocol  
+- likesT.php endpoint - hashset returning all all records of user's like status, used to verify like placement on client (version 133 initially was not supposed to verify likes on server, but I forgot to add client cache and had to extend revision)  
   
 ## R2
-Выпущена с релизом Object Hub 0.98  
-Расширения:  
-- Подписки на проекты  
-- Многие эндпоинты получили коды ошибок, они все ещё не имеют чёткой записи в протоколе  
+Released with Object Hub 0.98 release  
+Extensions:  
+- Subscriptions to projects  
+- Many endpoints received error codes, they still do not have clear recording in protocol  
   
 ## R3
-Будет завершена с релизом Object Hub 0.99, её временный вариант доступен уже с Object Hub 0.98.2  
-Расширения:  
-- Вся инфраструктура портфолио  
-Изменения:  
-- Поле resume в профиле станет по умолчанию пустым т.к. с 0.99 не рендерится, вместо этого оно будет по умолчанию в портфолио  
-- - Обратите внимание что поле именно будет пустым, а не удалится. Сделано это с целью формального сохранения совместимости с старыми клиентами
+Will be completed with Object Hub 0.99 release, its temporary variant is available already with Object Hub 0.98.2  
+Extensions:  
+- Entire portfolio infrastructure  
+Changes:  
+- Field resume in profile will become empty by default because since 0.99 it is not rendered, instead it will be by default in portfolio  
+- - Note that the field will be empty, and not deleted. This is done to formally preserve compatibility with old clients
 
-# Философия
-В истории Object Hub/GDPS Helper клиент и сервер развивались параллельно и очень согласованно, с целью максимально минимизировать трафик, количество API запросов, количество байт в ответе, ну и в конце концов ваш сервер  
-По этой причине весь протокол будет выглядеть очень дурно и странно, он был построен строго под требования официального клиента Object Hub, а не чтобы быть REST API  
-И цель существования протокола как таковая - оптимизировать ваш бекенд и сетевое потребление Object Hub API (да, я это озвучивал, повторение - мать учения)
-  
-
-# История
-Object Hub является форком GDPS Helper, у него были свои проблемы и особенности в протоколе  
-Самой первой версией Object Hub протокола был GDPS Helper 1.7 реализовавший протокол V64 (бывший тогда ещё очень нестабильным)  
-Протокол к версии GDPS Helper 1.8 частично устаканился - домены были выведены с концами, первая версия Legacy PHP бекенд была готова  
-После форка бета версии GDPS Helper 1.8 я в Object Hub начал ломать протокол "для красоты" и "для удобства", сломав некоторую часть агрессивных оптимизаций (не вообще всё, как по началу кажется)  
-Протокол относительно устаканился только к версии 104, все клиенты Object Hub с билда 104 (версия клиента 0.94) скорее всего будут работать без особых нареканий, или с минимальными mokey-patch'ами  
-Форк GDPS Helper Legacy PHP, переживший много object hub specific обновлений, стал основой Object Hub Protocol V133 R0  
-  
-## Исторически-выросшие-проблемы
-- Протокол недостаточно унифицирован
-- - Одни сущности отвечают объектами, другие массивами
-- Форматы ошибок разнятся от эндпоинта к эндпоинту, по этому у каждого эндпоинта будет своя таблица ошибок
-- - Правда много где ответ достаточно унифицирован - 200, `Access denied`
-- Вышеперечисленные проблемы не будут исправляться ради сохранения совместимости с устаревшими клиентами  
-- С V133R1 протокол взялся за сохранение совместимости с намного более старыми версиями, из-за этого на огромном количестве эндпоинтов стоит "свободный метод", потому что все клиенты Object Hub от 0.97.33 и старше то не слали токен и метод был GET, то слали токен в body и метод становился POST
+# Philosophy
+In the history of Object Hub/GDPS Helper, client and server developed in parallel and very coordinated, with the goal of maximally minimizing traffic, number of API requests, number of bytes in response, and ultimately your server  
+For this reason the entire protocol will look very bad and strange, it was built strictly for requirements of official Object Hub client, and not to be a REST API  
+And the goal of the protocol's existence as such - to optimize your backend and network consumption of Object Hub API (yes, I voiced this, repetition is mother of learning)
   
 
-# Функциональные-домены  
-## Мета-домены
-- Авторизация
-- Init-эндпоинт
-- Лайки
-- Комментарии
-- Поиск
-## Пользователи
-- Портфолио
-- Девайсы
-- Уведомления + Пуши
-## Проекты
-- Новости
-- Вакансии
-- Подписки (напрямую дёргают Пуш-уведы)
-- Со-владельцы
-## Вики
-- Форумы
-- Со-владельцы
-- Теги (надо переименовать в адреса) статей
-- Статьи
-- Комикс-ридер
-- Шаблоны
+# History
+Object Hub is a fork of GDPS Helper, it had its own problems and peculiarities in protocol  
+The very first version of Object Hub protocol was GDPS Helper 1.7 implementing protocol V64 (which was then still very unstable)  
+Protocol partially settled by GDPS Helper 1.8 - domains were brought out completely, first version of Legacy PHP backend was ready  
+After forking beta version of GDPS Helper 1.8 I in Object Hub started breaking protocol "for beauty" and "for convenience", breaking some part of aggressive optimizations (not everything, as it seems at first)  
+Protocol relatively settled only by version 104, all Object Hub clients from build 104 (client version 0.94) will most likely work without particular complaints, or with minimal mokey-patches  
+Fork of GDPS Helper Legacy PHP, having survived many object hub specific updates, became basis of Object Hub Protocol V133 R0  
   
-## Объясняю кринжатину:  
-- Системы со-владельцев у ГДПСов и Вики в будущем будут разные, поэтому это не мета-домен
-- Загрузчик это тупо загрузчик, он не должен быть доменом потому что он не является "бизнес логикой", также он не привязан к конкретной ревизии и может внутренне спокойно измениться как мне надо, хотя и смысла я в этом особо сейчас не вижу
+## Historically-grown problems
+- Protocol is insufficiently unified
+- - Some entities respond with objects, others with arrays
+- Error formats differ from endpoint to endpoint, therefore each endpoint will have its own error table
+- - Though in many places response is sufficiently unified - 200, `Access denied`
+- The above problems will not be fixed for sake of preserving compatibility with legacy clients  
+- Starting with V133R1 protocol took up preserving compatibility with much older versions, because of this on a huge number of endpoints there is a "free method", because all Object Hub clients from 0.97.33 and older either didn't send token and method was GET, or sent token in body and method became POST
+  
 
-# Мета-домены
+# Functional domains  
+## Meta domains
+- Authorization
+- Init endpoint
+- Likes
+- Comments
+- Search
+## Users
+- Portfolio
+- Devices
+- Notifications + Pushes
+## Projects
+- News
+- Vacancies
+- Subscriptions (directly trigger Push notifications)
+- Co-owners
+## Wiki
+- Forums
+- Co-owners
+- Tags (need to rename to addresses) of articles
+- Articles
+- Comic reader
+- Templates
   
-Это сущности, которые насквозь просачивают все домены и прочие сущности Object Hub протокола. Все ещё является самым спорным функциональным доменом  
-  
-Лайки, комментарии, и поиск являются доменами которые по полю определяющему тип реализуют свои внутренности (лайки ставят лайк, поиск ищет проекты а не всё подряд, комментарий ставится под новость а не непонятно куда)  
+## Explaining the cringe:  
+- Co-owner systems of GDPSs and Wiki will be different in future, therefore this is not a meta domain
+- The loader is just a loader, it should not be a domain because it is not "business logic", also it is not tied to a specific revision and can internally change as I need, although I don't see much sense in this right now
 
-## Авторизация
-Вообще это даже не домен, но очень важная часть функционала половины эндпоинтов API  
-Авторизация проверяет права пользователя на ту или иную сущность и иные условия выполнения, и если проверка провалилась выдаёт ошибку (обычно ответ "Access denied" без дополнительных заголовков)  
-Авторизация делится на 4 способа:
-0. Публичные данные
-  Здесь никаких проверок прав нет, эти данные доступны даже боту-сканеру который зачем то решил просканировать порт 443 по адресу `/server/133/search/new.php` вашего сервера  
-1. Данные пользователя
-  Этот способ авторизации обычно проверяет только корректность токена пользователя, встречается на Read эндпоинтах с приватными данными  
-  Например - список устройств, локальная база данных лайков  
-2. Обновление приватных данных
-  Этот способ авторизации сверяет токен пользователя и токен устройства, игнорируя статус активации аккаунта, встречается на всех приватных Write эндпоинах  
-  Например - Удаление устройства, смена пароля на аккаунте  
-3. Обновление публичных данных
-  Этот способ авторизации сверяет токен пользователя и токен устройства, проверяя равен ли статус активации аккаунта не нулю, встречается на всех публичных Write эндпоинах  
-  Например - установка лайка, отправка комментария, добавление проекта  
-Существование способа 1 обосновано оптимизацией нагрузки на базу данных
+# Meta domains
   
-### Способы отправлять токены
-MUST: проверка прав использует токены отправленные разными способами одинаково  
-SHOULD: сначала проверяются токены из headers  
+These are entities that leak through all domains and other entities of Object Hub protocol. Still is the most controversial functional domain  
+  
+Likes, comments, and search are domains that by the field determining type implement their internals (likes place a like, search searches projects and not everything, comment is placed under news and not somewhere unclear)  
+
+## Authorization
+Actually this is not even a domain, but a very important part of functionality of half of API endpoints  
+Authorization checks user rights to a particular entity and other execution conditions, and if check fails issues an error (usually response "Access denied" without additional headers)  
+Authorization is divided into 4 methods:
+0. Public data
+  Here there are no rights checks, this data is available even to a bot-scanner that for some reason decided to scan port 443 at address `/server/133/search/new.php` of your server  
+1. User data
+  This authorization method usually checks only correctness of user token, occurs on Read endpoints with private data  
+  For example - list of devices, local database of likes  
+2. Updating private data
+  This authorization method verifies user token and device token, ignoring account activation status, occurs on all private Write endpoints  
+  For example - Deleting device, changing password on account  
+3. Updating public data
+  This authorization method verifies user token and device token, checking whether account activation status is not zero, occurs on all public Write endpoints  
+  For example - placing like, sending comment, adding project  
+Existence of method 1 is justified by optimizing database load
+  
+### Ways to send tokens
+MUST: rights check uses tokens sent by different ways identically  
+SHOULD: first tokens from headers are checked  
   
 1. headers  
-  Токен пользователя летит в `user-token` заголовке, токен устройства в `device-static` заголовке  
+  User token goes in `user-token` header, device token in `device-static` header  
 2. body  
-  Токен пользователя летит полем `token` в теле запроса, токен устройства летит полем `device` в теле запроса  
+  User token goes in `token` field in request body, device token goes in `device` field in request body  
 
-## Init-эндпоинт
-Эндпоинт отвечающий за инициализацию официального Object Hub клиента, обычно содержит кеш приватных данных и немного публичных  
-Исторически является ответом не только для `loginT.php`, но и для многих других эндпоинтов, и порой с странной семантикой  
+## Init endpoint
+Endpoint responsible for initialization of official Object Hub client, usually contains cache of private data and a bit of public  
+Historically is response not only for `loginT.php`, but also for many other endpoints, and sometimes with strange semantics  
   
-Способ авторизации - 2. Здесь используется именно этот способ авторизации для блокировки аккаунта на клиенте при обычных обстоятельствах, см. типы ошибок  
-Метод - свободный  
-Параметры отсутствуют  
+Authorization method - 2. Here exactly this authorization method is used to block account on client under ordinary circumstances, see error types  
+Method - free  
+Parameters absent  
   
 MUST:  
-- Игнорировать проверку устройств и отдвать токен пользователя в поле token внутри Текущий\_пользователь при использовании Init функции на регистрации и логине  
-- Не трогать публичную часть ответа несмотря на все ошибки авторизаций  
+- Ignore device check and return user token in field token inside Current_user when using Init function on registration and login  
+- Not touch public part of response despite all authorization errors  
 SHOULD:  
-- При использовании кеша разделять публичные и приватные данные на 2 разных кеша, чтобы не отдавать другому пользователю чужие данные  
-- При использовании в ответе гостевого пользователя не кешировать его а хранить прямо в кеше вашего бекенда  
+- When using cache, separate public and private data into 2 different caches, so as not to give another user someone else's data  
+- When using guest user in response, not cache it but store directly in your backend cache  
   
-Формат ответа:
-```
-[
-  // начало приватного кеша
-  Текущий_пользователь,
-  [
-    Проекты_которыми_владеет_пользователь{},
-    Вики_которыми_владеет_пользователь{}
-  ],
-  // конец приватного кеша, начало публичного кеша
-  Кеш_проектов_для_главной_страницы{},
-  Кеш_новостей_для_главной_страницы[],
-  // конец публичного кеша
-]
-```
-Обратите внимание, где объект там ответ летит в виде объекта с ключами:  
-```
-[
-  // приватная часть ответа
-  Пользователь,
-  [
-    {
-      "c1":Project,
-      "p3":Project,
-      "t4":Project
-    },
-    {
-      "w1":Wiki,
-      "w2":Wiki,
-      "w3":Wiki
-    }
-  ],
-  // публичная часть ответа
-  {
-    "c1":Project,
-    "s2":Project
-  },
-  [
-    News,
-    News
-  ]
-]
-```
-Чтобы понять что какие буквы в ответе что означают обратитесь к разделу "Проекты"  
-  
-Формат ошибок - обычно если на стороне сервера произошла ошибка при авторизации пользователя (например просроченный device-токен) то пользователю возвращается "гостевой пользователь", когда вместо текущего пользователя отправляется обычная заглушка, где в поле token буквально лежит строка "false" (не bool!), массив пользовательских проектов и вики при этом будет пустым - [{},{}]  
-Если в целом нет никаких токенов (пользователь без аккаунта) то у гостевого пользователя не будет поля token в ответе как такового  
-Типы деградаций:  
-1. Просроченные токены - 200, гостевой пользователь + token:"false"  
-2. Токены отсутствуют - 200, гостевой пользователь + token отсутствует  
-3. Не удалось определить город и страну по IP адресу - деградация поля cityData, поле станет ["Unknown","Unknown"]  
-
-## Лайки
-Домен отвечающий за проверку лайков на конкретном элементе сущности  
-MUST: не допускать повторной отправки лайков  
-SHOULD NOT: считать число лайков сканом таблицы статусов при любом действии (будь то простое открытие проектов)  
-  
-## Object Hub Типы лайков
-- Является отдельным Enum-подобным пространством  
-0 = Проекты  
-1 = Комментарии к проектам  
-2 = Новости  
-3 = Мёртвое поле, ранее были GDPS Helper текстурпаки до их удаления в GDPS Helper 1.9  
-4 = Мёртвое поле, ранее были комментариями к GDPS Helper текстурпаки до их удаления в GDPS Helper 1.9  
-5 = Комментарии к новостям  
-6 = Комментарии к вики статьям  
-7 = Вики статьи  
-8 = Вики  
-9 = Форум посты  
-10 = Комментарии к постам в форуме  
-11 = Вакансии  
-12 = Комментарии к вакансиям  
-  
-## Откат лайков
-Каждый объект сущности сам хранит свой список лайков и дизлайков раздельно, хранение статуса установки лайка лежит в hashmap/таблице с индексами  
-Если есть запись о установленном лайке и идёт попытка установить новую оценку, то число оценок изменится в обратном порядке исходя из уже существующей записи в hashmap, потом запись из таблицы статуса лайка будет удалена  
-  
-## Эндпоинты
-  
-### /server/133/send/like.php
-Увеличивает счётчик лайков вверх  
-  
-Способ авторизации - 3  
-Метод - свободный  
-Параметры (неважно body или query):  
-- ide = Айди сущности  
-- type = Тип сущности (на примере object hub type=0 это проект, а type=1 это комментарии к проектам)  
-  
-Формат ответа:  
-```
-[
-  Количество лайков,
-  Количество дизлайков
-]
-```  
-Типы ошибок openGo, не являются каноничным протоколом:  
-1. Любой из токенов невалидный - 200, `Access denied`  
-2. Неверный ide - 500, `invalid id`  
-3. Неверный type - 500, `invalid type`  
-4. type нет в таблице зарегистрированных каналов - 500, `Unknown like type`  
-  
-### /server/133/send/dislike.php
-Увеличивает счётчик дизлайков вверх  
-  
-Способ авторизации - 3  
-Метод - свободный  
-Параметры (неважно body или query):  
-- ide = Айди сущности  
-- type = Тип сущности (на примере object hub type=0 это проект, а type=1 это комментарии к проектам)  
-  
-Формат ответа:  
-```
-[
-  Количество лайков,
-  Количество дизлайков
-]
-```  
-Типы ошибок openGo, не являются каноничным протоколом:  
-1. Любой из токенов невалидный - 200, `Access denied`  
-2. Неверный ide - 500, `invalid id`  
-3. Неверный type - 500, `invalid type`  
-4. type нет в таблице зарегистрированных каналов - 500, `Unknown like type`  
-  
-### /server/133/likesT.php
-Является hashset кешем для покраски кнопок лайков на object Hub клиенте  
-Стал отдельным от loginT.php эндпоинтом ради балансирования на TCP Handshake'ах  
-  
-Способ авторизации - 1, по факту openGo реализует 2  
-Метод - свободный  
-Параметры отсутствуют  
-  
-Формат ответа:  
-```
-{
-  "p": проекты,
-  "c": комментарии,
-  "n": новости,
-  "g": "гайды" - статьи к вики,
-  "w": вики,
-  "f": посты в форумах,
-  "v": вакансии,
-  "subs": подписки на проекты, эксплуатирующие инфраструктуру лайков чисто из-за схожести механими хранения, появились в Revision 2
-}
-```
-Типы ошибок:  
-1. Любой из токенов невалидный - 200, `Access denied`  
-2. Аккаунта не существует - 200, `Access denied`  
-  
-
-## Комментарии
-Сквозной домен, который отвечает за хранение и работу с комментариями
-  
-### Сущность "Комментарий"  
-```
-[
-  ID,
-  Ник_автора,
-  Текст,
-  UserID_автора,
-  Роль_автора,
-  [
-    Количество_лайков,
-    Количество_дизлайков
-  ],
-  Дата_в_unix,
-  0 (мёртвое поле, ранее являлось флагом "тут у пользователя стоит лайк", это поведение осталось в Legacy PHP)
-]
-```  
-  
-### "Стандартный геттер комментариев"
-Это внутренний метод (или функция) вашего бекенда, которая должна строго следовать этому формату позиционных аргументов:  
-`Function(Канал, Айди, Страница)` (в Legacy PHP третьим аргументом идёт userId, а уже четвёртым Page)  
-  
-Данная функция обязана вернуть список комментариев из 11 элементов если это возможно. Смещение работает так: ` OFFSET = page * 10`  
-Связано это с тем что клиент проверяет наличие 11-ого элемента и потом если он есть сбрасывает рендер и вставляет кнопку "показать больше", фактически это означает что для экономии трафика вы можете не отдавать полноценный 11й комментарий, а просто воткнуть туда 0 (если вы выбрали отвечать массивом)  
-Форматы ответа, которые допустимы для клиента:  
-```
-[
-  Комментарий,
-  Комментарий,
-  ...
-]
-```
-```
-{
-  "c<ID>": Комментарий,
-  "c<ID>": Комментарий,
-  ...
-}
-```
-В пустом результате отдаётся `[]` или `{}`, для клиента это никакой разницы не играет  
-  
-### Object Hub Каналы комментариев
-- Является отдельным Enum-подобным пространством  
-0 = Проекты, канал лайков = 1  
-1 = Мёртвое поле, ранее были GDPS Helper текстурпаки до их удаления в GDPS Helper 1.9, канал лайков = 4  
-2 = "гайды" - вики статьи, канал лайков = 6  
-3 = новости, канал лайков = 5  
-4 = форум посты, канал лайков = 10  
-5 = вакансии, канал лайков = 12  
-  
-### /server/133/send/comment.php  
-Отправляет комментарий под сущность и возвращает актуальный список комментариев первой страницы этой сущности  
-  
-Способ авторизации - 3  
-Метод - свободный  
-Параметры (неважно body или query):  
-- ide = Айди сущности, под которой ставится комментарий  
-- type = Канал комментария  
-- text = Текст комментария  
-  
-MUST:  
-- Санитайзить text на стороне сервера до проверки длины  
-- Не создавать комментарий, если санитайзенный text короче 10 БАЙТ (UTF-8), а не символов. Кириллица занимает 2 байта на символ  
-- Приводить невалидный type (не число) к каналу 0  
-- Приводить type=1 (мёртвый канал) к каналу 0  
-- Возвращать список комментариев со статусом 200 даже если комментарий не был создан из-за ограничения частоты. Клиент не узнаёт что комментарий был отброшен  
-SHOULD:  
-- Ограничивать частоту отправки комментариев на пользователя. openGo: 1 комментарий в 5 минут, Legacy PHP: 1 комментарий в 10 минут 
-- Не завязываться на конкретный список каналов: неизвестный канал не является ошибкой, комментарий уйдёт в канал 0, чтобы новый канал нельзя было "забыть зарегистрировать" и получить ошибку  
-  
-Формат ответа:  
-Стандартный геттер комментариев  
-  
-Типы ошибок:  
-1. Любой из токенов невалидный либо аккаунт не активирован - 200, `Access denied`  
-2. Неверный ide (не число или 0) - 400, `Invalid id` (относится только к openGo)  
-3. Текст короче 10 байт после санитайзинга - 200, `-4`  
-4. Внутренняя ошибка записи или чтения комментариев - 500, текст ошибки (относится только к openGo)  
-  
-### /server/133/content/fetchComms.php  
-Возвращает страницу комментариев под сущностью. Используется клиентом для подгрузки следующих страниц  
-  
-Способ авторизации - 0  
-Метод - GET  
-Параметры (query):  
-- type = Канал комментария  
-- id = Айди сущности, под которой лежат комментарии  
-- page = Номер страницы, отсчёт с 0  
-  
-MUST:  
-- Приводить невалидные (не числовые или отсутствующие) type, id и page к 0  
-  
-Формат ответа:  
-Стандартный геттер комментариев  
-  
-Типы ошибок openGo, не являются каноничным протоколом:  
-1. Внутренняя ошибка чтения комментариев - 500, `Failed to get comments: <текст ошибки>`  
-2. Внутренняя ошибка сериализации ответа - 500, `Failed to encode comments: <текст ошибки>`  
-  
-### /server/133/send/commentModify.php  
-Изменяет текст существующего комментария и возвращает новый текст  
-  
-Способ авторизации - 3  
-Метод - свободный  
-Параметры (неважно body или query):  
-- id = Айди самого комментария (не сущности, под которой он лежит)  
-- text = Новый текст комментария  
-  
-MUST:  
-- Разрешать изменять комментарий только его автору или модератору (пользователю с ненулевым priority). Модератор может изменять любые комментарии  
-- Санитайзить text на стороне сервера перед сохранением  
-- НЕ обновлять Дата\_в\_unix комментария при изменении  
-- Отвечать сырым text из запроса со статусом 200 при успехе. Клиент показывает этот ответ вместо старого текста  
-  
-Формат ответа:  
-```
-Новый текст комментария, обычная строка
-```
-Типы ошибок:  
-1. Любой из токенов невалидный - 200, `Access denied`  
-2. Неверный id (не число) - 400, `Invalid id` (относится только к openGo)  
-3. Аккаунт не активирован - 200, пустой ответ  
-4. Текст короче 10 байт до санитайзинга - 200, `-4`  
-5. Комментарий принадлежит другому пользователю (и пользователь не модератор) либо не существует - 200, `-3`  
-6. Внутренняя ошибка чтения или записи комментария - 500, текст ошибки (относится только к openGo)  
-  
-### /server/133/delete/comment.php  
-Удаляет комментарий вместе с его лайками и возвращает айди удалённого комментария  
-  
-Способ авторизации - 3  
-Метод - свободный для токенов, но ide MUST передаваться в query  
-Параметры:  
-- ide (query) = Айди самого комментария (не сущности, под которой он лежит)  
-- type (query) = Канал комментария. Клиент его шлёт, но openGo игнорирует, канал берётся из самого комментария  
-  
-MUST:  
-- Разрешать удалять комментарий только его автору или модератору (пользователю с ненулевым priority). Модератор может удалять любые комментарии  
-- Вместе с комментарием удалять записи о лайках/дизлайках на этот комментарий
-SHOULD:  
-- Определять канал по самому комментарию, а не по параметру type: клиент может прислать неверный type и удалить лайки не из того пространства  
-  
-Формат ответа:  
-```
-Айди удалённого комментария, обычная строка
-```
-  
-Типы ошибок:  
-1. Любой из токенов невалидный - 200, `Access denied`  
-2. Комментарий принадлежит другому пользователю (и пользователь не модератор) - 200, `-1`  
-3. Неверный ide (не число) - 400, `Invalid id` (относится только к openGo)  
-4. Внутренняя ошибка чтения или удаления комментария - 500, текст ошибки (относится только к openGo)  
-
+Response format:

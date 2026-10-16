@@ -18,12 +18,16 @@ func PushSub(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("-3"))
 		return
 	}
-	if len(endpoint) > 500 {
+	if len(endpoint) > 500 || !ValidPushEndpoint(endpoint) {
+		w.Write([]byte("-2"))
+		return
+	}
+	if n, err := CountSubscriptions(user.UserId, endpoint); err != nil || n >= 20 {
 		w.Write([]byte("-2"))
 		return
 	}
 
-	deviceToken := GetDeviceToken(r) // вообще это мидлвар но кто запрещает пинать напрямую
+	deviceToken := GetDeviceToken(r) // technically this is a middleware but who forbids poking it directly
 	device, err := GetDeviceByToken(deviceToken)
 	if err != nil {
 		w.Write([]byte("-5"))

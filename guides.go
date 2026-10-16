@@ -65,7 +65,7 @@ var (
 func buildGuideInfo(subtitles, subtexts []string) (string, string) {
 	n := len(subtitles)
 	if len(subtexts) < n {
-		n = len(subtexts) // защита от рассинхрона длин — иначе паника на subtexts[i]
+		n = len(subtexts) // protection against length desync — otherwise panic on subtexts[i]
 	}
 
 	var sb strings.Builder

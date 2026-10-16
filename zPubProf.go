@@ -32,7 +32,7 @@ func GetWikisByAuthor(userID int) ([]Wiki, error) {
 	return result, nil
 }
 
-// #region хандлеры
+// #region handlers
 
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get("id")

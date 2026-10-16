@@ -1,35 +1,35 @@
 package main
 
 /*
-КОММЕНТАРИИ - АД
-Приична - whereIz и каналы.
+COMMENTS - HELL
+Reason - whereIz and channels.
 
-Я сам не понимаю как и почему, но у базы данных есть небольшой рассинхрон
-значений который мне приходится поддерживать
+I myself don't understand how and why, but the database has a small desync
+of values that I have to maintain
 
-список каналов (вытащил из ojhub.js 0.97.7):
+channel list (pulled from ojhub.js 0.97.7):
 0 => GDPS
 1 => *???
-2 => Страницы вики (гайды)
-3 => Новости
-4 => Форум посты
-5 => Вакансии
-* - вообще это текстур паки ещё с гдпс хелпера, но оно по факту нигде не используется
-    т.к. текстурпаки в gpds helper были удалены ещё в 1.8
+2 => Wiki pages (guides)
+3 => News
+4 => Forum posts
+5 => Vacancies
+* - actually these are texture packs from gdps helper, but they are not used anywhere in practice
+    because texture packs in gpds helper were removed back in 1.8
 
-почему это ад? потому что канал приходит с клиента, и никаких эндпоинтов
-"комментарии проекта" или "комментарии вакансии" не существует!!!
-терпите.
+why is this hell? because the channel comes from the client, and there are no endpoints
+"project comments" or "vacancy comments"!!!
+deal with it.
 
-а ещё большая беда - каналы лайков:
+and an even bigger problem - like channels:
 1 => GDPS
-4 => Новости (поверх текстур)
-5 => Страницы вики (гайды)
-10 => Форум посты
-12 => Вакансии
+4 => News (on top of textures)
+5 => Wiki pages (guides)
+10 => Forum posts
+12 => Vacancies
 
-где же тут рассинхрон?
-А в половине случаев каналы гайдов и новостей перемешиваются и добавляются не туда!
+where is the desync here?
+And in half the cases, the guide and news channels get mixed up and added to the wrong place!
 */
 
 import (

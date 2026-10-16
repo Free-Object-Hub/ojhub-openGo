@@ -84,16 +84,16 @@ func GetCity(preIp string) ([2]string, error) {
 	return [2]string{record.Country.Names.English, record.City.Names.English}, nil
 }
 
-// использую универсальную прослойку чтоб подмена редиса на что то была реальной
+// I use a universal layer so that replacing redis with something is real
 var (
 	RamDB   *redis.Client
-	ctxBruh = context.Background() // это затычка а не "контекст", я не использую его на самом деле
+	ctxBruh = context.Background() // this is a stub and not a "context", I don't actually use it
 )
 
 func RamGet(key string) (string, error) {
 	if RamDB == nil {
-		// если редис здох, то тут нет смысла орать "ой ошибка!"
-		// всё равнов 99% случаев после него будет RamSet который уже точно заорёт
+		// if redis died, there's no point yelling "oh error!" here
+		// in any case, 99% of cases after it there will be RamSet which will definitely yell
 		return "", nil
 	}
 	value, err := RamDB.Get(ctxBruh, key).Result()

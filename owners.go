@@ -58,7 +58,7 @@ type WikiOwner struct {
 	ID     int `db:"ID"`
 	WikiId int `db:"wikiId"`
 	UserId int `db:"userId"`
-	// неиспользуемые поля
+	// unused fields
 	PermLevel int `db:"permLevel"`
 }
 
@@ -96,7 +96,7 @@ func DeleteOwnerWiki(wikiId, userId int) error {
 }
 
 // #endregion
-// #region joinlog (type -4, только чтение через fetchOwned)
+// #region joinlog (type -4, read-only via fetchOwned)
 type JoinLogEntry struct {
 	ID       int    `db:"ID"`
 	GdpsId   int    `db:"gdpsId"`

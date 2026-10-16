@@ -17,11 +17,11 @@ func TemplateGet(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id == 0 {
-		return // тихо, как в оригинале
+		return // silently, as in the original
 	}
 	access, err := CheckWikiAccess(user.UserId, id)
 	if err != nil || access == 0 {
-		return // тихо, как в оригинале
+		return // silently, as in the original
 	}
 	template, err := WikiTemplateGetOne(id, r.URL.Query().Get("name"))
 	if err != nil || template == nil {
@@ -70,7 +70,7 @@ var safeNameRe = regexp.MustCompile(`[^a-zA-Z0-9_\-]`)
 
 func doSafeName(name string) string {
 	safe := safeNameRe.ReplaceAllString(name, "")
-	if len(safe) == 0 { // фикс: guard до обращения к [0], в PHP тут был undefined-index warning без краша
+	if len(safe) == 0 { // fix: guard before accessing [0], in PHP there was an undefined-index warning without a crash
 		return "falseName"
 	}
 	if unicode.IsDigit(rune(safe[0])) {
@@ -124,11 +124,11 @@ func TemplateSave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if id == 0 {
-		return // тихо, как в оригинале
+		return // silently, as in the original
 	}
 	name := doSafeName(r.FormValue("name"))
 	method := allowedMethods(r.FormValue("method"))
-	rawArgs := r.Form["arg[]"] // как и с subtitle[]/subtext[] — реальное имя поля с квадратными скобками
+	rawArgs := r.Form["arg[]"] // as with subtitle[]/subtext[] — the actual field name has square brackets
 	var argsJSON string
 	if len(rawArgs) > 0 {
 		safeArgs := make([]string, len(rawArgs))
@@ -141,7 +141,7 @@ func TemplateSave(w http.ResponseWriter, r *http.Request) {
 		argsJSON = ""
 	}
 	var argsForCode []string
-	json.Unmarshal([]byte(argsJSON), &argsForCode) // если argsJSON == "", просто останется nil — эквивалент json_decode('') в PHP
+	json.Unmarshal([]byte(argsJSON), &argsForCode) // if argsJSON == "", it will simply remain nil — equivalent of json_decode('') in PHP
 	content := doSafeCode(r.FormValue("content"), argsForCode)
 	template, err := WikiTemplateSave(id, name, argsJSON, method, content)
 	if err != nil || template == nil {
@@ -166,5 +166,5 @@ func TemplateDelete(w http.ResponseWriter, r *http.Request) {
 	if err := WikiTemplateDelete(id, r.URL.Query().Get("name")); err != nil {
 		return
 	}
-	fmt.Fprint(w, "1") // PHP echo bool от PDOStatement::execute() — true печатается как "1"
+	fmt.Fprint(w, "1") // PHP echo bool from PDOStatement::execute() — true is printed as "1"
 }

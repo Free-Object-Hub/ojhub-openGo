@@ -47,7 +47,7 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 	title = ExploitPatch(title)
 	language := ExploitPatch(r.FormValue("language"))
 
-	// --- description: новый multi-клиент (language пустой) либо legacy single ---
+	// --- description: new multi-client (empty language) or legacy single ---
 	var descriptionToStore string
 	rawDescs := r.Form["description"]
 
@@ -69,7 +69,7 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 		descriptionToStore = description
 	}
 
-	// --- short: та же multi/single развилка, отдельный лимит длины ---
+	// --- short: same multi/single fork, separate length limit ---
 	var shortToStore string
 	rawShorts := r.Form["short"]
 
@@ -146,33 +146,33 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 	}
 
 	if imgFile != nil {
-		ext := GetFileExt(imgFile)
-		imgPath := fmt.Sprintf("%scustomuser/i%d.%s", getEnv("IMGS", "./imgs/"), gdpsId, ext)
-		if err := SaveFile(imgFile, imgPath); err != nil {
-			log.Println(err)
-			ApiError(w, 500, "File error", "-3")
+		if err := CheckImage(imgFile); err != nil {
+			ApiError(w, 400, "Bad image", "-3")
 			return
 		}
-		webpPath := fmt.Sprintf("%scustomuser/i%d.webp", getEnv("IMGS", "./imgs/"), gdpsId)
-		if err := ConvertToWebp(imgPath, webpPath, 256, 256); err != nil {
-			fmt.Printf("webp conversion failed: %v\n", err)
-			log.Println(err)
+	}
+	if banFile != nil {
+		if err := CheckImage(banFile); err != nil {
+			ApiError(w, 400, "Bad image", "-3")
+			return
+		}
+	}
+
+	imgsDir := getEnv("IMGS", "./imgs/")
+	if imgFile != nil {
+		webpPath := fmt.Sprintf("%scustomuser/i%d.webp", imgsDir, gdpsId)
+		if err := SaveAsWebp(imgFile, webpPath, 256, 256); err != nil {
+			log.Println("img:", err)
+			img = ""
 		} else {
 			img = fmt.Sprintf("%simgs/customuser/i%d.webp", HELPER_URL, gdpsId)
 		}
 	}
 	if banFile != nil {
-		ext := GetFileExt(banFile)
-		banPath := fmt.Sprintf("%scustomuser/b%d.%s", getEnv("IMGS", "./imgs/"), gdpsId, ext)
-		if err := SaveFile(banFile, banPath); err != nil {
-			log.Println(err)
-			ApiError(w, 500, "File error", "-3")
-			return
-		}
-		webpPath := fmt.Sprintf("%scustomuser/b%d.webp", getEnv("IMGS", "./imgs/"), gdpsId)
-		if err := ConvertToWebp(banPath, webpPath, 720, 300); err != nil {
-			fmt.Printf("webp conversion failed: %v\n", err)
-			log.Println(err)
+		webpPath := fmt.Sprintf("%scustomuser/b%d.webp", imgsDir, gdpsId)
+		if err := SaveAsWebp(banFile, webpPath, 720, 300); err != nil {
+			log.Println("ban:", err)
+			ban = ""
 		} else {
 			ban = fmt.Sprintf("%simgs/customuser/b%d.webp", HELPER_URL, gdpsId)
 		}
