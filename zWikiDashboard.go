@@ -131,6 +131,7 @@ func HandleSetMainWiki(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(strconv.Itoa(mainId)))
 }
 
+// this handler created for wiki owners, they can approve their guides in guides page
 func HandleCheckWiki(w http.ResponseWriter, r *http.Request) {
 	user, ok := RequireDevice(w, r)
 	if !ok {
