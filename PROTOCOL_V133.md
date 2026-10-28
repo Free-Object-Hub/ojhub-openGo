@@ -79,7 +79,7 @@ The fork of GDPS Helper Legacy PHP, which survived many Object Hub-specific upda
 - The problems listed above will not be fixed, in order to preserve compatibility with outdated clients  
 - Since V133R1 the protocol has taken on preserving compatibility with much older versions, because of this a huge number of endpoints have a "free method": all Object Hub clients 0.97.33 and older either didn't send the token and the method was GET, or sent the token in the body and the method became POST
   
-# GHE Engine
+# GDPS-Helper-Engine
 Many of the strange, stupid and non-obvious things come specifically from the GDPS Helper Engine (GHE). Forgive the tautology, but our homegrown engine lets us create not only powerful and clever optimizations, but also genuinely strange things. This section mostly lists the powerful features that explain some of the cringe parts of the protocol description
   
 ## newHelper lang
