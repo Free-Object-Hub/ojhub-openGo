@@ -592,7 +592,303 @@ Used when opening the project page
 }
 ```
 
+### /server/133/content/camp.php
+Returns everything needed to render a project page: the full project entity, the first page of comments, and the project's news  
+Despite the name, it serves projects of all channels (c, s, p, t), because gdpsId is unique across all channels  
+  
+Authorization method - 0  
+Method - free  
+Parameters:  
+- id (query) = gdpsId of the project  
+  
+MUST:  
+- Hide the project with the response `["NONE"]` if the user has the LGBT content ban enabled and the project has hasLgbt set. The response is indistinguishable from "project not found"  
+- Return comments in the "Standard comment getter" format (channel 0, first page)  
+SHOULD:  
+- Not make the response depend on the user, so that it can be cached as a whole. openGo does not personalize the response and caches the project entity and the news (10 minutes each)  
+  
+Response format:  
+```
+{
+  "gdps": Full_entity_project,
+  "comments": Standard_comment_getter,
+  "news": News
+}
+```
+News are allowed in two forms, the client understands both:  
+```
+{
+  "n<ID>": News_item,
+  "n<ID>": News_item
+}
+```
+```
+[
+  News_item,
+  News_item
+]
+```
+PHP returns news as an object, openGo returns a plain array as an optimization  
+Comments in PHP also arrive as an object (`"c<ID>"`), in openGo the form is determined by the getter  
+  
+Error types:  
+1. Project not found - 200, `["NONE"]`  
+2. Project hidden due to the LGBT content ban - 200, `["NONE"]` (not implemented in openGo)  
+3. Invalid id (not a number) - openGo: 400, `Invalid id parameter`, PHP: TODO verify (most likely `["NONE"]`)  
+4. Any internal error (DB, Redis, serialization) - openGo: 200, `["NONE"]`. The client can't tell it apart from "project not found"  
 
+### /server/133/send/bump.php
+Bumps a project in the listing. A project can be bumped once every 2 hours, by any user  
+  
+Authorization method - 3  
+Method - free  
+Parameters:  
+- id (query) = gdpsId of the project  
+- tokens: sent as described in the Authorization section  
+  
+MUST:  
+- Only bump projects with checked = 1  
+- Treat the 2-hour window as per project, not per user  
+- If the bump is still active (points > current time), not change points and return the current values  
+- Otherwise set points to the current time + 7200  
+  
+Response format:  
+```
+[
+  points,
+  new_points_value,
+  current_time - points
+]
+```
+Where:  
+- points = unix time until which the project is considered bumped, after this request  
+- new_points_value = current time + 7200, calculated regardless of whether the bump happened  
+- the third element is never positive: it is -7200 right after a successful bump, otherwise it is the negated number of seconds until the project can be bumped again  
+  
+A fresh bump can be told from an active one by `points == new_points_value`  
+  
+Error types:  
+1. Any of the tokens is invalid or the account is not activated - 200, `Access denied`  
+2. id is not a number, or the project has not passed the check (checked != 1) - 200, `no`  
+3. The project does not exist or an internal error occurred - 200, empty response  
+  
+NOTE: project ownership is not checked, any activated user can bump any checked project  
+NOTE: the response ends with a newline  
+  
+TODO: confirm that bumping by non-owners is intended  
+TODO: check against the client how it tells "bumped" from "bump still active"  
+TODO: where points go (search sorting?)  
+  
+### /join.php
+Redirects to the project's external link and writes the join to the join log. Lives outside /server/133/. Unlike the rest of the protocol it answers with HTML or a redirect, not JSON or plain strings  
+  
+Authorization method - non-standard, depends on the freejoin field of the project  
+Method - free  
+Parameters:  
+- id (query) = gdpsId of the project  
+- m (query) = 1 if the join comes from the catalog page, the log key becomes `mainPage`  
+- type (query) = a key from the project's links object  
+- token (query or body) = user token  
+- username, password (body or query) = login and password, an alternative to the token  
+  
+Link resolution:  
+MUST:  
+- If the project's links field starts with `{`, parse it as a JSON object after replacing `\"` with `"`. All values must be strings  
+- Otherwise use the links field itself as the link  
+- With type, use the link under that key and append `&<type>` to the log key. A type that is not in links is an error  
+- Without type and with a single link, use it immediately  
+- Without type and with several links, show a list of links (anchors, one per link, link texts are the keys)  
+MUST: check that the chosen link is a valid URL before redirecting  
+MUST: escape links and keys before putting them into HTML  
+NOTE: the order of links in the list is not guaranteed  
+NOTE: an empty links object produces an empty page  
+  
+Login logic (freejoin):  
+- freejoin = 0 - redirect without login. userId in the log is taken from the token (query only) if it is valid, otherwise 0. An invalid token is not an error here  
+- freejoin != 0 - redirect only after a valid username and password, or a valid token. Credentials are checked first, then the token  
+- If neither succeeds, show the login form: an HTML page with `username` and `password` fields that sends a POST to the same URL, keeping the query string  
+  
+Log:  
+MUST: write gdpsId, userId, the key and the time to the join log (joinlog table) before redirecting  
+Key format: `id=<id>` or `mainPage`, plus `&<type>` when type was used  
+A failed log write does not block the redirect  
+  
+Response:  
+- Redirect: HTTP 302, Location header with the link  
+- Link list and login form: HTTP 200, `text/html; charset=utf-8`  
+  
+Error types (plain text):  
+1. id is not a number - 400, `Invalid GDPS ID`  
+2. Project not found - 404, `GDPS not found`  
+3. type not found in links - 404, `Unknown GDPS link type`  
+4. Invalid URL - 500, `Invalid GDPS link`  
+5. links is not a valid JSON object of strings - 500, `Invalid GDPS links`  
+  
+NOTE: `checked` is not checked, unverified projects can be joined  
+  
+TODO: align freejoin in the "Projects" section with the semantics above
+
+## Project Add and Edit
+The eight endpoints `send/{camp,show,pere,tele}{Add,Edit}.php` are thin wrappers over two common handlers, Add and Edit. A wrapper only sets the channel of the project, the request format, validation and response are identical for all channels  
+  
+### Project fields (Add and Edit)
+Both handlers take the same multipart form fields  
+MUST: the body is multipart/form-data, other content types fail to parse  
+MUST: sanitize all text fields on the server side  
+  
+Fields:  
+- title = project title. Required  
+- language = empty for new multi-language clients, a language code for legacy single-language clients. Decides the format of description and short  
+- description = project description. Required  
+- - language is empty and description fields are present: repeated fields `<LANG>\t<text>` (language code, a TAB, the text). The server builds a newHelper langs dictionary from them and stores it as a JSON string. At least one valid entry is required  
+- - otherwise: a single text field, stored as is (legacy field)  
+- short = short description. Optional. Same two formats as description, with a separate length limit. An empty dictionary is stored as an empty string  
+- img, ban = project avatar and banner. Either a file part (an image) or a text field with a URL, stored as is. If a file is sent, the text field is ignored  
+- links[] = repeated field, consecutive pairs `key, value` (`discord`, `https://...`). An odd trailing element is ignored. Values are not validated as URLs  
+- tags[], os[] = repeated fields with tag IDs, see the newHelper lang section  
+  
+How the fields are stored:  
+- links: a JSON object whose quotes are escaped with a backslash, `{\"discord\":\"url\"}`. This is the legacy form that the entity renderer and /join.php undo. No links give `{}`  
+- tags, os: JSON arrays of strings, exactly as sent. IDs are not validated, no tags give the JSON `null`  
+- mask: a search bitmask built from the numeric values of tags and os merged together. Non-numeric values are stored but do not reach the mask  
+- username: the nickname of the author, or the login name if there is no nickname. It is copied at creation and not updated by Edit  
+  
+NOTE: Add and Edit do not write freejoin, wiki, checked, points and hasLgbt  
+  
+### Project Add (common handler)
+Creates a project and returns the refreshed Init response  
+  
+Authorization method - 3  
+Method - free  
+Parameters: the fields above, tokens as described in the Authorization section  
+  
+MUST:  
+- The author of the project is the user from the tokens  
+- Take gdpsId from the auto-increment of the projects table, so it is unique across all channels  
+- Return the Init response with the cache bypassed, so that the new project is in the private part  
+  
+Images:  
+- img is scaled to 256x256 WebP and saved as `imgs/customuser/i<gdpsId>.webp`  
+- ban is scaled to 720x300 WebP and saved as `imgs/customuser/b<gdpsId>.webp`  
+- The stored value is the full URL (`<HELPER_URL>imgs/customuser/i<gdpsId>.webp`)  
+- The ID is needed for the file name, so the project is inserted first with `FILE` in img/ban, and the field is replaced after saving  
+- If saving fails, the field becomes an empty string and the project stays created, the client is not told  
+  
+Response format:  
+Init endpoint format  
+  
+Error types:  
+1. Any of the tokens is invalid or the account is not activated - 200, `Access denied`  
+2. The body can't be parsed as multipart - 500, `-1`  
+3. title is empty, or description is empty in the single-language format - 200, `-27`  
+4. The multi-language description is invalid or empty - 400, `-28`  
+5. The multi-language short is invalid - 400, `-29`  
+6. Database error on insert or on updating the pictures - 200, `-1`  
+7. Invalid image - 400, `-3`  
+8. Failed to build the Init response - 500, error text. The project is already created  
+  
+TODO: the image check runs after the insert, so an invalid image returns `-3` but leaves the project created with `FILE` in img/ban. Validate before the insert  
+  
+#### /server/133/send/campAdd.php
+Creates a project of channel 0 (c, camp)  
+  
+#### /server/133/send/showAdd.php
+Creates a project of channel 1 (s, show)  
+  
+#### /server/133/send/pereAdd.php
+Creates a project of channel 2 (p, dubbing/translation). Reuses the tags of channel 1  
+  
+#### /server/133/send/teleAdd.php
+Creates a project of channel 3 (t, telegram channel)  
+  
+### Project Edit (common handler)
+Returns the current data of a project for the edit form, or saves new data. Returns the refreshed Init response after saving  
+  
+Authorization method - 2 for reading the form data, 3 for saving  
+Method - free  
+Parameters:  
+- id (query) = gdpsId of the project  
+- the fields above, tokens as described in the Authorization section  
+  
+Order of checks (matters for which error you get):  
+1. id is a number  
+2. the project exists  
+3. the tokens are valid  
+4. the user has access to the project  
+5. the mode is picked (read or save)  
+6. for saving: the account is activated  
+  
+MUST:  
+- Let only users with access to the project through. TODO: who exactly (owner, co-owners, which permissions)  
+- Pick the mode by title and description: if either of them is empty or missing (or the body can't be parsed as multipart), it is the read mode  
+  
+#### Read mode
+Response format:  
+```
+[
+  title,
+  description,
+  short,
+  links,
+  img,
+  ban,
+  tags,
+  os,
+  language
+]
+```
+- description and short are returned as stored: a newHelper langs dictionary string or a legacy text, the client tells them apart  
+- links is an object, as in the full entity. If the stored value is not a valid JSON object, the raw string is returned  
+- tags and os are returned as stored. TODO: check whether they arrive as arrays or as JSON inside strings  
+- the account does not have to be activated  
+  
+#### Save mode
+MUST:  
+- Replace all fields from the form. Omitted links, tags, os, short and language are cleared  
+- Exception: img and ban keep the stored value unless a file or a non-empty text value is sent. An image can't be removed  
+- Set the channel of the project from the endpoint that was called  
+- Validate the images before saving anything  
+- Increment the edit counter of the project on every save  
+  
+Images:  
+- Same sizes as in Add  
+- The file name contains the edit counter before the increment: `imgs/customuser/i<gdpsId>-<counter>.webp`, `b<gdpsId>-<counter>.webp`. Every edit gets a new URL, so caches don't hold the old picture  
+- Old files are not removed  
+- If saving a file fails, the response is 500 `-3`. The text fields are already saved by that time, the pictures are unchanged  
+  
+Response format:  
+Init endpoint format  
+  
+Error types:  
+1. id is not a number - 400, `-7`  
+2. The project does not exist - 404, `-6`  
+3. Any of the tokens is invalid - 200, `Access denied`  
+4. The user has no access to the project - 200, `-2`  
+5. The account is not activated (save mode) - 200, `Access denied`  
+6. Multi-language description is invalid or empty - 400, `-28`  
+7. Multi-language short is invalid - 400, `-29`  
+8. Description is empty in the single-language format - 200, `-27`. Practically unreachable, an empty description switches the handler to the read mode  
+9. Invalid image - 400, `-3`  
+10. Database error on saving or on updating the pictures - 200, `-1`  
+11. Failed to save an image file - 500, `-3`  
+12. Failed to build the Init response - 500, error text. The data is already saved  
+  
+NOTE: errors 1 and 2 are returned before the tokens are checked  
+  
+TODO: the channel is rewritten from the endpoint without checking the current channel, so calling the Edit of another channel moves the project to it. Is it intended  
+  
+#### /server/133/send/campEdit.php
+Sets the channel of the project to 0 (c, camp)  
+  
+#### /server/133/send/showEdit.php
+Sets the channel of the project to 1 (s, show)  
+  
+#### /server/133/send/pereEdit.php
+Sets the channel of the project to 2 (p, dubbing/translation)  
+  
+#### /server/133/send/teleEdit.php
+Sets the channel of the project to 3 (t, telegram channel)  
+  
 
 
 # TODO: endpoints
