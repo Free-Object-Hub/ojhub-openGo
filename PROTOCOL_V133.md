@@ -91,6 +91,8 @@ Geo-blocks are controlled exclusively by the site administrators, project author
   
 NOTE: the blocked response is the same as for a nonexistent project, see /server/133/content/camp.php  
 NOTE: project Add and Edit do not write hasLgbt  
+
+The reason: I want Object Hub to work in as many countries as possible at any cost, even if I have to make such a controversial compromise  
   
 TODO: extend the blocks to all Arab countries and to countries where LGBT is officially outlawed  
 TODO: find out which other blocks may have to be put into the protocol  
