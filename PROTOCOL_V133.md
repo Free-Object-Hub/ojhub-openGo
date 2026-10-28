@@ -84,6 +84,8 @@ The fork of GDPS Helper Legacy PHP, which survived many Object Hub-specific upda
 Object Hub was born in Russia around 2024 and to this day has a large share of Russian users. As is well known, Russia is an extremely homophobic country on the political stage. I will not start any political battles here, so I am leaving a giant TODO in which I will explain the mechanisms of political blocking that made it into the protocol  
   
 ### Geo-blocks
+I did this back when I lived in Russia, so that I wouldn't end up in prison  
+  
 Almost every project entity has a hasLgbt field. The current openGo does not take this field into account at all, but legacy PHP, when trying to open an LGBT project from Russia or Kazakhstan, returns a false "project not found" error  
 Geo-blocks are controlled exclusively by the site administrators, project authors can do nothing about it  
   
