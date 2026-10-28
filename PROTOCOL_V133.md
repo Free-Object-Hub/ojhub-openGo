@@ -17,6 +17,7 @@ This may also contain a detailed description of the divergences between the prot
 - Philosophy
 - History
 - - Historically-grown-problems
+- - Political-problems
 - GDPS-Helper-Engine
 - Functional-domains
 - Meta-domains
@@ -78,6 +79,22 @@ The fork of GDPS Helper Legacy PHP, which survived many Object Hub-specific upda
 - - Although in many places the response is fairly unified - 200, `Access denied`
 - The problems listed above will not be fixed, in order to preserve compatibility with outdated clients  
 - Since V133R1 the protocol has taken on preserving compatibility with much older versions, because of this a huge number of endpoints have a "free method": all Object Hub clients 0.97.33 and older either didn't send the token and the method was GET, or sent the token in the body and the method became POST
+
+## Political-problems
+Object Hub was born in Russia around 2024 and to this day has a large share of Russian users. As is well known, Russia is an extremely homophobic country on the political stage. I will not start any political battles here, so I am leaving a giant TODO in which I will explain the mechanisms of political blocking that made it into the protocol  
+  
+### Geo-blocks
+Almost every project entity has a hasLgbt field. The current openGo does not take this field into account at all, but legacy PHP, when trying to open an LGBT project from Russia or Kazakhstan, returns a false "project not found" error  
+Geo-blocks are controlled exclusively by the site administrators, project authors can do nothing about it  
+  
+NOTE: the blocked response is the same as for a nonexistent project, see /server/133/content/camp.php  
+NOTE: project Add and Edit do not write hasLgbt  
+  
+TODO: extend the blocks to all Arab countries and to countries where LGBT is officially outlawed  
+TODO: find out which other blocks may have to be put into the protocol  
+TODO: how the client's block flag is determined (legacy PHP keeps it in the session, probably from the country in cityData) and what happens when the country can't be determined (cityData becomes ["Unknown","Unknown"])  
+TODO: list the endpoints that must apply the block (camp.php in legacy PHP, search for sure should), and the openGo plans for it  
+TODO: whether hasLgbt is sent to the client (it is not in the entities of the Projects section) and which admin endpoint sets it  
   
 # GDPS-Helper-Engine
 Many of the strange, stupid and non-obvious things come specifically from the GDPS Helper Engine (GHE). Forgive the tautology, but our homegrown engine lets us create not only powerful and clever optimizations, but also genuinely strange things. This section mostly lists the powerful features that explain some of the cringe parts of the protocol description
