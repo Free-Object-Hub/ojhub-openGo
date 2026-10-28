@@ -17,6 +17,7 @@ This may also contain a detailed description of the divergences between the prot
 - Philosophy
 - History
 - - Historically-grown-problems
+- GDPS-Helper-Engine
 - Functional-domains
 - Meta-domains
 - - Authorization
@@ -78,6 +79,66 @@ The fork of GDPS Helper Legacy PHP, which survived many Object Hub-specific upda
 - The problems listed above will not be fixed, in order to preserve compatibility with outdated clients  
 - Since V133R1 the protocol has taken on preserving compatibility with much older versions, because of this a huge number of endpoints have a "free method": all Object Hub clients 0.97.33 and older either didn't send the token and the method was GET, or sent the token in the body and the method became POST
   
+# GHE Engine
+Many of the strange, stupid and non-obvious things come specifically from the GDPS Helper Engine (GHE). Forgive the tautology, but our homegrown engine lets us create not only powerful and clever optimizations, but also genuinely strange things. This section mostly lists the powerful features that explain some of the cringe parts of the protocol description
+  
+## newHelper lang
+It is a perfectly ordinary l10n implementation written from scratch. Its philosophy is "let's make the client reactive and able to work without a server"  
+  
+The protocol knows very few details about newHelper lang, only because I use it for optimization tricks  
+  
+### Tags
+Tags in projects (as on the whole site) are perhaps the most absurd part, because they are structured in a very complicated way  
+  
+Tags depend entirely on newHelper lang. The server stores and returns only tag IDs, while the tag texts live on the client in the translation dictionary. The tag ID is substituted into the translation variable using this formula:
+```
+(channel_name) + tag + (tag_id)
+```
+This is how `Showtag3` = "Series"  
+  
+Channel name in the formula:  
+TODO: table "channel letter - channel number - prefix in the formula" for `c`, `s`, `p`, `t`  
+Channel `p` (dubbing/translation) reuses the tags of channel `s`, i.e. the `Show` prefix is used for it  
+  
+MUST: return tags as JSON-inside-string with IDs, for example `"[\"1\",\"3\",\"9\"]"`  
+MUST: not return tag texts, only the client knows them  
+  
+#### Regular tags
+The `tags` field in the project entity. These are mostly genres and subgenres specific to the OSC (Object Show Community)  
+  
+#### Alternative tags
+The `os` field in the project entity. It is a leftover from GDPS Helper that still makes sense. On GDPS Helper regular tags meant the GDPS server type, and alternative tags meant the supported platforms  
+For example, the current Object Hub:  
+- Channel `s` (show) - episode length  
+  
+## newHelper langs dictionary
+A full-fledged multilingual description of an entity. Thanks to it, the client can keep the translation consistent if the project author translated the description into many languages  
+  
+Example of an old text field and a newHelper langs dictionary:  
+```
+{
+  "title": "Привет мир!",
+  "text": "{\"RU\": \"Привет ГХЭ!\",\"EN\": \"Hello GHE!\",\"ES\": \"¡Hola GHM!\"}"
+}
+```
+newHelper langs can work with "legacy fields" - places where the text has not yet been moved to the new storage system and is returned as plain text  
+  
+Note that the new field arrives as a string with JSON content. The client tries to parse the string as JSON, and if it gets an error, it shows the field content directly; this behavior is exactly what creates the legacy fallback  
+  
+The format is detected by the first character of the value:  
+```
+if (text[0] === '{') {...}
+```
+MUST (server): a string with a dictionary starts with `{`, with no whitespace or BOM before it, otherwise the client will treat it as legacy text  
+NOTE: legacy text that is itself a valid JSON object will be taken for a dictionary. In practice this doesn't occur  
+  
+### Object form
+Starting with revision TODO the client understands both forms: JSON inside a string and a plain JSON object. This is an extension, not a compatibility break, because the forms are interchangeable and a backend implementation may choose whichever is more convenient  
+SHOULD: return only the string to clients older than this revision  
+  
+### Where it is used
+The list of dictionary fields and the supported languages are described in the newHelper lang section (not to be confused with newHelper langs)  
+
 
 # Functional-domains  
 ## Meta-domains
@@ -455,4 +516,78 @@ Error types:
 1. Any of the tokens is invalid - 200, `Access denied`  
 2. The comment belongs to another user (and the user is not a moderator) - 200, `-1`  
 3. Invalid ide (not a number) - 400, `Invalid id` (openGo only)  
-4. Internal error reading or deleting the comment - 500, error text (openGo only)
+4. Internal error reading or deleting the comment - 500, error text (openGo only)  
+  
+
+# Projects
+The main entity of Object Hub, around which everything revolves  
+  
+## Project channels
+"c" - camp (channel 0)  
+"s" - show (channel 1)  
+"p" - dubbing/translation (in the client code it is more often called Pere, less often Dub) (channel 2*)  
+"t" - telegram channel (channel 3)  
+  
+\* - reuses the tags of channel 1  
+  
+## Tags
+The `tags` and `os` fields contain arrays of tag IDs as strings. Details and the formula for getting the tag text are described in the newHelper lang section  
+  
+## Related entities
+News - entirely tied to the gdpsId field  
+Vacancies - entirely tied to the gdpsId field  
+Wiki - can be "linked" to any project  
+  
+## Short entity "project"
+Used when rendering in search  
+```
+"(channel letter) + (project id)":{
+  ID - gdpsId of the project
+  title - project title
+  text - short project description, is a newHelper langs dictionary of added languages
+  tags - project tags:
+  [
+    "1",
+    "3",
+    "9"
+  ]
+  os - alternative project tags:
+  [
+    "10",
+    "11"
+  ]
+  likes: [like_count, dislike_count, comment_count]
+  author - userId of the project author
+  username - nickname of the project author
+  img - project avatar
+  ban - project banner
+  channel - number of the project channel
+  wiki - ID of the wiki linked to this project
+}
+```
+  
+## Full entity "project"
+Used when opening the project page
+```
+"gdps": {
+  ID - gdpsId of the project
+  title - project title
+  text - full project description, is a newHelper langs dictionary of added languages
+  tags - project tags
+  os - alternative project tags
+  links - external links to the project itself:
+  {
+    "discord": "url",
+    "youtube": "url"
+  }
+  likes: [like_count, dislike_count, comment_count]
+  author - userId of the project author
+  username - nickname of the project author
+  img - url of the project avatar
+  ban - url of the project banner
+  freejoin - whether to show the join button or not (int)
+  language - semi-dead field, formerly denoted the project language, since the second revision "MULTI" by default
+  channel - number of the project channel
+  wiki - ID of the wiki linked to this project
+}
+```
