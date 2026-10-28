@@ -1,243 +1,195 @@
 # Object Hub Protocol V133 R3
-
-**WARNING! THIS DOCUMENT IS INCOMPLETE. DO NOT BE SURPRISED BY BROKEN LINKS.**
-
-Version 133 of the Object Hub protocol. New revisions are backward-compatible with the clients they target.
-
-The first client version using this protocol is 0.97.4.
-
-This document describes the **PROTOCOL**, not how the backend works—just as the X11 protocol does not know what a graphics card is.
-
-This document may also describe protocol differences specific to the Object Hub openGo project.
-
-# Table of Contents
+  
+ATTENTION!!! THIS DOCUMENT IS UNFINISHED, DON'T BE SURPRISED BY BROKEN LINKS  
+Version 133 of the Object Hub protocol, new revisions are backward compatible for target clients  
+The first client version on this protocol is 0.97.4  
+This will not be a description of how the backend works, but a description of the PROTOCOL, just like the X11 protocol, which doesn't know what a video card is  
+  
+This may also contain a detailed description of the divergences between the protocol and the Object Hub openGo project  
+  
+# Table of contents  
 
 - Revisions
-  - R0
-  - R1
-  - R2
-  - R3
+- - R0
+- - R1
+- - R2
+- - R3
 - Philosophy
 - History
-  - Historically Accumulated Problems
-- Functional Domains
-- Meta-Domains
-  - Authentication
-  - Init Endpoint
-  - Likes
-  - Comments
+- - Historically-grown-problems
+- Functional-domains
+- Meta-domains
+- - Authorization
+- - Init-endpoint
+- - Likes
+- - Comments
+  
 
 # Revisions
-
-A revision is a backward-compatible extension of the protocol.
-
-Revisions are designated as `R<N>`.
-
-Adding new functionality to the backend inevitably increases the revision number.
-
-If backward compatibility is broken in any part of the protocol when creating a revision, it is a new version, not a revision.
-
+  
+A revision is a backward-compatible extension of the protocol  
+Revisions are denoted as R<N>  
+  
+Adding new functionality to the backend inevitably leads to an increase of the revision number  
+If backward compatibility is broken in any part of the protocol when creating a new revision, it is a new version, not a revision  
+  
 ## R0
-
-The canonical revision of version 133, released with Object Hub 0.97.4 NODE_BETA1.
-
+The canonical revision of version 133, released together with Object Hub 0.97.4 NODE\_BETA1  
+  
 ## R1
-
-Released with version 0.97.4 NODE_BETA3.
-
-Extensions:
-- Support for sending user and device tokens in the request body as well as in headers. This was added to preserve compatibility with version 132 of the protocol.
-- The `likesT.php` endpoint: a hash set containing all records of the user's like statuses. It is used to synchronize the like state on the client. Version 133 was originally not supposed to synchronize likes with the server, but I forgot to add a client-side cache, so the revision had to be extended.
-
+Released with Object Hub 0.97.4 NODE\_BETA3  
+Extensions:  
+- Support for sending user&device tokens via the body, alongside headers. Added to preserve compatibility with protocol version 132  
+- likesT.php endpoint - a hashset returning absolutely all records of the user's like statuses, used to reconcile the like state on the client (version 133 originally wasn't supposed to reconcile likes on the server, but I forgot to add a client-side cache and had to extend the revision)  
+  
 ## R2
-
-Released with Object Hub 0.98.
-
-Extensions:
-- Project subscriptions.
-- Many endpoints gained error codes, although these are still not formally specified in the protocol.
-
+Released with Object Hub 0.98  
+Extensions:  
+- Project subscriptions  
+- Many endpoints got error codes, they still don't have a clear record in the protocol  
+  
 ## R3
-
-Will be completed with Object Hub 0.99. A provisional version has been available since Object Hub 0.98.2.
-
-Extensions:
-- The entire portfolio infrastructure.
-
-Changes:
-- The `resume` field in the profile will be empty by default because it will no longer be rendered starting with 0.99. Instead, it will be included in the portfolio by default.
-- Note that the field will be empty, not removed. This formally preserves compatibility with older clients.
+Will be completed with the release of Object Hub 0.99, its temporary version is already available since Object Hub 0.98.2  
+Extensions:  
+- The entire portfolio infrastructure  
+Changes:  
+- The resume field in the profile will be empty by default, since it is no longer rendered as of 0.99; instead it will be in the portfolio by default  
+- - Note that the field will be empty, not removed. This is done to formally preserve compatibility with old clients
 
 # Philosophy
-
-Throughout the history of Object Hub/GDPS Helper, the client and server evolved in parallel and in close coordination, with the goal of minimizing traffic, the number of API requests, the number of bytes in responses, and, ultimately, the load on your server.
-
-For this reason, the protocol may look very ugly and strange. It was designed strictly around the requirements of the official Object Hub client, not to serve as a REST API.
-
-The protocol's purpose is to optimize your backend and Object Hub API network usage. Yes, I've said this before; repetition is the mother of learning.
+Throughout the history of Object Hub/GDPS Helper, the client and the server developed in parallel and in close coordination, with the goal of minimizing traffic, the number of API requests, the number of bytes in a response, and, in the end, your server  
+For this reason the whole protocol will look very ugly and strange: it was built strictly to the requirements of the official Object Hub client, not to be a REST API  
+And the very purpose of the protocol's existence is to optimize your backend and the network consumption of the Object Hub API (yes, I've said this out loud before, repetition is the mother of learning)
+  
 
 # History
+Object Hub is a fork of GDPS Helper, and it had its own problems and quirks in the protocol  
+The very first version of the Object Hub protocol was GDPS Helper 1.7, which implemented protocol V64 (very unstable at the time)  
+By GDPS Helper 1.8 the protocol had partially settled - the domains were removed for good, and the first version of the Legacy PHP backend was ready  
+After forking the beta version of GDPS Helper 1.8, in Object Hub I started breaking the protocol "for beauty" and "for convenience", breaking some of the aggressive optimizations (not absolutely everything, as it may seem at first)  
+The protocol relatively settled only by version 104; all Object Hub clients from build 104 (client version 0.94) will most likely work without major complaints, or with minimal monkey-patches  
+The fork of GDPS Helper Legacy PHP, which survived many Object Hub-specific updates, became the basis of Object Hub Protocol V133 R0  
+  
+## Historically-grown-problems
+- The protocol is not unified enough
+- - Some entities respond with objects, others with arrays
+- Error formats differ from endpoint to endpoint, so each endpoint will have its own error table
+- - Although in many places the response is fairly unified - 200, `Access denied`
+- The problems listed above will not be fixed, in order to preserve compatibility with outdated clients  
+- Since V133R1 the protocol has taken on preserving compatibility with much older versions, because of this a huge number of endpoints have a "free method": all Object Hub clients 0.97.33 and older either didn't send the token and the method was GET, or sent the token in the body and the method became POST
+  
 
-Object Hub is a fork of GDPS Helper, which had its own protocol problems and peculiarities.
-
-The first version of the Object Hub protocol was GDPS Helper 1.7, which implemented protocol V64 (which was still very unstable at the time).
-
-By GDPS Helper 1.8, the protocol had partially settled down: domains had been fully separated, and the first Legacy PHP backend was ready.
-
-After forking the beta version of GDPS Helper 1.8, I started breaking the protocol in Object Hub for the sake of “beauty” and “convenience”, undoing some of its aggressive optimizations (not all of them, despite what it might seem at first).
-
-The protocol did not really stabilize until version 104. All Object Hub clients from build 104 onward (client version 0.94) will most likely work without significant issues, or with only minimal monkey patches.
-
-The GDPS Helper Legacy PHP fork, which survived many Object Hub-specific updates, became the foundation of Object Hub Protocol V133 R0.
-
-## Historically Accumulated Problems
-
-- The protocol is not sufficiently consistent.
-  - Some entities are returned as objects, while others are returned as arrays.
-- Error formats vary from endpoint to endpoint, so each endpoint has its own error table.
-  - In many cases, however, responses are fairly consistent: `200`, `Access denied`.
-- These problems will not be fixed, in order to preserve compatibility with outdated clients.
-- Starting with V133 R1, the protocol began preserving compatibility with much older versions. As a result, many endpoints use a “free method” because Object Hub clients version 0.97.33 and older either sent no token and used the GET method, or sent the token in the body and therefore used POST.
-
-# Functional Domains
-
-## Meta-Domains
-
-- Authentication
-- Init endpoint
+# Functional-domains  
+## Meta-domains
+- Authorization
+- Init-endpoint
 - Likes
 - Comments
 - Search
-
 ## Users
-
 - Portfolio
 - Devices
-- Notifications + Push notifications
-
+- Notifications + Pushes
 ## Projects
-
 - News
-- Jobs
-- Subscriptions (directly trigger push notifications)
+- Vacancies
+- Subscriptions (directly trigger Push notifications)
 - Co-owners
-
 ## Wiki
-
 - Forums
 - Co-owners
-- Tags (should be renamed to article paths)
+- Article tags (need to be renamed to addresses)
 - Articles
 - Comic reader
 - Templates
+  
+## Explaining the cringe:  
+- The co-owner systems of GDPSes and Wikis will differ in the future, so it is not a meta-domain
+- The uploader is just an uploader, it shouldn't be a domain because it is not "business logic", it is also not tied to a specific revision and may change internally however I need, although I don't see much point in that right now
 
-## Explaining the Weirdness
+# Meta-domains
+  
+These are entities that permeate all domains and other entities of the Object Hub protocol. It is still the most controversial functional domain  
+  
+Likes, comments, and search are domains that implement their internals based on a field that defines the type (likes put a like, search looks for projects rather than everything, a comment is placed under a news item rather than who knows where)  
 
-- The co-owner systems for GDPSes and the Wiki will be different in the future, so this is not a meta-domain.
-- The loader is just a loader. It should not be a domain because it is not “business logic”. It is also not tied to a specific revision and can be changed internally whenever needed, although I do not see much reason to do so right now.
+## Authorization
+It's not really a domain, but it is a very important part of the functionality of half of the API endpoints  
+Authorization checks the user's permissions on a given entity and other execution conditions, and if the check fails it returns an error (usually the response "Access denied" without additional headers)  
+Authorization is divided into 4 methods:
+0. Public data
+  There are no permission checks here, this data is available even to a scanner bot that for some reason decided to scan port 443 at the address `/server/133/search/new.php` of your server  
+1. User data
+  This authorization method usually only checks the validity of the user's token, found on Read endpoints with private data  
+  For example - the device list, the local likes database  
+2. Updating private data
+  This authorization method checks the user token and the device token, ignoring the account activation status, found on all private Write endpoints  
+  For example - deleting a device, changing the account password  
+3. Updating public data
+  This authorization method checks the user token and the device token, verifying that the account activation status is not zero, found on all public Write endpoints  
+  For example - setting a like, posting a comment, adding a project  
+The existence of method 1 is justified by database load optimization
+  
+### Ways to send tokens
+MUST: the permission check treats tokens sent by different methods identically  
+SHOULD: tokens from headers are checked first  
+  
+1. headers  
+  The user token goes in the `user-token` header, the device token in the `device-static` header  
+2. body  
+  The user token goes in the `token` field of the request body, the device token goes in the `device` field of the request body  
 
-# Meta-Domains
-
-These are entities that cut across all domains and other entities in the Object Hub protocol. This is still the most controversial functional domain.
-
-Likes, comments, and search are domains whose internal behavior is determined by a field specifying the type: likes apply a like, search searches for projects rather than everything indiscriminately, and a comment is posted under a news item rather than somewhere unspecified.
-
-## Authentication
-
-Strictly speaking, this is not even a domain, but it is an important part of the functionality of many API endpoints.
-
-Authentication checks the user's permissions for a given entity and other execution conditions. If a check fails, it returns an error (usually the response `Access denied`, without additional headers).
-
-There are four authentication methods:
-
-0. **Public data**  
-   No permission checks are performed. This data is available even to a scanning bot that, for whatever reason, decided to scan port 443 at `/server/133/search/new.php` on your server.
-
-1. **User data**  
-   This method usually checks only whether the user token is valid. It is used by read endpoints that return private data.  
-   Examples: device list, local like-status database.
-
-2. **Updating private data**  
-   This method checks the user token and device token, while ignoring the account's activation status. It is used by all private write endpoints.  
-   Examples: deleting a device, changing the account password.
-
-3. **Updating public data**  
-   This method checks the user token and device token and verifies that the account's activation status is not zero. It is used by all public write endpoints.  
-   Examples: liking something, posting a comment, adding a project.
-
-The existence of method 1 is justified by the need to reduce database load.
-
-### Ways to Send Tokens
-
-**MUST:** Permission checks must treat tokens sent through the different supported methods identically.
-
-**SHOULD:** Check tokens from headers first.
-
-1. **Headers**  
-   The user token is sent in the `user-token` header, and the device token in the `device-static` header.
-
-2. **Body**  
-   The user token is sent in the `token` field of the request body, and the device token in the `device` field.
-
-## Init Endpoint
-
-The endpoint responsible for initializing the official Object Hub client. It usually contains a cache of private data and some public data.
-
-Historically, it has served as a response not only for `loginT.php`, but also for many other endpoints, sometimes with strange semantics.
-
-Authentication method: **2**. This method is used here specifically to lock the account on the client under normal circumstances; see the error types.
-
-Method: **free**.
-
-Parameters: none.
-
-**MUST:**
-- Skip device validation and return the user token in the `token` field inside `Current_user` when the Init function is used during registration and login.
-- Do not modify the public part of the response, regardless of authentication errors.
-
-**SHOULD:**
-- If caching is used, keep public and private data in two separate caches to avoid returning one user's data to another user.
-- If a guest user is included in the response, do not cache that user separately; store it directly in your backend's cache.
-
+## Init-endpoint
+The endpoint responsible for initializing the official Object Hub client, usually contains a cache of private data and a bit of public data  
+Historically it is the response not only for `loginT.php`, but for many other endpoints too, and sometimes with strange semantics  
+  
+Authorization method - 2. This particular method is used here to block the account on the client under normal circumstances, see error types  
+Method - free  
+No parameters  
+  
+MUST:  
+- Skip the device check and return the user token in the token field inside Current\_user when the Init function is used on registration and login  
+- Not touch the public part of the response regardless of any authorization errors  
+SHOULD:  
+- When using a cache, split public and private data into 2 separate caches, so as not to give one user another user's data  
+- When the guest user is used in the response, don't cache it but store it directly in your backend's cache  
+  
 Response format:
-
-```json
+```
 [
-  // Start of private cache
+  // start of private cache
   Current_user,
   [
     Projects_owned_by_user{},
     Wikis_owned_by_user{}
   ],
-  // End of private cache; start of public cache
-  Project_cache_for_home_page{},
-  News_cache_for_home_page[],
-  // End of public cache
+  // end of private cache, start of public cache
+  Home_page_projects_cache{},
+  Home_page_news_cache[],
+  // end of public cache
 ]
 ```
-
-Note that wherever an object is expected, the response is an object whose keys are:
-
-```json
+Note that where it says object, the response comes as an object with keys:  
+```
 [
-  // Private part of the response
+  // private part of the response
   User,
   [
     {
-      "c1": Project,
-      "p3": Project,
-      "t4": Project
+      "c1":Project,
+      "p3":Project,
+      "t4":Project
     },
     {
-      "w1": Wiki,
-      "w2": Wiki,
-      "w3": Wiki
+      "w1":Wiki,
+      "w2":Wiki,
+      "w3":Wiki
     }
   ],
-  // Public part of the response
+  // public part of the response
   {
-    "c1": Project,
-    "s2": Project
+    "c1":Project,
+    "s2":Project
   },
   [
     News,
@@ -245,149 +197,120 @@ Note that wherever an object is expected, the response is an object whose keys a
   ]
 ]
 ```
-
-To understand what the letters in the response mean, see the “Projects” section.
-
-### Error Format
-
-Usually, if an authentication error occurs on the server side (for example, because the device token has expired), the client receives a “guest user”: instead of the current user, the response contains a standard placeholder whose `token` field literally contains the string `"false"` (not a boolean). The array of the user's projects and wikis will be empty: `[{},{}]`.
-
-If no tokens are provided at all (the user does not have an account), the guest user will not have a `token` field in the response.
-
-Degradation cases:
-1. Expired tokens — `200`, guest user + `token:"false"`.
-2. No tokens provided — `200`, guest user with no `token` field.
-3. The city and country cannot be determined from the IP address — the `cityData` field falls back to `["Unknown","Unknown"]`.
+To understand what the letters in the response mean, see the "Projects" section  
+  
+Error format - usually, if an error occurred on the server side while authorizing the user (for example an expired device token), a "guest user" is returned to the user, i.e. a regular stub is sent instead of the current user, where the token field literally contains the string "false" (not bool!), and the array of the user's projects and wikis will be empty - [{},{}]  
+If there are no tokens at all (a user without an account), the guest user won't have a token field in the response at all  
+Types of degradation:  
+1. Expired tokens - 200, guest user + token:"false"  
+2. Tokens missing - 200, guest user + token absent  
+3. Failed to determine city and country by IP address - the cityData field degrades, the field becomes ["Unknown","Unknown"]  
 
 ## Likes
-
-A domain responsible for checking likes on a specific entity item.
-
-**MUST:** Prevent the same like action from being submitted more than once.
-
-**SHOULD NOT:** Recalculate the number of likes by scanning the status table on every action (including simply opening a project).
-
-## Object Hub Like Types
-
-This is a separate enum-like namespace:
-
-- `0` = Projects
-- `1` = Comments on projects
-- `2` = News
-- `3` = Dead field; previously used for GDPS Helper texture packs, before they were removed in GDPS Helper 1.9
-- `4` = Dead field; previously used for comments on GDPS Helper texture packs, before they were removed in GDPS Helper 1.9
-- `5` = Comments on news
-- `6` = Comments on Wiki articles
-- `7` = Wiki articles
-- `8` = Wikis
-- `9` = Forum posts
-- `10` = Comments on forum posts
-- `11` = Jobs
-- `12` = Comments on jobs
-
-## Like Rollback
-
-Each entity object stores its own list of likes and dislikes separately. The record of a user's like status is stored in a hashmap/table indexed by identifiers.
-
-If a record for an existing like is found and an attempt is made to set a new rating, the corresponding count is adjusted in the opposite direction based on the existing record in the hashmap. The like-status record is then deleted from the table.
-
+The domain responsible for checking likes on a specific element of an entity  
+MUST: not allow likes to be sent twice  
+SHOULD NOT: count the number of likes by scanning the status table on every action (even a simple project open)  
+  
+## Object Hub like types
+- This is a separate Enum-like space  
+0 = Projects  
+1 = Project comments  
+2 = News  
+3 = Dead field, formerly GDPS Helper texture packs until their removal in GDPS Helper 1.9  
+4 = Dead field, formerly comments on GDPS Helper texture packs until their removal in GDPS Helper 1.9  
+5 = News comments  
+6 = Wiki article comments  
+7 = Wiki articles  
+8 = Wikis  
+9 = Forum posts  
+10 = Forum post comments  
+11 = Vacancies  
+12 = Vacancy comments  
+  
+## Like rollback
+Each entity object stores its own list of likes and dislikes separately, the like status is stored in a hashmap/table with indexes  
+If there is a record of an existing like and an attempt is made to set a new rating, the rating counts will change in the reverse order based on the already existing record in the hashmap, then the record from the like status table will be deleted  
+  
 ## Endpoints
-
-### `/server/133/send/like.php`
-
-Increments the like count.
-
-Authentication method: **3**.
-
-Method: **free**.
-
-Parameters (either in the body or query string):
-- `ide` = Entity ID
-- `type` = Entity type. For example, in Object Hub, `type=0` means a project and `type=1` means a comment on a project.
-
-Response format:
-
-```json
-[
-  Like_count,
-  Dislike_count
-]
+  
+### /server/133/send/like.php
+Increments the like counter  
+  
+Authorization method - 3  
+Method - free  
+Parameters (body or query, doesn't matter):  
+- ide = Entity ID  
+- type = Entity type (in Object Hub terms type=0 is a project, and type=1 is project comments)  
+  
+Response format:  
 ```
-
-openGo error types (not part of the canonical protocol):
-1. Either token is invalid — `200`, `Access denied`.
-2. Invalid `ide` — `500`, `invalid id`.
-3. Invalid `type` — `500`, `invalid type`.
-4. `type` is not in the registered channel table — `500`, `Unknown like type`.
-
-### `/server/133/send/dislike.php`
-
-Increments the dislike count.
-
-Authentication method: **3**.
-
-Method: **free**.
-
-Parameters (either in the body or query string):
-- `ide` = Entity ID
-- `type` = Entity type. For example, in Object Hub, `type=0` means a project and `type=1` means a comment on a project.
-
-Response format:
-
-```json
 [
-  Like_count,
-  Dislike_count
+  Like count,
+  Dislike count
 ]
+```  
+openGo error types, not part of the canonical protocol:  
+1. Any of the tokens is invalid - 200, `Access denied`  
+2. Invalid ide - 500, `invalid id`  
+3. Invalid type - 500, `invalid type`  
+4. type is not in the table of registered channels - 500, `Unknown like type`  
+  
+### /server/133/send/dislike.php
+Increments the dislike counter  
+  
+Authorization method - 3  
+Method - free  
+Parameters (body or query, doesn't matter):  
+- ide = Entity ID  
+- type = Entity type (in Object Hub terms type=0 is a project, and type=1 is project comments)  
+  
+Response format:  
 ```
-
-openGo error types (not part of the canonical protocol):
-1. Either token is invalid — `200`, `Access denied`.
-2. Invalid `ide` — `500`, `invalid id`.
-3. Invalid `type` — `500`, `invalid type`.
-4. `type` is not in the registered channel table — `500`, `Unknown like type`.
-
-### `/server/133/likesT.php`
-
-A hash-set cache used to determine how like buttons should be colored in the Object Hub client.
-
-It was made a separate endpoint from `loginT.php` to balance the load from TCP handshakes.
-
-Authentication method: **1**; in practice, openGo implements method **2**.
-
-Method: **free**.
-
-Parameters: none.
-
-Response format:
-
-```json
+[
+  Like count,
+  Dislike count
+]
+```  
+openGo error types, not part of the canonical protocol:  
+1. Any of the tokens is invalid - 200, `Access denied`  
+2. Invalid ide - 500, `invalid id`  
+3. Invalid type - 500, `invalid type`  
+4. type is not in the table of registered channels - 500, `Unknown like type`  
+  
+### /server/133/likesT.php
+A hashset cache for coloring the like buttons in the Object Hub client  
+It became a separate endpoint from loginT.php in order to balance on TCP handshakes  
+  
+Authorization method - 1, in practice openGo implements 2  
+Method - free  
+No parameters  
+  
+Response format:  
+```
 {
-  "p": "projects",
-  "c": "comments",
-  "n": "news",
-  "g": "guides" - Wiki articles,
-  "w": "wikis",
-  "f": "forum posts",
-  "v": "jobs",
-  "subs": "project subscriptions, which use the like infrastructure solely because their storage mechanisms are similar; introduced in Revision 2"
+  "p": projects,
+  "c": comments,
+  "n": news,
+  "g": "guides" - wiki articles,
+  "w": wikis,
+  "f": forum posts,
+  "v": vacancies,
+  "subs": project subscriptions, which exploit the likes infrastructure purely because of the similar storage mechanics, appeared in Revision 2
 }
 ```
-
-Error types:
-1. Either token is invalid — `200`, `Access denied`.
-2. The account does not exist — `200`, `Access denied`.
+Error types:  
+1. Any of the tokens is invalid - 200, `Access denied`  
+2. The account does not exist - 200, `Access denied`  
+  
 
 ## Comments
-
-A cross-cutting domain responsible for storing and handling comments.
-
-### The “Comment” Entity
-
-```json
+A cross-cutting domain responsible for storing and handling comments
+  
+### The "Comment" entity  
+```
 [
   ID,
-  Author_nickname,
+  Author_nick,
   Text,
   Author_UserID,
   Author_role,
@@ -395,173 +318,141 @@ A cross-cutting domain responsible for storing and handling comments.
     Like_count,
     Dislike_count
   ],
-  Unix_timestamp,
-  0
+  Date_in_unix,
+  0 (dead field, formerly a flag "the user has a like here", this behavior remained in Legacy PHP)
 ]
+```  
+  
+### "Standard comment getter"
+This is an internal method (or function) of your backend, which must strictly follow this positional argument format:  
+`Function(Channel, ID, Page)` (in Legacy PHP the third argument is userId, and only the fourth is Page)  
+  
+This function must return a list of 11 comments if possible. The offset works like this: ` OFFSET = page * 10`  
+This is because the client checks for the presence of an 11th element and, if it exists, resets the render and inserts a "show more" button; effectively this means that to save traffic you may not return a full 11th comment, and just put a 0 there (if you chose to respond with an array)  
+Response formats that are acceptable for the client:  
 ```
-
-The final `0` is a dead field. It previously indicated whether the user had liked the comment; this behavior remains in Legacy PHP.
-
-### Standard Comment Getter
-
-This is an internal backend method (or function) that must strictly follow this positional argument format:
-
-`Function(Channel, ID, Page)`
-
-In Legacy PHP, the third argument is `userId` and the fourth is `Page`.
-
-This function must return a list of 11 comments, if possible. The offset is calculated as `OFFSET = page * 10`.
-
-This is because the client checks whether an 11th item exists. If it does, the client resets the rendering and inserts a “Show more” button. To save bandwidth, you do not need to return a full 11th comment; you can simply put `0` in its place if you choose to return an array.
-
-Response formats accepted by the client:
-
-```json
 [
   Comment,
   Comment,
   ...
 ]
 ```
-
-```json
+```
 {
   "c<ID>": Comment,
   "c<ID>": Comment,
   ...
 }
 ```
-
-For an empty result, return `[]` or `{}`; the client makes no distinction between them.
-
-### Object Hub Comment Channels
-
-This is a separate enum-like namespace:
-
-- `0` = Projects; like channel = `1`
-- `1` = Dead field; previously used for GDPS Helper texture packs, before they were removed in GDPS Helper 1.9; like channel = `4`
-- `2` = “Guides” (Wiki articles); like channel = `6`
-- `3` = News; like channel = `5`
-- `4` = Forum posts; like channel = `10`
-- `5` = Jobs; like channel = `12`
-
-### `/server/133/send/comment.php`
-
-Posts a comment under an entity and returns the current list of comments on that entity's first page.
-
-Authentication method: **3**.
-
-Method: **free**.
-
-Parameters (either in the body or query string):
-- `ide` = ID of the entity the comment is posted under
-- `type` = Comment channel
-- `text` = Comment text
-
-**MUST:**
-- Sanitize `text` on the server before checking its length.
-- Do not create a comment if the sanitized `text` is shorter than 10 **bytes** (UTF-8), not characters. Cyrillic characters occupy 2 bytes each.
-- Convert an invalid `type` (not a number) to channel `0`.
-- Convert `type=1` (the dead channel) to channel `0`.
-- Return the comment list with status `200` even if the comment was not created because of rate limiting. The client does not know that the comment was discarded.
-
-**SHOULD:**
-- Rate-limit comments per user. openGo: 1 comment every 5 minutes; Legacy PHP: 1 comment every 10 minutes.
-- Avoid relying on a fixed list of channels. An unknown channel is not an error: the comment should go to channel `0`, so that a new channel cannot be “forgotten during registration” and cause an error.
-
-Response format:
-
-The Standard Comment Getter.
-
-Error types:
-1. Either token is invalid, or the account is not activated — `200`, `Access denied`.
-2. Invalid `ide` (not a number or `0`) — `400`, `Invalid id` (openGo-specific).
-3. Text shorter than 10 bytes after sanitization — `200`, `-4`.
-4. Internal error while writing or reading comments — `500`, error text (openGo-specific).
-
-### `/server/133/content/fetchComms.php`
-
-Returns a page of comments under an entity. The client uses it to load subsequent pages.
-
-Authentication method: **0**.
-
-Method: **GET**.
-
-Query parameters:
-- `type` = Comment channel
-- `id` = ID of the entity the comments belong to
-- `page` = Page number, starting at `0`
-
-**MUST:**
-- Convert invalid values (non-numeric or missing) for `type`, `id`, and `page` to `0`.
-
-Response format:
-
-The Standard Comment Getter.
-
-openGo error types (not part of the canonical protocol):
-1. Internal error while reading comments — `500`, `Failed to get comments: <error text>`.
-2. Internal error while serializing the response — `500`, `Failed to encode comments: <error text>`.
-
-### `/server/133/send/commentModify.php`
-
-Modifies the text of an existing comment and returns the new text.
-
-Authentication method: **3**.
-
-Method: **free**.
-
-Parameters (either in the body or query string):
-- `id` = ID of the comment itself (not the entity it belongs to)
-- `text` = New comment text
-
-**MUST:**
-- Allow a comment to be edited only by its author or a moderator (a user with nonzero `priority`). Moderators can edit any comment.
-- Sanitize `text` on the server before saving.
-- **Do not** update the comment's `Unix_timestamp` when it is edited.
-- On success, return the raw `text` from the request with status `200`. The client displays this response in place of the old text.
-
-Response format:
-
-```text
-New comment text, as a plain string
+For an empty result `[]` or `{}` is returned, it makes no difference to the client  
+  
+### Object Hub comment channels
+- This is a separate Enum-like space  
+0 = Projects, likes channel = 1  
+1 = Dead field, formerly GDPS Helper texture packs until their removal in GDPS Helper 1.9, likes channel = 4  
+2 = "guides" - wiki articles, likes channel = 6  
+3 = news, likes channel = 5  
+4 = forum posts, likes channel = 10  
+5 = vacancies, likes channel = 12  
+  
+### /server/133/send/comment.php  
+Posts a comment under an entity and returns the current list of comments of the first page of this entity  
+  
+Authorization method - 3  
+Method - free  
+Parameters (body or query, doesn't matter):  
+- ide = ID of the entity under which the comment is placed  
+- type = Comment channel  
+- text = Comment text  
+  
+MUST:  
+- Sanitize text on the server side before checking the length  
+- Not create a comment if the sanitized text is shorter than 10 BYTES (UTF-8), not characters. Cyrillic takes 2 bytes per character  
+- Coerce an invalid type (not a number) to channel 0  
+- Coerce type=1 (dead channel) to channel 0  
+- Return the list of comments with status 200 even if the comment was not created due to rate limiting. The client doesn't learn that the comment was dropped  
+SHOULD:  
+- Rate-limit comment posting per user. openGo: 1 comment per 5 minutes, Legacy PHP: 1 comment per 10 minutes 
+- Not depend on a specific list of channels: an unknown channel is not an error, the comment goes to channel 0, so that a new channel can't be "forgotten to register" and produce an error  
+  
+Response format:  
+Standard comment getter  
+  
+Error types:  
+1. Any of the tokens is invalid or the account is not activated - 200, `Access denied`  
+2. Invalid ide (not a number or 0) - 400, `Invalid id` (openGo only)  
+3. Text shorter than 10 bytes after sanitizing - 200, `-4`  
+4. Internal error writing or reading comments - 500, error text (openGo only)  
+  
+### /server/133/content/fetchComms.php  
+Returns a page of comments under an entity. Used by the client to load subsequent pages  
+  
+Authorization method - 0  
+Method - GET  
+Parameters (query):  
+- type = Comment channel  
+- id = ID of the entity under which the comments lie  
+- page = Page number, counting from 0  
+  
+MUST:  
+- Coerce invalid (non-numeric or missing) type, id and page to 0  
+  
+Response format:  
+Standard comment getter  
+  
+openGo error types, not part of the canonical protocol:  
+1. Internal error reading comments - 500, `Failed to get comments: <error text>`  
+2. Internal error serializing the response - 500, `Failed to encode comments: <error text>`  
+  
+### /server/133/send/commentModify.php  
+Changes the text of an existing comment and returns the new text  
+  
+Authorization method - 3  
+Method - free  
+Parameters (body or query, doesn't matter):  
+- id = ID of the comment itself (not of the entity under which it lies)  
+- text = New comment text  
+  
+MUST:  
+- Allow editing a comment only to its author or a moderator (a user with non-zero priority). A moderator can edit any comments  
+- Sanitize text on the server side before saving  
+- NOT update the comment's Date\_in\_unix on edit  
+- Respond with the raw text from the request with status 200 on success. The client shows this response instead of the old text  
+  
+Response format:  
 ```
-
-Error types:
-1. Either token is invalid — `200`, `Access denied`.
-2. Invalid `id` (not a number) — `400`, `Invalid id` (openGo-specific).
-3. Account is not activated — `200`, empty response.
-4. Text shorter than 10 bytes before sanitization — `200`, `-4`.
-5. The comment belongs to another user (and the current user is not a moderator), or the comment does not exist — `200`, `-3`.
-6. Internal error while reading or writing the comment — `500`, error text (openGo-specific).
-
-### `/server/133/delete/comment.php`
-
-Deletes a comment along with its likes and returns the ID of the deleted comment.
-
-Authentication method: **3**.
-
-The HTTP method may vary for the tokens, but `ide` **MUST** be passed in the query string.
-
-Parameters:
-- `ide` (query) = ID of the comment itself (not the entity it belongs to)
-- `type` (query) = Comment channel. The client sends this, but openGo ignores it; the channel is taken from the comment itself.
-
-**MUST:**
-- Allow a comment to be deleted only by its author or a moderator (a user with nonzero `priority`). Moderators can delete any comment.
-- Delete the like/dislike records for the comment along with the comment itself.
-
-**SHOULD:**
-- Determine the channel from the comment itself rather than from the `type` parameter. The client may send an incorrect `type`, which could cause likes to be deleted from the wrong namespace.
-
-Response format:
-
-```text
-ID of the deleted comment, as a plain string
+New comment text, plain string
 ```
-
-Error types:
-1. Either token is invalid — `200`, `Access denied`.
-2. The comment belongs to another user, and the current user is not a moderator — `200`, `-1`.
-3. Invalid `ide` (not a number) — `400`, `Invalid id` (openGo-specific).
-4. Internal error while reading or deleting the comment — `500`, error text (openGo-specific).
+Error types:  
+1. Any of the tokens is invalid - 200, `Access denied`  
+2. Invalid id (not a number) - 400, `Invalid id` (openGo only)  
+3. Account not activated - 200, empty response  
+4. Text shorter than 10 bytes before sanitizing - 200, `-4`  
+5. The comment belongs to another user (and the user is not a moderator) or does not exist - 200, `-3`  
+6. Internal error reading or writing the comment - 500, error text (openGo only)  
+  
+### /server/133/delete/comment.php  
+Deletes a comment along with its likes and returns the ID of the deleted comment  
+  
+Authorization method - 3  
+Method - free for tokens, but ide MUST be passed in the query  
+Parameters:  
+- ide (query) = ID of the comment itself (not of the entity under which it lies)  
+- type (query) = Comment channel. The client sends it, but openGo ignores it, the channel is taken from the comment itself  
+  
+MUST:  
+- Allow deleting a comment only to its author or a moderator (a user with non-zero priority). A moderator can delete any comments  
+- Delete the like/dislike records for this comment together with the comment
+SHOULD:  
+- Determine the channel from the comment itself, not from the type parameter: the client may send a wrong type and delete likes from the wrong space  
+  
+Response format:  
+```
+ID of the deleted comment, plain string
+```
+  
+Error types:  
+1. Any of the tokens is invalid - 200, `Access denied`  
+2. The comment belongs to another user (and the user is not a moderator) - 200, `-1`  
+3. Invalid ide (not a number) - 400, `Invalid id` (openGo only)  
+4. Internal error reading or deleting the comment - 500, error text (openGo only)
