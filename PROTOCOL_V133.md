@@ -591,3 +591,228 @@ Used when opening the project page
   wiki - ID of the wiki linked to this project
 }
 ```
+
+
+
+
+# TODO: endpoints
+  
+Checklist for each endpoint (copy into the description):  
+- authorization method (0-3)  
+- method (free, GET or POST)  
+- parameters (body or query)  
+- response format  
+- MUST/SHOULD  
+- error table  
+- mark "canonical / openGo only / Legacy PHP only"  
+  
+Legend: [POST] - openGo accepts only POST, no mark - free method  
+All paths are relative to /server/133/  
+  
+## Already described in the protocol (nothing to do)  
+- send/like.php [POST] (Likes)  
+- send/dislike.php [POST] (Likes)  
+- likesT.php (Likes)  
+- loginT.php (Init-endpoint)  
+- send/comment.php [POST] (Comments)  
+- content/fetchComms.php (Comments)  
+- send/commentModify.php [POST] (Comments)  
+- delete/comment.php (Comments)  
+  
+## Meta-domains
+
+### Authorization
+- user/login.php [POST]: TODO response in the Init endpoint format, token in the token field, degradations do not apply  
+- user/logout.php [POST]  
+- user/register.php [POST]: TODO response in the Init endpoint format, same as login  
+- challenge.php: Altcha captcha, TODO challenge format, where it is required (registration? login? comments?)  
+TODO: authorization methods 0-3 are described but not tied to the endpoint list. Add a summary table "endpoint - authorization method"  
+
+### Search
+- search/new.php: main project search, TODO parameters (query, channel, tags, os, page, sorting), response format (short entity "project")  
+- wiki/getWikis.php: wiki search (lives in zSearch.go in the code)  
+- vacans/getAll.php: vacancy search (lives in zSearch.go in the code)  
+TODO: decide whether wiki/getWikis and vacans/getAll stay in Search or move to Wiki/Vacancies, leaving a link in Search  
+
+## Users
+  
+### Profile (new section, not in the table of contents, I suggest adding it)
+- user/getAccInfo.php [POST]  
+- user/setNickname.php  
+- user/setSocials.php  
+- user/setResume.php: account for R3, resume is empty by default and not rendered since 0.99  
+  
+### Public profile (also a new section)
+- content/getUser.php  
+- content/getAddedCamps.php  
+- content/getAddedShows.php  
+- content/getAddedPeres.php  
+- content/getAddedTeles.php  
+- content/getUserGuides.php  
+TODO: is the "short project entity" format shared with search or separate  
+TODO: pagination  
+
+### Portfolio (R3)
+- user/works.php  
+- user/workAdd.php  
+- user/workEdit.php  
+- user/workDelete.php [POST]  
+- user/workVerify.php [POST]  
+TODO: "work" entity (fields, format)  
+TODO: who verifies and how (workVerify), statuses  
+TODO: relation to resume  
+
+### Devices
+- user/devices.php  
+- user/removeDevice.php  
+- send/deviceAdd.php [POST]  
+TODO: device token (device-static), lifetime, list format  
+
+### Notifications + Pushes
+- content/getAlarms.php  
+- content/getAlarm.php  
+- send/deleteAlarm.php  
+- send/writeAlarm.php  
+- sub.php [POST]: push subscription (zPushs.go), not to be confused with project subscriptions  
+TODO: "alarm" entity, types, read/unread  
+TODO: push subscription format (endpoint, keys)  
+
+## Projects
+  
+### Entities and creation (the section already describes entities, but has no endpoints)
+- content/camp.php: opening the project page (full entity), despite the name it most likely returns all channels. TODO: verify  
+- send/campAdd.php  
+- send/showAdd.php  
+- send/pereAdd.php  
+- send/teleAdd.php  
+- send/campEdit.php  
+- send/showEdit.php  
+- send/pereEdit.php  
+- send/teleEdit.php  
+- send/bump.php: bumping a project. TODO: limits, permissions  
+- reportGdps.php [POST]: project report. TODO: decide whether a separate "Reports" section is needed  
+TODO: do Add/Edit have different fields per channel? Describe the common part once and the differences in a table  
+TODO: there is no project deletion endpoint in the list. Does it not exist, or is it not in the protocol?  
+TODO: img/ban upload goes through /loader (see the "Uploader" section)  
+
+### News
+- send/newsPost.php [POST]  
+- send/newsModify.php [POST]  
+- delete/newsPost.php  
+- content/newsAll.php: global news (zGlobalNews.go)  
+- content/news.php: project news  
+- content/newsC.php: a single news item  
+TODO: "news" entity, binding to gdpsId  
+TODO: permissions (project author, co-owners)  
+
+### Vacancies
+- vacans/getAll.php (see Search)  
+- vacans/get.php  
+- content/vacsC.php: a single vacancy  
+- send/vacsAdd.php  
+- send/vacsEdit.php  
+- vacans/edit.php: preloading data for the edit form (VacsEditPre)  
+- vacans/removeVac.php  
+- vacans/apply.php: application  
+- vacans/removeApl.php: withdrawing an application  
+- vacans/applies.php: list of applications  
+TODO: "vacancy" and "application" entities, statuses  
+
+### Subscriptions (R2)
+- gdps/sub.php  
+- gdps/unsub.php  
+- gdps/subs.php  
+TODO: relation to likesT.php, the subs key  
+TODO: how subscriptions produce pushes (the code lives in zAlarms.go)  
+
+### Co-owners
+- content/getOwners.php  
+- send/permAdd.php  
+- send/perm.php: judging by the PermRemove handler, this is permission removal. TODO: verify, rename in the description  
+- content/getJoinLog.php  
+TODO: "permission" entity and the list of permissions  
+TODO: freejoin and the join log  
+
+## Wiki
+
+### Wiki and styling
+- wiki/getWiki.php: the same handler as getGuides in the code (GuidesHandler). TODO: do the responses differ  
+- send/newWiki.php  
+- send/editWiki.php  
+- wiki/colors.php  
+- wiki/setMainWiki.php  
+- wiki/getWikis.php (see Search)  
+
+### Link to projects
+- search/conntectWiki.php: typo in the path ("conntect"), keep as is, mark it in the protocol  
+- search/conntectContent.php: same  
+TODO: what exactly each of the two links  
+TODO: does the link support "many projects - one wiki"  
+
+### Articles ("guides")
+- wiki/getGuides.php  
+- wiki/getGuide.php  
+- content/getGuidesAdmin.php  
+- send/newGuide.php  
+- send/editGuide.php  
+TODO: "article" entity  
+TODO: explicitly bind like type 7 and comment channel 2  
+
+### Article tags (planned to be renamed to addresses)
+- wiki/setWikiTag.php  
+TODO: decide whether the rename affects the path too  
+
+### Templates
+- wiki/templateGet.php  
+- wiki/templatesGet.php  
+- wiki/templateSave.php  
+- wiki/templateDelete.php  
+TODO: template format, restrictions  
+
+### Forums
+- forum/create.php  
+- forum/createPost.php  
+- send/forumPost.php: alias to the same handler (ForumCreatePost). Describe as an alias, once  
+- forum/getPost.php  
+- forum/getPosts.php  
+TODO: "forum" and "post" entities, like type 9, comment channel 4  
+
+### Comic reader
+- no separate endpoints in the list  
+TODO: find out how it is served (most likely inside wiki/getGuide.php), and either describe the format or remove it from the domain list  
+
+### Wiki co-owners
+- no separate endpoints visible, possibly uses content/getOwners.php and send/permAdd.php  
+TODO: check whether this is the same system as for projects (the domains section says they will differ in the future)  
+
+## Uploader (not a domain, but worth a separate note)
+- /loader: TODO purpose, format, limits  
+- /join.php: TODO purpose (GDPSjoin handler, judging by the name, joining a project)  
+- wiki/filesGet.php, wiki/filesSend.php, search/deleteWikiFiles.php: stubs (DropPhp) in openGo. TODO: decide whether to document as "not implemented in openGo"  
+TODO: note that the uploader is not tied to a revision (this is already written in the "Explaining the cringe" section)  
+
+## Outside the protocol (one line in the document is enough, or nothing)
+- / (IndexParser)  
+- wordleRU.php, wordleEN.php  
+- !newTakeAll.php, Aaction.php: admin  
+- vless.php: DropPhp stub  
+TODO: decide what to do with the admin endpoints (document as internal or don't mention at all)  
+
+## Divergences I noticed (worth moving into an "openGo divergences" block)
+- like, dislike, comment, commentModify are POST-only in openGo, while the protocol says "free method"  
+- fetchComms is specified as GET in the protocol, in openGo the method is free  
+- loginT.php has a handler named FreeBSDcompile, either a joke or a forgotten name  
+- The paths search/conntectWiki and search/conntectContent contain a typo  
+- Wiki file deletion lives in search/ (you left a comment about it in the code yourself)  
+- wiki/getWiki.php and wiki/getGuides.php lead to one handler, and so do send/forumPost.php and forum/createPost.php  
+- There is no endpoint for deleting a project, nor for updating/deleting forums, articles and wikis  
+
+## Order (by dependencies, as before)
+1. Entities User, News, Vacancy (Project already exists)  
+2. Authorization, login/register/logout, loginT, Devices  
+3. Projects (endpoints), News, Subscriptions  
+4. Search  
+5. Co-owners, Vacancies  
+6. Portfolio (R3), Profile  
+7. Notifications + Pushes  
+8. Wiki, Articles, Tags, Templates, Forums  
