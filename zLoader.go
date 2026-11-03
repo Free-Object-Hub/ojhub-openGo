@@ -78,7 +78,7 @@ func (v clientVersion) isWorking() bool {
 var versions = []clientVersion{
 
 	{
-		Ver: "0.98.2", Date: "?? ??? 2026", Desc: "portfolio init AND easy-css init",
+		Ver: "0.99", Date: "?? ??? 2026", Desc: "first release after 2+ years of beta",
 		Lifecycle: LifecycleDev, State: StateWorking,
 		CSS: []asset{
 			{Href: "main.css", Query: "?ver=22"},
@@ -91,8 +91,21 @@ var versions = []clientVersion{
 	},
 
 	{
-		Ver: "0.98.1", Date: "15 Sep 2026", Desc: "GHE 2.2 and Jails init",
+		Ver: "0.98.2", Date: "8 Oct 2026", Desc: "portfolio init AND easy-css init",
 		Lifecycle: LifecycleStable, State: StateWorking,
+		CSS: []asset{
+			{Href: "main.css", Query: "?ver=22"},
+		},
+		JS: []asset{
+			{Href: "newHelper.js", Query: "?ver=31", Defer: true},
+			{Href: "nhConfig.js", Query: "?ver=31", Defer: true},
+			{Href: "ojhub.js", Query: "?ver=31", Defer: true},
+		},
+	},
+
+	{
+		Ver: "0.98.1", Date: "15 Sep 2026", Desc: "GHE 2.2 and Jails init",
+		Lifecycle: LifecycleSupported, State: StateWorking,
 		CSS: []asset{
 			{Href: "main.css", Query: "?ver=21"},
 			{Href: "window.css", Query: "?ver=21"},
@@ -120,7 +133,7 @@ var versions = []clientVersion{
 
 	{
 		Ver: "0.97.8", Date: "?? ??? 2026", Desc: "openRust AND action write init, broken at now",
-		Lifecycle: LifecycleDev, State: StateWorking,
+		Lifecycle: LifecycleLegacy, State: StateWorking,
 		CSS: []asset{
 			{Href: "main.css", Query: "?ver=20"},
 			{Href: "window.css", Query: "?ver=20"},
