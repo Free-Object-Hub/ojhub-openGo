@@ -20,8 +20,9 @@ export IMGS="/home/miobomb/ojhub/public/imgs/"
 export VERS_DIR="/home/miobomb/ojhub-cli/"
 
 export CLI_VER="0.98.1"
+export USE_TLS="0"
 
-export ALTCHA_SECRET="" # делайте сами
+export ALTCHA_SECRET="NONE"
 
 #go126 run .
 /home/miobomb/go/bin/air
