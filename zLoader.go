@@ -78,7 +78,7 @@ func (v clientVersion) isWorking() bool {
 var versions = []clientVersion{
 
 	{
-		Ver: "0.99", Date: "?? ??? 2026", Desc: "first release after 2+ years of beta",
+		Ver: "0.99_BETA1", Date: "?? ??? 2026", Desc: "JUST A BETA",
 		Lifecycle: LifecycleDev, State: StateWorking,
 		CSS: []asset{
 			{Href: "main.css", Query: "?ver=22"},
