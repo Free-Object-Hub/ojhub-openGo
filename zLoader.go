@@ -99,7 +99,7 @@ var versions = []clientVersion{
 		JS: []asset{
 			{Href: "newHelper.js", Query: "?ver=31", Defer: true},
 			{Href: "nhConfig.js", Query: "?ver=31", Defer: true},
-			{Href: "ojhub.js", Query: "?ver=31", Defer: true},
+			{Href: "ojhub.js", Query: "?ver=32", Defer: true},
 		},
 	},
 
