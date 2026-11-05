@@ -107,7 +107,8 @@ func SaveAsWebp(fh *multipart.FileHeader, destPath string, maxW, maxH int) error
 	defer func() { <-cwebpSem }()
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	out, err := exec.CommandContext(ctx, "cwebp", args...).CombinedOutput()
+	// XXX: Hardcoded for freebsd cwebp path
+	out, err := exec.CommandContext(ctx, "/usr/local/bin/cwebp", args...).CombinedOutput()
 	if err != nil {
 		os.Remove(destPath)
 		return fmt.Errorf("cwebp: %w: %s", err, out)
