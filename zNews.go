@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -31,20 +33,29 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+
 	form, file, err := ParseMultipart(r)
 	if err != nil {
 		ApiError(w, 400, "Form error", "-7")
 		return
 	}
-	gdpsID, err := strconv.Atoi(form.Value["gdps"][0])
+
+	gdpsRaw, ok := form.Value["gdps"]
+	if !ok || len(gdpsRaw) == 0 {
+		ApiError(w, 400, "Missing gdps", "-7")
+		return
+	}
+
+	gdpsID, err := strconv.Atoi(gdpsRaw[0])
 	if err != nil || gdpsID <= 0 {
 		ApiError(w, 400, "Bad gdps", "-7")
 		return
 	}
+
 	if user.Activated == 0 {
 		return
 	}
-	// FIXME: what to do with the error here
+
 	check, err := CheckGdpsAccess(user.UserId, gdpsID)
 	if err != nil {
 		ApiError(w, 404, "check not found", "-6")
@@ -54,27 +65,35 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("-2"))
 		return
 	}
+
 	gdps, err := GDPSfetchById(gdpsID)
 	if err != nil {
 		ApiError(w, 404, "Data not found", "-6")
 		return
 	}
+
 	titleRaw, ok1 := form.Value["title"]
 	textRaw, ok2 := form.Value["text"]
-	if !ok1 || !ok2 {
+	if !ok1 || !ok2 || len(titleRaw) == 0 || len(textRaw) == 0 {
+		ApiError(w, 400, "Missing title or text", "-7")
 		return
 	}
+
 	title := ExploitPatch(titleRaw[0])
 	textPre := ExploitPatch(textRaw[0])
-	text := base64.StdEncoding.EncodeToString(
-		[]byte(textPre),
-	)
+	text := base64.StdEncoding.EncodeToString([]byte(textPre))
 
 	if file != nil {
 		if err := CheckImage(file); err != nil {
 			ApiError(w, 400, "Bad image", "-9")
 			return
 		}
+	}
+
+	// No image = no image extension.
+	imageExt := ""
+	if file != nil {
+		imageExt = newsImageExt
 	}
 
 	newsID, err := NEWSpost(
@@ -84,17 +103,30 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 		time.Now().Unix(),
 		title,
 		gdps.Checked,
-		// GetFileExt(file),
-		"webp",
+		imageExt,
 	)
 	if err != nil {
 		ApiError(w, 500, "Database error", "-8")
 		return
 	}
+
 	if file != nil {
-		webpPath := fmt.Sprintf("%scustomnews/%d.webp", getEnv("IMGS", "./imgs/"), newsID)
+		webpPath := filepath.Join(
+			getEnv("IMGS", "./imgs/"),
+			"customnews",
+			fmt.Sprintf("%d.%s", newsID, newsImageExt),
+		)
+
+		if err := os.MkdirAll(filepath.Dir(webpPath), 0755); err != nil {
+			log.Printf("news image directory creation failed: %v", err)
+			ApiError(w, 500, "Image save error", "-8")
+			return
+		}
+
 		if err := SaveAsWebp(file, webpPath, 1000, 1000); err != nil {
-			log.Println("news image:", err)
+			log.Printf("news image save failed for news %d: %v", newsID, err)
+			ApiError(w, 500, "Image save error", "-8")
+			return
 		}
 	}
 
@@ -104,12 +136,14 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 			log.Println("failed to get subscribers:", err)
 			return
 		}
+
 		alarmTitle := title
-		if len(alarmTitle) > 100 {
-			alarmTitle = alarmTitle[:100]
+		runes := []rune(alarmTitle)
+		if len(runes) > 100 {
+			alarmTitle = string(runes[:100])
 		}
+
 		for _, subId := range subscribers {
-			log.Println(subId)
 			alarmID, err := FullWrite(
 				alarmTitle,
 				textPre,
@@ -117,11 +151,12 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 				time.Now().Unix(),
 				0,
 			)
-			log.Println("SUBS:", alarmID)
+
 			if err != nil {
 				log.Printf("alarm creation failed for user %d: %v\n", subId, err)
 				continue
 			}
+
 			log.Printf("created alarm %d for user %d\n", alarmID, subId)
 		}
 	}()

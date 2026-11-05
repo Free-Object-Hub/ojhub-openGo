@@ -20,6 +20,8 @@ const (
 	maxImageBytes  = 5 << 20
 	maxImageSide   = 6000
 	maxImagePixels = 16_000_000
+
+	newsImageExt = "webp"
 )
 
 var (
