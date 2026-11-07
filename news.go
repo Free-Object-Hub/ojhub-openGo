@@ -25,6 +25,8 @@ type News struct {
 	Checked     int    `db:"checked"`
 	CommsCount  int    `db:"commsCount"`
 	HasFile     string `db:"hasFile"`
+	Poll        string `db:"poll"`
+
 	// legacy fields I'm too lazy to remove
 	Lusername string `db:"username,omitempty"`
 }
@@ -130,6 +132,7 @@ func (p News) NewsRender() NewsResp {
 			p.CommsCount,
 		},
 		HasFile: p.HasFile,
+		//Poll: p.Poll,
 	}
 }
 
@@ -158,6 +161,7 @@ func (p News) NewsRenderLegacy() []interface{} {
 		0, // isLiked, dead field
 		p.HasFile,
 		p.GdpsImg,
+		p.Poll,
 	}
 }
 
@@ -197,6 +201,9 @@ func NEWSdelete(id int) error {
 		return err
 	}
 	defer tx.Rollback()
+	if _, err = tx.Exec(`DELETE FROM pollVotes WHERE newsId = ?`, id); err != nil {
+		return err
+	}
 	if _, err = tx.Exec(
 		`DELETE FROM likes
 		 WHERE whereIz = ? AND channel = 6`,

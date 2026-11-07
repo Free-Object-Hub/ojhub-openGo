@@ -96,6 +96,21 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 		imageExt = newsImageExt
 	}
 
+	poll := ""
+	if opts := form.Value["pollOpt[]"]; len(opts) > 0 {
+		get := func(k string) string {
+			if v := form.Value[k]; len(v) > 0 {
+				return v[0]
+			}
+			return ""
+		}
+		var okP bool
+		if poll, okP = pollBuild(opts, get("pollM"), get("pollH"), get("pollDays")); !okP {
+			ApiError(w, 400, "Bad poll", "-7")
+			return
+		}
+	}
+
 	newsID, err := NEWSpost(
 		user.UserId,
 		gdpsID,
@@ -108,6 +123,12 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		ApiError(w, 500, "Database error", "-8")
 		return
+	}
+
+	if poll != "" {
+		if _, err := DB.Exec("UPDATE news SET poll = ? WHERE ID = ?", poll, newsID); err != nil {
+			log.Printf("poll save failed for news %d: %v", newsID, err)
+		}
 	}
 
 	if file != nil {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"sort"
+	"strconv"
 )
 
 type LikeRow struct {
@@ -43,15 +44,16 @@ func LikesT(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	result := map[string][]int{
-		"p":    {},
-		"c":    {},
-		"n":    {},
-		"g":    {},
-		"w":    {},
-		"f":    {},
-		"v":    {},
-		"subs": {},
+	result := map[string]interface{}{
+		"p":     []int{},
+		"c":     []int{},
+		"n":     []int{},
+		"g":     []int{},
+		"w":     []int{},
+		"f":     []int{},
+		"v":     []int{},
+		"subs":  []int{},
+		"polls": map[string]int{},
 	}
 
 	if user.Activated == 0 {
@@ -73,6 +75,7 @@ func LikesT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Likes
 	for _, l := range likes {
 		ch, ok := LikeExportChannels[l.Channel]
 		if !ok {
@@ -80,18 +83,21 @@ func LikesT(w http.ResponseWriter, r *http.Request) {
 		}
 
 		result[ch] = append(
-			result[ch],
+			result[ch].([]int),
 			l.WhereIz*l.Type,
 		)
 	}
 
-	for k := range result {
-		sort.Slice(result[k], func(i, j int) bool {
-			return abs(result[k][i]) > abs(result[k][j])
+	// Sort likes
+	for _, ch := range []string{"p", "c", "n", "g", "w", "f", "v"} {
+		sort.Slice(result[ch].([]int), func(i, j int) bool {
+			return abs(result[ch].([]int)[i]) > abs(result[ch].([]int)[j])
 		})
 	}
 
+	// Subscriptions
 	var subRows []int
+
 	err = DB.Select(
 		&subRows,
 		`SELECT gdpsId FROM gdpsSubs WHERE userId = ?`,
@@ -102,13 +108,27 @@ func LikesT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for k := range result {
-		sort.Slice(result[k], func(i, j int) bool {
-			return abs(result[k][i]) > abs(result[k][j])
-		})
-	}
-
 	result["subs"] = subRows
+
+	// Polls
+	polls := map[string]int{}
+	var pv []struct {
+		NewsId int `db:"newsId"`
+		Mask   int `db:"mask"`
+	}
+	err = DB.Select(
+		&pv,
+		`SELECT newsId, mask FROM pollVotes WHERE userId = ?`,
+		user.UserId,
+	)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	for _, v := range pv {
+		polls["n"+strconv.Itoa(v.NewsId)] = v.Mask
+	}
+	result["polls"] = polls
 
 	json.NewEncoder(w).Encode(result)
 }

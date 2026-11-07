@@ -84,6 +84,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -176,6 +177,9 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "content/newsAll" + php, GlobalNews},                 // zGlobalNews.go
 	{"", apiAddr + "content/news" + php, LocalNews},                     // zGlobalNews.go
 	{"", apiAddr + "content/newsC" + php, NewsGetOne},                   // zGlobalNews.go
+	{"POST ", apiAddr + "content/polls/vote" + php, PollVote},           // zPolls.go
+	{"POST ", apiAddr + "content/polls/results" + php, PollResults},     // zPolls.go
+	{"POST ", apiAddr + "content/polls/stop" + php, PollStopHandler},    // zPolls.go
 	{"", apiAddr + "search/new" + php, fullSearch},                      // zSearch.go
 	{"", apiAddr + "content/getUser" + php, GetUserHandler},             // zPubProf.go
 	{"", apiAddr + "content/getAddedCamps" + php, GetAddedCampsHandler}, // zPubProf.go
@@ -261,6 +265,14 @@ func main() {
 	}
 	registerStaticRoutes(mux)                                      // standalone.go: /imgs/, /cli/, /sw.js from IMGS and VERS_DIR
 	handler := securityHeaders(gzipMiddleware(blockDotfiles(mux))) // standalone.go
+
+	// clearing просроченных polls
+	go func() {
+		for {
+			time.Sleep(10 * time.Minute)
+			PollSweep()
+		}
+	}()
 
 	// nginx no longer stands before openGo — we hold :80 ourselves (only for ACME
 	// HTTP-01 challenge) and :443 (TLS), certificate is issued and renewed
