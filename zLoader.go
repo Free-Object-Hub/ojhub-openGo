@@ -84,9 +84,9 @@ var versions = []clientVersion{
 			{Href: "main.css", Query: "?ver=22"},
 		},
 		JS: []asset{
-			{Href: "newHelper.js", Query: "?ver=31", Defer: true},
-			{Href: "nhConfig.js", Query: "?ver=31", Defer: true},
-			{Href: "ojhub.js", Query: "?ver=32", Defer: true},
+			{Href: "newHelper.js", Query: "?ver=33", Defer: true},
+			{Href: "nhConfig.js", Query: "?ver=33", Defer: true},
+			{Href: "ojhub.js", Query: "?ver=33", Defer: true},
 		},
 		Extra: []string{
 			`<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`,
