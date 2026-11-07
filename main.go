@@ -259,8 +259,8 @@ func main() {
 		mux.HandleFunc(ep.Path, ep.Handler)
 		//log.Println("==> Loading", ep.Path)
 	}
-	registerStaticRoutes(mux)     // standalone.go: /imgs/, /cli/, /sw.js from IMGS and VERS_DIR
-	handler := blockDotfiles(mux) // standalone.go
+	registerStaticRoutes(mux)                                      // standalone.go: /imgs/, /cli/, /sw.js from IMGS and VERS_DIR
+	handler := securityHeaders(gzipMiddleware(blockDotfiles(mux))) // standalone.go
 
 	// nginx no longer stands before openGo — we hold :80 ourselves (only for ACME
 	// HTTP-01 challenge) and :443 (TLS), certificate is issued and renewed
