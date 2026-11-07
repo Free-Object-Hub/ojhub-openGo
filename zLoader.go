@@ -88,6 +88,11 @@ var versions = []clientVersion{
 			{Href: "nhConfig.js", Query: "?ver=31", Defer: true},
 			{Href: "ojhub.js", Query: "?ver=32", Defer: true},
 		},
+		Extra: []string{
+			`<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`,
+			`<link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/unbounded/v12/Yq6W-LOTXCb04q32xlpwu8Zf.woff2">`,
+			`<link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/unbounded/v12/Yq6W-LOTXCb04q32xlpwv8ZfrxE.woff2">`,
+		},
 	},
 
 	{
@@ -100,6 +105,11 @@ var versions = []clientVersion{
 			{Href: "newHelper.js", Query: "?ver=31", Defer: true},
 			{Href: "nhConfig.js", Query: "?ver=31", Defer: true},
 			{Href: "ojhub.js", Query: "?ver=33", Defer: true},
+		},
+		Extra: []string{
+			`<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`,
+			`<link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/unbounded/v12/Yq6W-LOTXCb04q32xlpwu8Zf.woff2">`,
+			`<link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/unbounded/v12/Yq6W-LOTXCb04q32xlpwv8ZfrxE.woff2">`,
 		},
 	},
 
@@ -115,6 +125,11 @@ var versions = []clientVersion{
 			{Href: "nhConfig.js", Query: "?ver=29", Defer: true},
 			{Href: "ojhub.js", Query: "?ver=28", Defer: true},
 		},
+		Extra: []string{
+			`<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`,
+			`<link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/unbounded/v12/Yq6W-LOTXCb04q32xlpwu8Zf.woff2">`,
+			`<link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/unbounded/v12/Yq6W-LOTXCb04q32xlpwv8ZfrxE.woff2">`,
+		},
 	},
 
 	{
@@ -128,6 +143,11 @@ var versions = []clientVersion{
 			{Href: "newHelper.js", Query: "?ver=29", Defer: true},
 			{Href: "nhConfig.js", Query: "?ver=29", Defer: true},
 			{Href: "ojhub.js", Query: "?ver=29", Defer: true},
+		},
+		Extra: []string{
+			`<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`,
+			`<link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/unbounded/v12/Yq6W-LOTXCb04q32xlpwu8Zf.woff2">`,
+			`<link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/unbounded/v12/Yq6W-LOTXCb04q32xlpwv8ZfrxE.woff2">`,
 		},
 	},
 
