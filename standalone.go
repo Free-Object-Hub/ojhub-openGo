@@ -148,6 +148,17 @@ func gzipMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func securityHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h := w.Header()
+		h.Set("Strict-Transport-Security", "max-age=31536000")
+		h.Set("X-Frame-Options", "DENY")
+		h.Set("Cross-Origin-Opener-Policy", "same-origin")
+		h.Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		next.ServeHTTP(w, r)
+	})
+}
+
 func registerStaticRoutes(mux *http.ServeMux) {
 	imgsDir := os.Getenv("IMGS")
 	if imgsDir == "" {
