@@ -132,7 +132,7 @@ func (p News) NewsRender() NewsResp {
 			p.CommsCount,
 		},
 		HasFile: p.HasFile,
-		//Poll: p.Poll,
+		//Poll: p.PollElem(),
 	}
 }
 
@@ -161,7 +161,7 @@ func (p News) NewsRenderLegacy() []interface{} {
 		0, // isLiked, dead field
 		p.HasFile,
 		p.GdpsImg,
-		p.Poll,
+		p.PollElem(),
 	}
 }
 

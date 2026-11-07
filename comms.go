@@ -69,17 +69,17 @@ func COMMfetchById(ID int) (*Comm, error) {
 }
 
 func GetComms(channel int, whereIz int, page int) ([]CommResp, error) {
-	cackeKey := fmt.Sprintf("comms:%d:%d", channel, whereIz)
+	cacheKey := fmt.Sprintf("comms:%d:%d", channel, whereIz)
 	if page == 0 {
 		var err error
-		cached, err := RamGet(cackeKey)
+		cached, err := RamGet(cacheKey)
 		if err != nil {
 			return nil, err
 		}
 		if cached != "" {
 			var comments []CommResp
 			if err := json.Unmarshal([]byte(cached), &comments); err != nil {
-				log.Printf("Failed to decode cached comments %s: %v", cackeKey, err)
+				log.Printf("Failed to decode cached comments %s: %v", cacheKey, err)
 			} else {
 				return comments, nil
 			}
@@ -107,9 +107,8 @@ func GetComms(channel int, whereIz int, page int) ([]CommResp, error) {
 	}
 	if page == 0 {
 		if commCache, err := json.Marshal(result); err != nil {
-			log.Printf("Failed to decode cached comments %s: %v", cackeKey, err)
+			log.Printf("Failed to decode cached comments %s: %v", cacheKey, err)
 		} else {
-			log.Println(commCache)
 			RamSet(
 				fmt.Sprintf("comms:%d:%d", channel, whereIz),
 				string(commCache),

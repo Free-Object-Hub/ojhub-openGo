@@ -1,7 +1,7 @@
 package main
 
 /*
- * Loader 1.10
+ * Loader 1.40
  *
  * Author: Claude code, with prompts and patches from MIOBOMB (2026)
  *
@@ -11,7 +11,6 @@ package main
  * hence version 1.10 in openGo.
  * For understanding: in nodejs the "/" route had all tags hardcoded and just substituted
  * the cookie with the version into them, this broke 0.97.33 in Chromium browsers, that's no longer the case here.
- * ^^^ outdated
  *
  * Merging openRust improvements back into openGo:
  * - two independent statuses instead of one (lifecycle + technical build state)
@@ -434,6 +433,11 @@ func CliLoader(w http.ResponseWriter, r *http.Request) {
 <html>
 <head>
 	<meta charset="utf-8">
+		<meta property="og:title" content="Object Hub Loader">
+		<meta property="title" content="Object Hub Loader">
+		<meta property="og:description" content="Open any historic version of our site!">
+		<meta property="description" content="Open any historic version of our site!">
+		<meta property="og:image" content="%s/imgs/hubbig.png">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
 	<title>OJHUB LOADER v1.40</title>
 		<style>
@@ -478,5 +482,5 @@ func CliLoader(w http.ResponseWriter, r *http.Request) {
 		%s
 	</table>
 </body>
-</html>`, html.EscapeString(current), html.EscapeString(current), alive, lost)
+</html>`, HELPER_URL, html.EscapeString(current), html.EscapeString(current), alive, lost)
 }
