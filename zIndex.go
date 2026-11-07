@@ -105,13 +105,9 @@ func buildMetaTags(r *http.Request) string {
 	}
 	return fmt.Sprintf(
 		`<meta property="og:title" content="%s">
-		<meta property="title" content="%s">
 		<meta property="og:description" content="%s">
-		<meta property="description" content="%s">
 		<meta property="og:image" content="%s">`,
 		metaTitle,
-		metaTitle,
-		metaDescription,
 		metaDescription,
 		metaImage,
 	)

@@ -434,9 +434,7 @@ func CliLoader(w http.ResponseWriter, r *http.Request) {
 <head>
 	<meta charset="utf-8">
 		<meta property="og:title" content="Object Hub Loader">
-		<meta property="title" content="Object Hub Loader">
 		<meta property="og:description" content="Open any historic version of our site!">
-		<meta property="description" content="Open any historic version of our site!">
 		<meta property="og:image" content="%s/imgs/hubbig.png">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
 	<title>OJHUB LOADER v1.40</title>
