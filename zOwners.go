@@ -109,7 +109,7 @@ func PermAdd(w http.ResponseWriter, r *http.Request) {
 	}
 	gdpsId, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {
-		w.Write([]byte("-1"))
+		w.Write([]byte("-2"))
 		return
 	}
 	channelType, err := strconv.Atoi(r.URL.Query().Get("type"))
@@ -119,7 +119,7 @@ func PermAdd(w http.ResponseWriter, r *http.Request) {
 	}
 	targetUserId, err := strconv.Atoi(r.URL.Query().Get("user"))
 	if err != nil {
-		w.Write([]byte("-3"))
+		w.Write([]byte("-2"))
 		return
 	}
 	var access int
@@ -129,16 +129,16 @@ func PermAdd(w http.ResponseWriter, r *http.Request) {
 		access, err = CheckGdpsAccess(user.UserId, gdpsId)
 	}
 	if err != nil {
-		w.Write([]byte("-4"))
+		w.Write([]byte("-2"))
 		return
 	}
 	if access != 2 {
-		w.Write([]byte("-5"))
+		w.Write([]byte("-2"))
 		return
 	}
 	targetUser, err := GetUserById(targetUserId)
 	if err != nil {
-		w.Write([]byte("-6"))
+		w.Write([]byte("-2"))
 		return
 	}
 	if channelType == -1 {
@@ -147,7 +147,7 @@ func PermAdd(w http.ResponseWriter, r *http.Request) {
 		err = AddOwnerGdps(gdpsId, targetUser.UserId, channelType)
 	}
 	if err != nil {
-		w.Write([]byte("-7"))
+		w.Write([]byte("-2"))
 		return
 	}
 	username := targetUser.Nickname
