@@ -75,8 +75,12 @@ func (p News) PollElem() any {
 	return out
 }
 
+const PollCharBudget = 1500 // сумма рун всех вариантов одного опроса
+const PollRowMax = 2048     // размер колонки news.poll
+
 func pollBuild(opts []string, m, h, days string) (string, bool) {
-	if len(opts) < 2 || len(opts) > 10 {
+	n := len(opts)
+	if n < 2 || n > 31 {
 		return "", false
 	}
 	mi, e1 := strconv.Atoi(m)
@@ -85,16 +89,25 @@ func pollBuild(opts []string, m, h, days string) (string, bool) {
 	if e1 != nil || e2 != nil || e3 != nil || mi < 0 || mi > 1 || hi < 0 || hi > 2 || di < 1 || di > 365 {
 		return "", false
 	}
-	out := []any{PollParams{M: mi, H: hi, E: time.Now().Unix() + int64(di)*86400, R: make([]int, len(opts))}}
+	out := []any{PollParams{M: mi, H: hi, E: time.Now().Unix() + int64(di)*86400, R: make([]int, n)}}
+	total := 0
 	for _, o := range opts {
 		o = strings.TrimSpace(o)
-		if o == "" || utf8.RuneCountInString(o) > 100 {
+		c := utf8.RuneCountInString(o)
+		if c == 0 {
+			return "", false
+		}
+		if total += c; total > PollCharBudget {
 			return "", false
 		}
 		out = append(out, ExploitPatch(o))
 	}
 	b, err := json.Marshal(out)
-	return string(b), err == nil
+	// запас: r вырастет с нулей до счётчиков и добавится "f":1
+	if err != nil || utf8.RuneCountInString(string(b))+10*n+10 > PollRowMax {
+		return "", false
+	}
+	return string(b), true
 }
 
 // точные счётчики из таблицы голосов: группируем по маске, раскладываем биты
