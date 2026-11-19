@@ -178,8 +178,8 @@ var endpoints = []Endpoint{
 	{"", apiAddr + "content/news" + php, LocalNews},                     // zGlobalNews.go
 	{"", apiAddr + "content/newsC" + php, NewsGetOne},                   // zGlobalNews.go
 	{"POST ", apiAddr + "content/polls/vote" + php, PollVote},           // zPolls.go
-	{"POST ", apiAddr + "content/polls/results" + php, PollResults},     // zPolls.go
-	{"POST ", apiAddr + "content/polls/stop" + php, PollStopHandler},    // zPolls.go
+	{"POST ", apiAddr + "send/polls/results" + php, PollResults},        // zPolls.go
+	{"POST ", apiAddr + "send/polls/stop" + php, PollStopHandler},       // zPolls.go
 	{"", apiAddr + "search/new" + php, fullSearch},                      // zSearch.go
 	{"", apiAddr + "content/getUser" + php, GetUserHandler},             // zPubProf.go
 	{"", apiAddr + "content/getAddedCamps" + php, GetAddedCampsHandler}, // zPubProf.go
