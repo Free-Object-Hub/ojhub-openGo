@@ -448,6 +448,19 @@ func renderRow(v clientVersion) string {
 // CliLoader — p.4: a full standalone page, as it was in openGo
 // (unlike the Rust variant there's no need to change behavior here — it's already like that).
 func CliLoader(w http.ResponseWriter, r *http.Request) {
+	if q := r.URL.Query().Get("ver"); q != "" {
+		if v, ok := findVersion(q); ok && v.isWorking() {
+			http.SetCookie(w, &http.Cookie{
+				Name:   "cli_ver",
+				Value:  v.Ver,
+				Path:   "/",
+				MaxAge: 60 * 60 * 24 * 365,
+			})
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+	}
+
 	current := defaultVer()
 	if c, err := r.Cookie("cli_ver"); err == nil {
 		if _, ok := findVersion(c.Value); ok {
