@@ -80,7 +80,7 @@ var versions = []clientVersion{
 		Ver: "0.99_BETA2", Date: "?? ??? 2026", Desc: "JUST A BETA",
 		Lifecycle: LifecycleDev, State: StateWorking,
 		CSS: []asset{
-			{Href: "main.css", Query: "?ver=22"},
+			{Href: "main.css", Query: "?ver=23"},
 		},
 		JS: []asset{
 			{Href: "newHelper.js", Query: "?ver=33", Defer: true},
@@ -98,7 +98,7 @@ var versions = []clientVersion{
 		Ver: "0.99_BETA1", Date: "?? ??? 2026", Desc: "JUST A BETA",
 		Lifecycle: LifecycleDev, State: StateWorking,
 		CSS: []asset{
-			{Href: "main.css", Query: "?ver=22"},
+			{Href: "main.css", Query: "?ver=23"},
 		},
 		JS: []asset{
 			{Href: "newHelper.js", Query: "?ver=33", Defer: true},
@@ -172,7 +172,7 @@ var versions = []clientVersion{
 		Ver: "0.97.8", Date: "?? ??? 2026", Desc: "openRust AND action write init, broken at now",
 		Lifecycle: LifecycleLegacy, State: StateWorking,
 		CSS: []asset{
-			{Href: "main.css", Query: "?ver=20"},
+			{Href: "main.css", Query: "?ver=21"},
 			{Href: "window.css", Query: "?ver=20"},
 		},
 		JS: []asset{
