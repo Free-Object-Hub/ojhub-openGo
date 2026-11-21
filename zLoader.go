@@ -290,7 +290,7 @@ var versions = []clientVersion{
 			{Href: "window.css", Query: "?ver=18"},
 		},
 		JS: []asset{
-			{Href: "ojhub.js", Query: "?ver=18&helper", Defer: true},
+			{Href: "ojhub.js", Query: "?ver=19&helper", Defer: true},
 		},
 	},
 
