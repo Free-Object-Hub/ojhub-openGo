@@ -438,10 +438,14 @@ func renderRow(v clientVersion) string {
 			html.EscapeString(v.Ver), 60*60*24*365, html.EscapeString(v.Ver),
 		)
 	}
+	isStable := ""
+	if v.Ver == getEnv("CLI_VER", "0.97.7") {
+		isStable = " class=frameprofile"
+	}
 
 	return fmt.Sprintf(
-		`<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>`,
-		verCell, html.EscapeString(status), html.EscapeString(v.Date), html.EscapeString(v.Desc),
+		`<tr%s><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>`,
+		isStable, verCell, html.EscapeString(status), html.EscapeString(v.Date), html.EscapeString(v.Desc),
 	)
 }
 
