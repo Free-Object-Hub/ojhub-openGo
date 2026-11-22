@@ -133,104 +133,107 @@ func DropPhp(w http.ResponseWriter, r *http.Request) {
 
 // Note - in php there are 97 endpoints, here there are only 92
 var endpoints = []Endpoint{
-	{"POST ", apiAddr + "user/login" + php, userLogin},                  // zUserLogin.go
-	{"POST ", apiAddr + "user/logout" + php, userLogout},                // zUserLogin.go
-	{"POST ", apiAddr + "user/register" + php, userRegister},            // zUserLogin.go
-	{"POST ", apiAddr + "send/newsPost" + php, AddNews},                 // zNews.go
-	{"POST ", apiAddr + "send/newsModify" + php, NewsEdit},              // zNews.go
-	{"", apiAddr + "delete/newsPost" + php, NewsDelete},                 // zNews.go
-	{"POST ", apiAddr + "send/comment" + php, CommentSend},              // zComms.go
-	{"POST ", apiAddr + "send/commentModify" + php, CommentModify},      // zComms.go
-	{"", apiAddr + "delete/comment" + php, CommentDelete},               // zComms.go
-	{"POST ", apiAddr + "send/like" + php, LikeSend},                    // zLikes.go
-	{"POST ", apiAddr + "send/dislike" + php, DislSend},                 // zLikes.go
-	{"POST ", apiAddr + "reportGdps" + php, ReportGdps},                 // zReport.go
-	{"", apiAddr + "user/devices" + php, OpenDeviceTab},                 // zDevices.go
-	{"", apiAddr + "user/removeDevice" + php, RemoveDevice},             // zDevices.go
-	{"POST ", apiAddr + "user/getAccInfo" + php, GetConfInfo},           // zUserEdit.go
-	{"", apiAddr + "user/setNickname" + php, SetNicknameHandler},        // zUserEdit.go
-	{"", apiAddr + "user/setSocials" + php, SetSocialsHandler},          // zUserEdit.go
-	{"", apiAddr + "user/setResume" + php, SetResumeHandler},            // zUserEdit.go
-	{"POST ", apiAddr + "send/deviceAdd" + php, DeviceAddTab},           // zDevices.go
-	{"", apiAddr + "content/getAlarms" + php, GetAlarms},                // zAlarms.go
-	{"", apiAddr + "content/getAlarm" + php, GetAlarm},                  // zAlarms.go
-	{"", apiAddr + "send/deleteAlarm" + php, DeleteAlarm},               // zAlarms.go
-	{"", apiAddr + "send/writeAlarm" + php, WriteAlarmHandler},          // zAlarms.go
-	{"", apiAddr + "send/campAdd" + php, CampAdd},                       // zGdpsAdd.go
-	{"", apiAddr + "send/showAdd" + php, ShowAdd},                       // zGdpsAdd.go
-	{"", apiAddr + "send/pereAdd" + php, PereAdd},                       // zGdpsAdd.go
-	{"", apiAddr + "send/teleAdd" + php, TeleAdd},                       // zGdpsAdd.go
-	{"", apiAddr + "send/campEdit" + php, CampEdit},                     // zGdpsEdit.go
-	{"", apiAddr + "send/showEdit" + php, ShowEdit},                     // zGdpsEdit.go
-	{"", apiAddr + "send/pereEdit" + php, PereEdit},                     // zGdpsEdit.go
-	{"", apiAddr + "send/teleEdit" + php, TeleEdit},                     // zGdpsEdit.go
-	{"", apiAddr + "content/getJoinLog" + php, GetJoinLog},              // zOwners.go
-	{"", apiAddr + "send/bump" + php, GdpsBump},                         // zGdps.go
-	{"", apiAddr + "content/getOwners" + php, GetOwners},                // zOwners.go
-	{"", apiAddr + "send/permAdd" + php, PermAdd},                       // zOwners.go
-	{"", apiAddr + "send/perm" + php, PermRemove},                       // zOwners.go
-	{"", apiAddr + "gdps/sub" + php, gdpsSub},                           // zAlarms.go
-	{"", apiAddr + "gdps/unsub" + php, gdpsUnsub},                       // zAlarms.go
-	{"", apiAddr + "gdps/subs" + php, gdpsSubs},                         // zAlarms.go
-	{"POST ", apiAddr + "sub" + php, PushSub},                           // zPushs.go
-	{"", apiAddr + "content/fetchComms" + php, LoadMoreComms},           // zComms.go
-	{"", apiAddr + "content/newsAll" + php, GlobalNews},                 // zGlobalNews.go
-	{"", apiAddr + "content/news" + php, LocalNews},                     // zGlobalNews.go
-	{"", apiAddr + "content/newsC" + php, NewsGetOne},                   // zGlobalNews.go
-	{"POST ", apiAddr + "content/polls/vote" + php, PollVote},           // zPolls.go
-	{"POST ", apiAddr + "send/polls/results" + php, PollResults},        // zPolls.go
-	{"POST ", apiAddr + "send/polls/stop" + php, PollStopHandler},       // zPolls.go
-	{"", apiAddr + "search/new" + php, fullSearch},                      // zSearch.go
-	{"", apiAddr + "content/getUser" + php, GetUserHandler},             // zPubProf.go
-	{"", apiAddr + "content/getAddedCamps" + php, GetAddedCampsHandler}, // zPubProf.go
-	{"", apiAddr + "content/getAddedShows" + php, GetAddedShowsHandler}, // zPubProf.go
-	{"", apiAddr + "content/getAddedPeres" + php, GetAddedPeresHandler}, // zPubProf.go
-	{"", apiAddr + "content/getAddedTeles" + php, GetAddedTelesHandler}, // zPubProf.go
-	{"", apiAddr + "content/getUserGuides" + php, GetUserGuidesHandler}, // zPubProf.go
-	{"", apiAddr + "wiki/getWikis" + php, wikiSearch},                   // zSearch.go
-	{"", apiAddr + "wiki/getWiki" + php, GuidesHandler},                 // zWiki.go
-	{"", apiAddr + "wiki/getGuides" + php, GuidesHandler},               // zWiki.go
-	{"", apiAddr + "wiki/getGuide" + php, GuideHandler},                 // zWiki.go
-	{"", apiAddr + "send/newWiki" + php, HandleNewWiki},                 // zWikiDashboard.go
-	{"", apiAddr + "send/editWiki" + php, HandleEditWiki},               // zWikiDashboard.go
-	{"", apiAddr + "wiki/colors" + php, HandleWikiColors},               // zWikiDashboard.go
-	{"", apiAddr + "wiki/setMainWiki" + php, HandleSetMainWiki},         // zWikiDashboard.go
-	{"", apiAddr + "search/conntectWiki" + php, ConnectWiki},            // zGdpsWikiLinknig.go
-	{"", apiAddr + "search/conntectContent" + php, ConnectContent},      // zGdpsWikiLinknig.go
-	{"", apiAddr + "content/getGuidesAdmin" + php, GetGuidesAdmin},      // zWikiDashboard.go
-	{"", apiAddr + "send/newGuide" + php, NewGuide},                     // zWikiDashboard.go
-	{"", apiAddr + "send/editGuide" + php, EditGuideHandler},            // zWikiDashboard.go
-	{"", apiAddr + "wiki/setWikiTag" + php, SetWikiTagHandler},          // zWikiDashboard.go
-	{"", apiAddr + "wiki/templateGet" + php, TemplateGet},               // zWikiTemplates.go
-	{"", apiAddr + "wiki/templatesGet" + php, TemplatesGet},             // zWikiTemplates.go
-	{"", apiAddr + "wiki/templateSave" + php, TemplateSave},             // zWikiTemplates.go
-	{"", apiAddr + "wiki/templateDelete" + php, TemplateDelete},         // zWikiTemplates.go
-	{"", apiAddr + "forum/create" + php, ForumCreate},                   // zForums.go
-	{"", apiAddr + "forum/createPost" + php, ForumCreatePost},           // zForums.go
-	{"", apiAddr + "send/forumPost" + php, ForumCreatePost},             // zForums.go
-	{"", apiAddr + "forum/getPost" + php, ForumGetPost},                 // zForums.go
-	{"", apiAddr + "forum/getPosts" + php, ForumGetPosts},               // zForums.go
-	{"", apiAddr + "vacans/getAll" + php, vacsSearch},                   // zSearch.go
-	{"", apiAddr + "vacans/apply" + php, vacApply},                      // zVacApls.go
-	{"", apiAddr + "vacans/removeApl" + php, vacUnapply},                // zVacApls.go
-	{"", apiAddr + "content/vacsC" + php, GetOneVac},                    // zVacApls.go
-	{"", apiAddr + "vacans/get" + php, VacsGet},                         // zVacans.go
-	{"", apiAddr + "send/vacsAdd" + php, VacsAdd},                       // zVacans.go
-	{"", apiAddr + "send/vacsEdit" + php, VacsEdit},                     // zVacans.go
-	{"", apiAddr + "vacans/edit" + php, VacsEditPre},                    // zVacans.go
-	{"", apiAddr + "vacans/applies" + php, VacsApplies},                 // zVacans.go
-	{"", apiAddr + "vacans/removeVac" + php, VacsRemove},                // zVacans.go
-	{"", apiAddr + "content/camp" + php, GDPSopener},                    // zGdps.go
-	{"", apiAddr + "loginT" + php, FreeBSDcompile},                      // zLoginT.go
-	{"", apiAddr + "likesT" + php, LikesT},                              // zLikesT.go
-	{"", apiAddr + "wordleRU" + php, WordleRU},                          // zWordle.go
-	{"", apiAddr + "wordleEN" + php, WordleEN},                          // zWordle.go
-	{"", "/join" + php, GDPSjoin},                                       // zLoader.go
-	{"", "/loader", CliLoader},                                          // zLoader.go
-	{"", "/", IndexParser},                                              // zIndex.go
-	{"", apiAddr + "challenge" + php, AltchaChallenge},                  // captcha.go
-	{"", apiAddr + "!newTakeAll" + php, AdminTakeAll},                   // zAdmin.go
-	{"", apiAddr + "Aaction" + php, Aaction},                            // zAdmin.go
+	{"POST ", apiAddr + "user/login" + php, userLogin},                     // zUserLogin.go
+	{"POST ", apiAddr + "user/logout" + php, userLogout},                   // zUserLogin.go
+	{"POST ", apiAddr + "user/register" + php, userRegister},               // zUserLogin.go
+	{"POST ", apiAddr + "send/newsPost" + php, AddNews},                    // zNews.go
+	{"POST ", apiAddr + "send/newsModify" + php, NewsEdit},                 // zNews.go
+	{"", apiAddr + "delete/newsPost" + php, NewsDelete},                    // zNews.go
+	{"POST ", apiAddr + "send/comment" + php, CommentSend},                 // zComms.go
+	{"POST ", apiAddr + "send/commentModify" + php, CommentModify},         // zComms.go
+	{"", apiAddr + "delete/comment" + php, CommentDelete},                  // zComms.go
+	{"POST ", apiAddr + "send/like" + php, LikeSend},                       // zLikes.go
+	{"POST ", apiAddr + "send/dislike" + php, DislSend},                    // zLikes.go
+	{"POST ", apiAddr + "reportGdps" + php, ReportGdps},                    // zReport.go
+	{"", apiAddr + "user/devices" + php, OpenDeviceTab},                    // zDevices.go
+	{"", apiAddr + "user/removeDevice" + php, RemoveDevice},                // zDevices.go
+	{"POST ", apiAddr + "user/getAccInfo" + php, GetConfInfo},              // zUserEdit.go
+	{"", apiAddr + "user/setNickname" + php, SetNicknameHandler},           // zUserEdit.go
+	{"", apiAddr + "user/setSocials" + php, SetSocialsHandler},             // zUserEdit.go
+	{"", apiAddr + "user/setResume" + php, SetResumeHandler},               // zUserEdit.go
+	{"POST ", apiAddr + "send/deviceAdd" + php, DeviceAddTab},              // zDevices.go
+	{"", apiAddr + "content/getAlarms" + php, GetAlarms},                   // zAlarms.go
+	{"", apiAddr + "content/getAlarm" + php, GetAlarm},                     // zAlarms.go
+	{"", apiAddr + "send/deleteAlarm" + php, DeleteAlarm},                  // zAlarms.go
+	{"", apiAddr + "send/writeAlarm" + php, WriteAlarmHandler},             // zAlarms.go
+	{"", apiAddr + "send/campAdd" + php, CampAdd},                          // zGdpsAdd.go
+	{"", apiAddr + "send/showAdd" + php, ShowAdd},                          // zGdpsAdd.go
+	{"", apiAddr + "send/pereAdd" + php, PereAdd},                          // zGdpsAdd.go
+	{"", apiAddr + "send/teleAdd" + php, TeleAdd},                          // zGdpsAdd.go
+	{"", apiAddr + "send/campEdit" + php, CampEdit},                        // zGdpsEdit.go
+	{"", apiAddr + "send/showEdit" + php, ShowEdit},                        // zGdpsEdit.go
+	{"", apiAddr + "send/pereEdit" + php, PereEdit},                        // zGdpsEdit.go
+	{"", apiAddr + "send/teleEdit" + php, TeleEdit},                        // zGdpsEdit.go
+	{"", apiAddr + "content/getJoinLog" + php, GetJoinLog},                 // zOwners.go
+	{"", apiAddr + "send/bump" + php, GdpsBump},                            // zGdps.go
+	{"", apiAddr + "content/getOwners" + php, GetOwners},                   // zOwners.go
+	{"", apiAddr + "send/permAdd" + php, PermAdd},                          // zOwners.go
+	{"", apiAddr + "send/perm" + php, PermRemove},                          // zOwners.go
+	{"", apiAddr + "gdps/sub" + php, gdpsSub},                              // zAlarms.go
+	{"", apiAddr + "gdps/unsub" + php, gdpsUnsub},                          // zAlarms.go
+	{"", apiAddr + "gdps/subs" + php, gdpsSubs},                            // zAlarms.go
+	{"POST ", apiAddr + "sub" + php, PushSub},                              // zPushs.go
+	{"", apiAddr + "content/fetchComms" + php, LoadMoreComms},              // zComms.go
+	{"", apiAddr + "content/newsAll" + php, GlobalNews},                    // zGlobalNews.go
+	{"", apiAddr + "content/news" + php, LocalNews},                        // zGlobalNews.go
+	{"", apiAddr + "content/newsC" + php, NewsGetOne},                      // zGlobalNews.go
+	{"POST ", apiAddr + "content/polls/vote" + php, PollVote},              // zPolls.go
+	{"POST ", apiAddr + "send/polls/results" + php, PollResults},           // zPolls.go
+	{"POST ", apiAddr + "send/polls/stop" + php, PollStopHandler},          // zPolls.go
+	{"POST ", apiAddr + "send/polls/custom" + php, PollCustomVote},         // zPollsCustom.go
+	{"POST ", apiAddr + "send/polls/customs" + php, PollCustomsList},       // zPollsCustom.go
+	{"POST ", apiAddr + "send/polls/customDelete" + php, PollCustomDelete}, // zPollsCustom.go
+	{"", apiAddr + "search/new" + php, fullSearch},                         // zSearch.go
+	{"", apiAddr + "content/getUser" + php, GetUserHandler},                // zPubProf.go
+	{"", apiAddr + "content/getAddedCamps" + php, GetAddedCampsHandler},    // zPubProf.go
+	{"", apiAddr + "content/getAddedShows" + php, GetAddedShowsHandler},    // zPubProf.go
+	{"", apiAddr + "content/getAddedPeres" + php, GetAddedPeresHandler},    // zPubProf.go
+	{"", apiAddr + "content/getAddedTeles" + php, GetAddedTelesHandler},    // zPubProf.go
+	{"", apiAddr + "content/getUserGuides" + php, GetUserGuidesHandler},    // zPubProf.go
+	{"", apiAddr + "wiki/getWikis" + php, wikiSearch},                      // zSearch.go
+	{"", apiAddr + "wiki/getWiki" + php, GuidesHandler},                    // zWiki.go
+	{"", apiAddr + "wiki/getGuides" + php, GuidesHandler},                  // zWiki.go
+	{"", apiAddr + "wiki/getGuide" + php, GuideHandler},                    // zWiki.go
+	{"", apiAddr + "send/newWiki" + php, HandleNewWiki},                    // zWikiDashboard.go
+	{"", apiAddr + "send/editWiki" + php, HandleEditWiki},                  // zWikiDashboard.go
+	{"", apiAddr + "wiki/colors" + php, HandleWikiColors},                  // zWikiDashboard.go
+	{"", apiAddr + "wiki/setMainWiki" + php, HandleSetMainWiki},            // zWikiDashboard.go
+	{"", apiAddr + "search/conntectWiki" + php, ConnectWiki},               // zGdpsWikiLinknig.go
+	{"", apiAddr + "search/conntectContent" + php, ConnectContent},         // zGdpsWikiLinknig.go
+	{"", apiAddr + "content/getGuidesAdmin" + php, GetGuidesAdmin},         // zWikiDashboard.go
+	{"", apiAddr + "send/newGuide" + php, NewGuide},                        // zWikiDashboard.go
+	{"", apiAddr + "send/editGuide" + php, EditGuideHandler},               // zWikiDashboard.go
+	{"", apiAddr + "wiki/setWikiTag" + php, SetWikiTagHandler},             // zWikiDashboard.go
+	{"", apiAddr + "wiki/templateGet" + php, TemplateGet},                  // zWikiTemplates.go
+	{"", apiAddr + "wiki/templatesGet" + php, TemplatesGet},                // zWikiTemplates.go
+	{"", apiAddr + "wiki/templateSave" + php, TemplateSave},                // zWikiTemplates.go
+	{"", apiAddr + "wiki/templateDelete" + php, TemplateDelete},            // zWikiTemplates.go
+	{"", apiAddr + "forum/create" + php, ForumCreate},                      // zForums.go
+	{"", apiAddr + "forum/createPost" + php, ForumCreatePost},              // zForums.go
+	{"", apiAddr + "send/forumPost" + php, ForumCreatePost},                // zForums.go
+	{"", apiAddr + "forum/getPost" + php, ForumGetPost},                    // zForums.go
+	{"", apiAddr + "forum/getPosts" + php, ForumGetPosts},                  // zForums.go
+	{"", apiAddr + "vacans/getAll" + php, vacsSearch},                      // zSearch.go
+	{"", apiAddr + "vacans/apply" + php, vacApply},                         // zVacApls.go
+	{"", apiAddr + "vacans/removeApl" + php, vacUnapply},                   // zVacApls.go
+	{"", apiAddr + "content/vacsC" + php, GetOneVac},                       // zVacApls.go
+	{"", apiAddr + "vacans/get" + php, VacsGet},                            // zVacans.go
+	{"", apiAddr + "send/vacsAdd" + php, VacsAdd},                          // zVacans.go
+	{"", apiAddr + "send/vacsEdit" + php, VacsEdit},                        // zVacans.go
+	{"", apiAddr + "vacans/edit" + php, VacsEditPre},                       // zVacans.go
+	{"", apiAddr + "vacans/applies" + php, VacsApplies},                    // zVacans.go
+	{"", apiAddr + "vacans/removeVac" + php, VacsRemove},                   // zVacans.go
+	{"", apiAddr + "content/camp" + php, GDPSopener},                       // zGdps.go
+	{"", apiAddr + "loginT" + php, FreeBSDcompile},                         // zLoginT.go
+	{"", apiAddr + "likesT" + php, LikesT},                                 // zLikesT.go
+	{"", apiAddr + "wordleRU" + php, WordleRU},                             // zWordle.go
+	{"", apiAddr + "wordleEN" + php, WordleEN},                             // zWordle.go
+	{"", "/join" + php, GDPSjoin},                                          // zLoader.go
+	{"", "/loader", CliLoader},                                             // zLoader.go
+	{"", "/", IndexParser},                                                 // zIndex.go
+	{"", apiAddr + "challenge" + php, AltchaChallenge},                     // captcha.go
+	{"", apiAddr + "!newTakeAll" + php, AdminTakeAll},                      // zAdmin.go
+	{"", apiAddr + "Aaction" + php, Aaction},                               // zAdmin.go
 	{"", apiAddr + "wiki/filesGet" + php, DropPhp},
 	{"", apiAddr + "wiki/filesSend" + php, DropPhp},
 	{"", apiAddr + "search/deleteWikiFiles" + php, DropPhp}, // why the hell is file deletion in search?

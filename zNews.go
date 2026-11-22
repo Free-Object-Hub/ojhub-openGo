@@ -105,7 +105,7 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 			return ""
 		}
 		var okP bool
-		if poll, okP = pollBuild(opts, get("pollM"), get("pollH"), get("pollDays")); !okP {
+		if poll, okP = pollBuild(opts, get("pollM"), get("pollH"), get("pollDays"), get("pollX")); !okP {
 			ApiError(w, 400, "Bad poll", "-7")
 			return
 		}

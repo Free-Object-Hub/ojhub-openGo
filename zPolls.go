@@ -18,6 +18,7 @@ type PollParams struct {
 	M int   `json:"m"`
 	H int   `json:"h"`
 	E int64 `json:"e"`
+	X int   `json:"x,omitempty"` // community choice: 1 = включен, отсутствует = выключен
 	F int   `json:"f,omitempty"` // только в БД: окончательно закрыт, голоса удалены, r финальный
 	C int   `json:"c,omitempty"` // только в ответе: закрыт
 	R []int `json:"r,omitempty"` // живые счётчики, после закрытия финальные
@@ -78,7 +79,7 @@ func (p News) PollElem() any {
 const PollCharBudget = 1500 // сумма рун всех вариантов одного опроса
 const PollRowMax = 2048     // размер колонки news.poll
 
-func pollBuild(opts []string, m, h, days string) (string, bool) {
+func pollBuild(opts []string, m, h, days, x string) (string, bool) {
 	n := len(opts)
 	if n < 2 || n > 31 {
 		return "", false
@@ -86,10 +87,14 @@ func pollBuild(opts []string, m, h, days string) (string, bool) {
 	mi, e1 := strconv.Atoi(m)
 	hi, e2 := strconv.Atoi(h)
 	di, e3 := strconv.Atoi(days)
+	xi := 0
+	if x == "1" {
+		xi = 1
+	}
 	if e1 != nil || e2 != nil || e3 != nil || mi < 0 || mi > 1 || hi < 0 || hi > 2 || di < 1 || di > 365 {
 		return "", false
 	}
-	out := []any{PollParams{M: mi, H: hi, E: time.Now().Unix() + int64(di)*86400, R: make([]int, n)}}
+	out := []any{PollParams{M: mi, H: hi, E: time.Now().Unix() + int64(di)*86400, R: make([]int, n), X: xi}}
 	total := 0
 	for _, o := range opts {
 		o = strings.TrimSpace(o)
