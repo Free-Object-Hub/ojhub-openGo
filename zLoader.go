@@ -84,7 +84,7 @@ var versions = []clientVersion{
 		},
 		JS: []asset{
 			{Href: "newHelper.js", Query: "?ver=33", Defer: true},
-			{Href: "nhConfig.js", Query: "?ver=34", Defer: true},
+			{Href: "nhConfig.js", Query: "?ver=35", Defer: true},
 			{Href: "ojhub.js", Query: "?ver=33", Defer: true},
 		},
 		Extra: []string{
@@ -156,7 +156,7 @@ var versions = []clientVersion{
 		},
 		JS: []asset{
 			{Href: "newHelper.js", Query: "?ver=31", Defer: true},
-			{Href: "nhConfig.js", Query: "?ver=32", Defer: true},
+			{Href: "nhConfig.js", Query: "?ver=33", Defer: true},
 			{Href: "ojhub.js", Query: "?ver=33", Defer: true},
 		},
 		Extra: []string{
