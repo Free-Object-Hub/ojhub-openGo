@@ -35,7 +35,7 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 	}
 
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		ApiError(w, 500, "Parse error", "-1")
+		ApiError(w, 200, "Parse error", "-1")
 		return
 	}
 
@@ -55,7 +55,7 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 		multiMap, err := ParseMultiField(rawDescs, MAX_DESC_LEN)
 		if err != nil || len(multiMap) == 0 {
 			log.Println(err)
-			ApiError(w, 400, "Bad description", "-28")
+			ApiError(w, 200, "Bad description", "-28")
 			return
 		}
 		descJSON, _ := json.Marshal(multiMap)
@@ -76,7 +76,7 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 	if language == "" && len(rawShorts) > 0 {
 		multiShortMap, err := ParseMultiField(rawShorts, MAX_SHORT_LEN)
 		if err != nil {
-			ApiError(w, 400, "Bad short", "-29")
+			ApiError(w, 200, "Bad short", "-29")
 			return
 		}
 		if len(multiShortMap) == 0 {
@@ -147,13 +147,13 @@ func gdpsAddHandler(w http.ResponseWriter, r *http.Request, contentType int) {
 
 	if imgFile != nil {
 		if err := CheckImage(imgFile); err != nil {
-			ApiError(w, 400, "Bad image", "-3")
+			ApiError(w, 200, "Bad image", "-3")
 			return
 		}
 	}
 	if banFile != nil {
 		if err := CheckImage(banFile); err != nil {
-			ApiError(w, 400, "Bad image", "-3")
+			ApiError(w, 200, "Bad image", "-3")
 			return
 		}
 	}

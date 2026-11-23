@@ -12,12 +12,12 @@ import (
 func userLogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", 200)
 		return
 	}
 	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, "Error parsing form: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Error parsing form: "+err.Error(), 200)
 		return
 	}
 
@@ -35,7 +35,7 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 		user, err = GetUserByUsername(username)
 	}
 	if err != nil {
-		http.Error(w, "Error with user", http.StatusInternalServerError)
+		http.Error(w, "Error with user", 200)
 		log.Println(err)
 		return
 	}
@@ -52,9 +52,7 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 	ip := ExtractIP(r)
 	city, err := GetCity(ip)
 	if err != nil {
-		http.Error(w, "Error with city", http.StatusInternalServerError)
-		log.Println(err)
-		return
+		city = [2]string{"unknown", "unknown"}
 	}
 
 	device := r.FormValue("device")
@@ -68,7 +66,8 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 		r.FormValue("deviceDynamic"),
 	)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		log.Println("InsertDevice:", err, "ip:", ip, "ua:", r.Header.Get("User-Agent"), "device:", device)
+		http.Error(w, err.Error(), 200)
 		return
 	}
 
@@ -76,11 +75,11 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 
 	jsonData, err := InitOjhub(ip, user.Token, device, true, true, false)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), 200)
 		return
 	}
 	if err := json.NewEncoder(w).Encode(jsonData); err != nil {
-		http.Error(w, "User data error: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "User data error: "+err.Error(), 200)
 	}
 }
 
