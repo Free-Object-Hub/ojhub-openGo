@@ -10,106 +10,120 @@ import (
 	"strings"
 )
 
-func firstQueryValue(q url.Values, keys ...string) string {
-	for _, key := range keys {
-		if value := q.Get(key); value != "" {
-			return value
-		}
+type meta struct{ title, desc, image string }
+
+func parseRoute(r *http.Request) (segs []string, value string) {
+	raw := r.URL.RawQuery
+	if i := strings.IndexByte(raw, '&'); i >= 0 {
+		raw = raw[:i] // дальше только команды
 	}
-	return ""
+	if i := strings.IndexByte(raw, '='); i >= 0 {
+		value, _ = url.QueryUnescape(raw[i+1:])
+		raw = raw[:i]
+	}
+	if p, err := url.PathUnescape(raw); err == nil {
+		raw = p
+	}
+	return strings.Split(raw, "/"), value
 }
 
-func futureLinkFormat(r *http.Request) (string, int, bool) {
-	// remember reader - this format is the future, it will on the contrary in the future start
-	// dominating over the entire routing architecture,
-	// even if it breaks old clients
-	//
-	// FIXME:
-	// 1. make a parser for guides
-	// 2. figure out what to do with links of the format:
-	// "?wiki/{wikiId}/page/{guideId}"
-	// yes, this is the very fixme that will hang for more than one year
-	for key := range r.URL.Query() {
-		parts := strings.SplitN(key, "/", 2)
-		if len(parts) != 2 {
-			continue
-		}
-		id, err := strconv.Atoi(parts[1])
-		if err != nil {
-			continue
-		}
-		return parts[0], id, true
+func (m *meta) fromGDPS(idStr string) {
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return
 	}
-	return "", 0, false
+	if gdps, err := GDPSfetchById(id); err == nil && gdps != nil {
+		f := gdps.ToShort(false, false)
+		m.title, m.desc, m.image = f.Title, f.Text, f.Img
+	}
+}
+
+func (m *meta) fromWiki(idStr string) {
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return
+	}
+	if wiki, err := WIKIfetchById(id); err == nil && wiki != nil {
+		m.title, m.desc = wiki.Title, wiki.Text
+	}
+}
+
+func (m *meta) fromNews(idStr string) {
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return
+	}
+	news, err := NEWSfetchById(id)
+	if err != nil || news == nil {
+		return
+	}
+	m.title = news.Title
+	m.desc = ""
+	if decoded, err := base64.StdEncoding.DecodeString(news.Text); err == nil {
+		m.desc = string(decoded)
+	}
+	if gdps, err := GDPSfetchById(news.GdpsId); err == nil && gdps != nil {
+		m.image = gdps.ToShort(false, false).Img
+	}
+}
+
+func (m *meta) fromVac(idStr string) {
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return
+	}
+	if vac, err := VACSfetchById(id, 0); err == nil && vac != nil {
+		m.title, m.desc = vac.Title, vac.Text
+		if gdps, err := GDPSfetchById(vac.GdpsID); err == nil && gdps != nil {
+			m.image = gdps.ToShort(false, false).Img
+		}
+	}
 }
 
 func buildMetaTags(r *http.Request) string {
-	metaTitle := "Object hub"
-	metaDescription := "A convenient service for finding and hosting your object shows and camps!"
-	metaImage := "https://objecthub.xyz/imgs/hubbig.png"
-	//
-	route, id, ok := futureLinkFormat(r)
-	if ok {
-		switch route {
-		case "VacsC":
-			if vac, err := VACSfetchById(id, 0); err == nil && vac != nil {
-				metaTitle = vac.Title
-				metaDescription = vac.Text
-				if gdps, err := GDPSfetchById(vac.GdpsID); err == nil && gdps != nil {
-					metaImage = gdps.ToShort(false, false).Img
-				}
+	m := meta{
+		title: "Object hub",
+		desc:  "A convenient service for finding and hosting your object shows and camps!",
+		image: "https://objecthub.xyz/imgs/hubbig.png",
+	}
+	segs, value := parseRoute(r)
+	switch segs[0] {
+	case "gdps": // ?gdps/ch/gId[/news[/nId]]
+		if len(segs) >= 3 {
+			if len(segs) == 5 && segs[3] == "news" {
+				m.fromNews(segs[4])
+			} else {
+				m.fromGDPS(segs[2]) // и сам GDPS, и список его новостей
 			}
 		}
-	} else {
-		q := r.URL.Query()
-		if _, ok := q["Wikis"]; ok {
-			metaTitle = "Object Hub Wiki"
-			metaDescription = "Object Hub Wiki - not Mediawiki! welcome to our wiki engine!"
+	case "wiki": // ?wiki=12 и будущий ?wiki/12/...
+		if len(segs) >= 2 {
+			m.fromWiki(segs[1])
+		} else {
+			m.fromWiki(value)
 		}
-		if gdpsID := firstQueryValue(q, "camp", "show", "pere", "tele"); gdpsID != "" {
-			if id, err := strconv.Atoi(gdpsID); err == nil {
-				if gdps, err := GDPSfetchById(id); err == nil && gdps != nil {
-					gdpsFull := gdps.ToShort(false, false)
-					metaTitle = gdpsFull.Title
-					metaDescription = gdpsFull.Text
-					metaImage = gdpsFull.Img
-				}
-			}
+	case "Wikis", "wikis":
+		m.title = "Object Hub Wiki"
+		m.desc = "Object Hub Wiki - not Mediawiki! welcome to our wiki engine!"
+	case "VacsC": // ?VacsC/5
+		if len(segs) >= 2 {
+			m.fromVac(segs[1])
 		}
-		if wikiID := q.Get("wiki"); wikiID != "" {
-			if id, err := strconv.Atoi(wikiID); err == nil {
-				if wiki, err := WIKIfetchById(id); err == nil && wiki != nil {
-					metaTitle = wiki.Title
-					metaDescription = wiki.Text
-				}
-			}
-		}
-		if newsID := q.Get("news/comms"); newsID != "" {
-			parts := strings.SplitN(newsID, "|", 2)
-			if len(parts) > 0 {
-				if id, err := strconv.Atoi(parts[0]); err == nil {
-					if news, err := NEWSfetchById(id); err == nil && news != nil {
-						metaTitle = news.Title
-						if decoded, err := base64.StdEncoding.DecodeString(news.Text); err == nil {
-							metaDescription = string(decoded)
-						} else {
-							metaDescription = ""
-						}
-						if gdps, err := GDPSfetchById(news.GdpsId); err == nil && gdps != nil {
-							metaImage = gdps.ToShort(false, false).Img
-						}
-					}
-				}
-			}
+	// deprecated, пока живут
+	case "camp", "show", "pere", "tele":
+		m.fromGDPS(value)
+	case "news": // ?news/comms=5|...
+		if len(segs) == 2 && segs[1] == "comms" {
+			m.fromNews(strings.SplitN(value, "|", 2)[0])
 		}
 	}
 	return fmt.Sprintf(
 		`<meta property="og:title" content="%s">
 		<meta property="og:description" content="%s">
 		<meta property="og:image" content="%s">`,
-		metaTitle,
-		metaDescription,
-		metaImage,
+		html.EscapeString(m.title),
+		html.EscapeString(m.desc),
+		html.EscapeString(m.image),
 	)
 }
 
