@@ -94,7 +94,7 @@ import (
 // below you will find the proxy mechanism that handles this
 var (
 	HELPER_VER   = "133"
-	REVISION_NUM = "4"
+	REVISION_NUM = "5"
 	apiAddr      = "/server/" + HELPER_VER + "/"
 	php          = ".php"
 	HELPER_URL   = "https://objecthub.xyz/"
