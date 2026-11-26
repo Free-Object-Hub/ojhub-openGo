@@ -186,7 +186,7 @@ var versions = []clientVersion{
 
 	{
 		Ver: "0.98.1", Date: "15 Sep 2026", Desc: "GHE 2.2 and Jails init",
-		Lifecycle: LifecycleSupported, State: StateWorking,
+		Lifecycle: LifecycleLegacy, State: StateWorking,
 		CSS: []asset{
 			{Href: "main.css", Query: "?ver=21"},
 			{Href: "window.css", Query: "?ver=21"},
@@ -205,7 +205,7 @@ var versions = []clientVersion{
 
 	{
 		Ver: "0.98", Date: "28 Aug 2026", Desc: "",
-		Lifecycle: LifecycleSupported, State: StateWorking,
+		Lifecycle: LifecycleLegacy, State: StateWorking,
 		CSS: []asset{
 			{Href: "main.css", Query: "?ver=21"},
 			{Href: "window.css", Query: "?ver=21"},
