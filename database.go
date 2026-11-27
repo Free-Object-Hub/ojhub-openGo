@@ -6,13 +6,11 @@ import (
 	"log"
 	"net/netip"
 	"os"
-	"strconv"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/oschwald/geoip2-golang/v2"
-	"github.com/redis/go-redis/v9"
 )
 
 var DB *sqlx.DB
@@ -82,78 +80,6 @@ func GetCity(preIp string) ([2]string, error) {
 		return [2]string{"Unknown", "Unknown"}, nil
 	}
 	return [2]string{record.Country.Names.English, record.City.Names.English}, nil
-}
-
-// I use a universal layer so that replacing redis with something is real
-var (
-	RamDB   *redis.Client
-	ctxBruh = context.Background() // this is a stub and not a "context", I don't actually use it
-)
-
-func RamGet(key string) (string, error) {
-	if RamDB == nil {
-		// if redis died, there's no point yelling "oh error!" here
-		// in any case, 99% of cases after it there will be RamSet which will definitely yell
-		return "", nil
-	}
-	value, err := RamDB.Get(ctxBruh, key).Result()
-	if err == redis.Nil {
-		return "", nil
-	}
-	return value, err
-}
-
-func RamSet(key string, val string, ttl time.Duration) error {
-	if RamDB == nil {
-		log.Println("redis is died")
-		return nil //errors.New("redis die")
-	}
-	if err := RamDB.Set(ctxBruh, key, val, ttl).Err(); err != nil {
-		log.Printf("Redis SET %s failed: %v", key, err)
-	}
-	return nil
-}
-
-func RamDel(keys string) error {
-	if RamDB == nil {
-		return nil
-	}
-	return RamDB.Del(ctxBruh, keys).Err()
-}
-
-func InitRedis() bool {
-	host := getEnv("RAMDB_HOST", "localhost")
-	port := getEnv("RAMDB_PORT", "6379")
-	password := getEnv("RAMDB_PASSWD", "")
-	db := getEnv("RAMDB_NUM", "0")
-
-	log.Printf("> Connecting to Redis: host=%s, port=%s, db=%s", host, port, db)
-
-	dbInt := 0
-	if db != "" {
-		if d, err := strconv.Atoi(db); err == nil {
-			dbInt = d
-		}
-	}
-
-	RamDB = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", host, port),
-		Password: password,
-		DB:       dbInt,
-		PoolSize: 10,
-	})
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := RamDB.Ping(ctx).Err(); err != nil {
-		log.Printf("Failed to connect to Redis: %v (continuing without cache)", err)
-		RamDB = nil
-		return false
-	} else {
-		log.Println("> Redis done")
-		return true
-	}
 }
 
 func getEnv(key, defaultValue string) string {

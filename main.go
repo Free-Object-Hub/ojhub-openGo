@@ -252,15 +252,12 @@ func main() {
 	// create my own cache right in the process,
 	// because instance is 1, and I simply don't need to keep
 	// a single service for in-ram cache
-	InitDB()           // database.go
-	InitGeoDb()        // databese.go
-	rDb := InitRedis() // database.go
-	InitAltcha()       // captcha.go
+	InitDB()       // database.go
+	InitGeoDb()    // databese.go
+	InitRamCache() // database.go
+	InitAltcha()   // captcha.go
 	defer DB.Close()
 	defer GeoDb.Close()
-	if rDb {
-		defer RamDB.Close()
-	}
 	mux := http.NewServeMux()
 	for _, ep := range endpoints {
 		mux.HandleFunc(ep.Path, ep.Handler)

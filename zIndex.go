@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"html"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -12,11 +13,44 @@ import (
 
 type meta struct{ title, desc, image string }
 
-func parseRoute(r *http.Request) (segs []string, value string) {
-	raw := r.URL.RawQuery
-	if i := strings.IndexByte(raw, '&'); i >= 0 {
-		raw = raw[:i] // дальше только команды
+const (
+	defTitle = "Object hub"
+	defDesc  = "A convenient service for finding and hosting your object shows and camps!"
+	defImg   = "https://objecthub.xyz/imgs/hubbig.png"
+)
+
+// set перезаписывает только непустые поля, дефолты не затираются
+func (m *meta) set(title, desc, img string) {
+	if title != "" {
+		m.title = title
 	}
+	if desc != "" {
+		m.desc = desc
+	}
+	if img != "" {
+		m.image = img
+	}
+}
+
+// clip схлопывает пробелы и переносы строк и режет по рунам
+func clip(s string, n int) string {
+	r := []rune(strings.Join(strings.Fields(s), " "))
+	if len(r) > n {
+		return string(r[:n]) + "…"
+	}
+	return string(r)
+}
+
+// cutCmd отрезает командную часть запроса (всё после первого &)
+func cutCmd(raw string) string {
+	if i := strings.IndexByte(raw, '&'); i >= 0 {
+		return raw[:i]
+	}
+	return raw
+}
+
+func parseRoute(r *http.Request) (segs []string, value string) {
+	raw := cutCmd(r.URL.RawQuery)
 	if i := strings.IndexByte(raw, '='); i >= 0 {
 		value, _ = url.QueryUnescape(raw[i+1:])
 		raw = raw[:i]
@@ -27,6 +61,22 @@ func parseRoute(r *http.Request) (segs []string, value string) {
 	return strings.Split(raw, "/"), value
 }
 
+func (m *meta) fromUser(idStr string, portfolio bool) {
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return
+	}
+	u, err := GetUserById(id)
+	if err != nil || u == nil {
+		return
+	}
+	title := u.GetNick()
+	if portfolio {
+		title += " - portfolio"
+	}
+	m.set(title, u.Resume, "")
+}
+
 func (m *meta) fromGDPS(idStr string) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -34,7 +84,7 @@ func (m *meta) fromGDPS(idStr string) {
 	}
 	if gdps, err := GDPSfetchById(id); err == nil && gdps != nil {
 		f := gdps.ToShort(false, false)
-		m.title, m.desc, m.image = f.Title, f.Text, f.Img
+		m.set(f.Title, f.Text, f.Img)
 	}
 }
 
@@ -44,7 +94,7 @@ func (m *meta) fromWiki(idStr string) {
 		return
 	}
 	if wiki, err := WIKIfetchById(id); err == nil && wiki != nil {
-		m.title, m.desc = wiki.Title, wiki.Text
+		m.set(wiki.Title, wiki.Text, "")
 	}
 }
 
@@ -57,14 +107,15 @@ func (m *meta) fromNews(idStr string) {
 	if err != nil || news == nil {
 		return
 	}
-	m.title = news.Title
-	m.desc = ""
+	desc := ""
 	if decoded, err := base64.StdEncoding.DecodeString(news.Text); err == nil {
-		m.desc = string(decoded)
+		desc = string(decoded)
 	}
+	img := ""
 	if gdps, err := GDPSfetchById(news.GdpsId); err == nil && gdps != nil {
-		m.image = gdps.ToShort(false, false).Img
+		img = gdps.ToShort(false, false).Img
 	}
+	m.set(news.Title, desc, img)
 }
 
 func (m *meta) fromVac(idStr string) {
@@ -72,20 +123,19 @@ func (m *meta) fromVac(idStr string) {
 	if err != nil {
 		return
 	}
-	if vac, err := VACSfetchById(id, 0); err == nil && vac != nil {
-		m.title, m.desc = vac.Title, vac.Text
-		if gdps, err := GDPSfetchById(vac.GdpsID); err == nil && gdps != nil {
-			m.image = gdps.ToShort(false, false).Img
-		}
+	vac, err := VACSfetchById(id, 0)
+	if err != nil || vac == nil {
+		return
 	}
+	img := ""
+	if gdps, err := GDPSfetchById(vac.GdpsID); err == nil && gdps != nil {
+		img = gdps.ToShort(false, false).Img
+	}
+	m.set(vac.Title, vac.Text, img)
 }
 
 func buildMetaTags(r *http.Request) string {
-	m := meta{
-		title: "Object hub",
-		desc:  "A convenient service for finding and hosting your object shows and camps!",
-		image: "https://objecthub.xyz/imgs/hubbig.png",
-	}
+	m := meta{title: defTitle, desc: defDesc, image: defImg}
 	segs, value := parseRoute(r)
 	switch segs[0] {
 	case "gdps": // ?gdps/ch/gId[/news[/nId]]
@@ -96,6 +146,12 @@ func buildMetaTags(r *http.Request) string {
 				m.fromGDPS(segs[2]) // и сам GDPS, и список его новостей
 			}
 		}
+	case "user": // ?user/12[/portfolio]
+		if len(segs) >= 2 {
+			m.fromUser(segs[1], len(segs) >= 3 && segs[2] == "portfolio")
+		}
+	case "profiles": // deprecated: ?profiles=12, ?profiles/portfolio=12
+		m.fromUser(value, len(segs) >= 2 && segs[1] == "portfolio")
 	case "wiki": // ?wiki=12 и будущий ?wiki/12/...
 		if len(segs) >= 2 {
 			m.fromWiki(segs[1])
@@ -103,8 +159,7 @@ func buildMetaTags(r *http.Request) string {
 			m.fromWiki(value)
 		}
 	case "Wikis", "wikis":
-		m.title = "Object Hub Wiki"
-		m.desc = "Object Hub Wiki - not Mediawiki! welcome to our wiki engine!"
+		m.set("Object Hub Wiki", "Object Hub Wiki - not Mediawiki! welcome to our wiki engine!", "")
 	case "VacsC": // ?VacsC/5
 		if len(segs) >= 2 {
 			m.fromVac(segs[1])
@@ -117,12 +172,20 @@ func buildMetaTags(r *http.Request) string {
 			m.fromNews(strings.SplitN(value, "|", 2)[0])
 		}
 	}
+
+	log.Printf("meta: q=%q title=%q img=%q", r.URL.RawQuery, m.title, m.image) // ВРЕМЕННО, потом удалить
+
 	return fmt.Sprintf(
-		`<meta property="og:title" content="%s">
+		`<meta property="og:type" content="website">
+		<meta property="og:site_name" content="Object Hub">
+		<meta property="og:url" content="https://objecthub.xyz/?%s">
+		<meta property="og:title" content="%s">
 		<meta property="og:description" content="%s">
-		<meta property="og:image" content="%s">`,
-		html.EscapeString(m.title),
-		html.EscapeString(m.desc),
+		<meta property="og:image" content="%s">
+		<meta name="twitter:card" content="summary_large_image">`,
+		html.EscapeString(cutCmd(r.URL.RawQuery)),
+		html.EscapeString(clip(m.title, 90)),
+		html.EscapeString(clip(m.desc, 200)),
 		html.EscapeString(m.image),
 	)
 }
