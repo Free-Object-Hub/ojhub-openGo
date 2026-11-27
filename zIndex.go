@@ -74,7 +74,9 @@ func (m *meta) fromUser(idStr string, portfolio bool) {
 	if portfolio {
 		title += " - portfolio"
 	}
-	m.set(title, u.Resume, "")
+	resume := strings.ReplaceAll(u.Resume, `\n`, "\n")
+	resume = strings.ReplaceAll(resume, `\r`, "\r")
+	m.set(title, resume, "")
 }
 
 func (m *meta) fromGDPS(idStr string) {
