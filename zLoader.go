@@ -78,7 +78,7 @@ var versions = []clientVersion{
 
 	{
 		Ver: "0.99", Date: "27 Now 2026", Desc: "GHE 2.2 based",
-		Lifecycle: LifecycleDev, State: StateWorking,
+		Lifecycle: LifecycleStable, State: StateWorking,
 		CSS: []asset{
 			{Href: "main.css", Query: "?ver=24"},
 		},
@@ -168,7 +168,7 @@ var versions = []clientVersion{
 
 	{
 		Ver: "0.98.2", Date: "8 Oct 2026", Desc: "portfolio init AND easy-css init",
-		Lifecycle: LifecycleStable, State: StateWorking,
+		Lifecycle: LifecycleSupported, State: StateWorking,
 		CSS: []asset{
 			{Href: "main.css", Query: "?ver=22"},
 		},
