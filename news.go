@@ -33,7 +33,7 @@ type News struct {
 
 func NEWSfetchById(ID int) (*News, error) {
 	var news News
-	query := `SELECT n.*, u.username as uUsername, u.nickname as uNickname, g.title as gTitle, g.img as gImg, g.channel as gChannel 
+	query := `SELECT n.*, u.username as uUsername, u.nickname as uNickname, COALESCE(g.title, '') as gTitle, COALESCE(g.img, '') as gImg, COALESCE(g.channel, 0) as gChannel 
 		FROM news n
 		LEFT JOIN users u ON n.userId = u.userId 
 		LEFT JOIN gdpses g ON n.gdpsId = g.ID
@@ -47,7 +47,7 @@ func NEWSfetchById(ID int) (*News, error) {
 
 func GetLocalNews(gdpsId int, page int) ([]News, error) {
 	var news []News
-	query := `SELECT n.*, u.username as uUsername, u.nickname as uNickname, g.title as gTitle, g.img as gImg, g.channel as gChannel 
+	query := `SELECT n.*, u.username as uUsername, u.nickname as uNickname, COALESCE(g.title, '') as gTitle, COALESCE(g.img, '') as gImg, COALESCE(g.channel, 0) as gChannel 
 		FROM news n
 		LEFT JOIN users u ON n.userId = u.userId 
 		LEFT JOIN gdpses g ON n.gdpsId = g.ID 
@@ -69,7 +69,7 @@ func GetLocalNews(gdpsId int, page int) ([]News, error) {
 
 func GetGlobalNews(page int) ([]News, error) {
 	var news []News
-	query := `SELECT n.*, u.username as uUsername, u.nickname as uNickname, g.title as gTitle, g.img as gImg, g.channel as gChannel 
+	query := `SELECT n.*, u.username as uUsername, u.nickname as uNickname, COALESCE(g.title, '') as gTitle, COALESCE(g.img, '') as gImg, COALESCE(g.channel, 0) as gChannel 
 		FROM news n
 		LEFT JOIN users u ON n.userId = u.userId 
 		LEFT JOIN gdpses g ON n.gdpsId = g.ID 
