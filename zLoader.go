@@ -77,15 +77,15 @@ func (v clientVersion) isWorking() bool {
 var versions = []clientVersion{
 
 	{
-		Ver: "0.99", Date: "?? ??? 2026", Desc: "GHE 2.2 based. Current statis is beta",
+		Ver: "0.99", Date: "27 Now 2026", Desc: "GHE 2.2 based",
 		Lifecycle: LifecycleDev, State: StateWorking,
 		CSS: []asset{
-			{Href: "main.css", Query: "?ver=23"},
+			{Href: "main.css", Query: "?ver=24"},
 		},
 		JS: []asset{
-			{Href: "newHelper.js", Query: "?ver=36", Defer: true},
-			{Href: "nhConfig.js", Query: "?ver=36", Defer: true},
-			{Href: "ojhub.js", Query: "?ver=36", Defer: true},
+			{Href: "newHelper.js", Query: "?ver=37", Defer: true},
+			{Href: "nhConfig.js", Query: "?ver=37", Defer: true},
+			{Href: "ojhub.js", Query: "?ver=37", Defer: true},
 		},
 		Extra: []string{
 			`<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`,
